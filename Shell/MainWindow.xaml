@@ -1,0 +1,63 @@
+<Window x:Class="AmbientSFXMachineGUI.Shell.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:avalon="https://github.com/Dirkster99/AvalonDock"
+        xmlns:agent="clr-namespace:AmbientSFXMachineGUI.Panels.AgentPanel"
+        xmlns:log="clr-namespace:AmbientSFXMachineGUI.Panels.LogPanel"
+        xmlns:now="clr-namespace:AmbientSFXMachineGUI.Panels.NowPlayingPanel"
+        xmlns:sb="clr-namespace:AmbientSFXMachineGUI.Panels.SoundboardPanel"
+        Title="AmbientAgents" Height="720" Width="1200">
+    <DockPanel>
+        <!-- Toolbar: Master Vol | Mute All | Profile Picker | Settings -->
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar>
+                <TextBlock Text="Master" VerticalAlignment="Center" Margin="4,0"/>
+                <Slider Width="120" Minimum="0" Maximum="100"
+                        Value="{Binding MasterVolume, Mode=TwoWay}"/>
+                <ToggleButton Content="Mute All" IsChecked="{Binding IsMutedAll}"/>
+                <Separator/>
+                <TextBlock Text="Profile:" VerticalAlignment="Center" Margin="4,0"/>
+                <ComboBox Width="160"
+                          ItemsSource="{Binding Profiles}"
+                          SelectedItem="{Binding ActiveProfile, Mode=TwoWay}"
+                          DisplayMemberPath="Name"/>
+                <Button Content="Save" Command="{Binding QuickSaveProfileCommand}"/>
+                <Separator/>
+                <TextBox Width="200" Tag="Search sounds..."
+                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"/>
+                <Separator/>
+                <Button Content="Settings" Command="{Binding OpenSettingsCommand}"/>
+            </ToolBar>
+        </ToolBarTray>
+
+        <!-- AvalonDock host -->
+        <avalon:DockingManager x:Name="DockManager">
+            <avalon:LayoutRoot>
+                <avalon:LayoutPanel Orientation="Vertical">
+                    <avalon:LayoutPanel Orientation="Horizontal">
+                        <avalon:LayoutAnchorablePane DockWidth="*">
+                            <avalon:LayoutAnchorable ContentId="agents" Title="Agents" CanClose="False">
+                                <agent:AgentPanelView/>
+                            </avalon:LayoutAnchorable>
+                        </avalon:LayoutAnchorablePane>
+                        <avalon:LayoutAnchorablePane DockWidth="*">
+                            <avalon:LayoutAnchorable ContentId="log" Title="Live Log" CanClose="False">
+                                <log:LogPanelView/>
+                            </avalon:LayoutAnchorable>
+                        </avalon:LayoutAnchorablePane>
+                    </avalon:LayoutPanel>
+                    <avalon:LayoutAnchorablePane DockHeight="120">
+                        <avalon:LayoutAnchorable ContentId="now" Title="Now Playing" CanClose="False">
+                            <now:NowPlayingPanelView/>
+                        </avalon:LayoutAnchorable>
+                    </avalon:LayoutAnchorablePane>
+                    <avalon:LayoutAnchorablePane DockHeight="160">
+                        <avalon:LayoutAnchorable ContentId="soundboard" Title="Soundboard" CanClose="False">
+                            <sb:SoundboardPanelView/>
+                        </avalon:LayoutAnchorable>
+                    </avalon:LayoutAnchorablePane>
+                </avalon:LayoutPanel>
+            </avalon:LayoutRoot>
+        </avalon:DockingManager>
+    </DockPanel>
+</Window>
