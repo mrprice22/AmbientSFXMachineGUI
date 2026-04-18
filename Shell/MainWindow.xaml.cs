@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using AvalonDock.Layout.Serialization;
@@ -12,11 +13,14 @@ public partial class MainWindow : Window
         "AmbientAgents",
         "layout.xml");
 
+    private bool _allowClose;
+
     public MainWindow()
     {
         InitializeComponent();
         DataContext = new ShellViewModel(App.Coordinator, App.Profiles, App.Hotkeys);
         Loaded += OnLoaded;
+        StateChanged += OnStateChanged;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -34,8 +38,47 @@ public partial class MainWindow : Window
         }
     }
 
-    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    private void OnStateChanged(object? sender, EventArgs e)
     {
+        if (WindowState == WindowState.Minimized)
+        {
+            Hide();
+            App.Tray.SetWindowVisibleState(false);
+        }
+    }
+
+    public void ToggleVisibility()
+    {
+        if (IsVisible && WindowState != WindowState.Minimized)
+        {
+            Hide();
+            App.Tray.SetWindowVisibleState(false);
+        }
+        else
+        {
+            Show();
+            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+            Activate();
+            App.Tray.SetWindowVisibleState(true);
+        }
+    }
+
+    public void ForceClose()
+    {
+        _allowClose = true;
+        Close();
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        if (!_allowClose)
+        {
+            e.Cancel = true;
+            Hide();
+            App.Tray.SetWindowVisibleState(false);
+            return;
+        }
+
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(LayoutFilePath)!);

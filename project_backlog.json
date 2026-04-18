@@ -24,7 +24,7 @@
       "title": "System tray integration",
       "description": "App minimizes to the system tray. Right-click context menu exposes: show/hide window, mute all, exit.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": []
     },
     {
