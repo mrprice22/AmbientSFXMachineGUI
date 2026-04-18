@@ -44,7 +44,7 @@
       "title": "Configurable global hotkey bindings",
       "description": "In-app UI for binding keyboard shortcuts to actions: mute all, toggle/solo a machine, force-play an agent, toggle an agent, switch profile, show/hide window. Uses RegisterHotKey via P/Invoke. Per-machine hotkey bindings override global app-level bindings when that machine is active.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["SHELL-01"]
     },
     {

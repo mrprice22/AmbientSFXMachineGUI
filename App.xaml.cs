@@ -24,6 +24,11 @@ public partial class App : Application
         Tray.MuteAllToggled += OnTrayMuteAllToggled;
         Tray.ExitRequested += OnTrayExitRequested;
 
+        Hotkeys.Register("app.muteAll", () => Dispatcher.Invoke(() => OnTrayMuteAllToggled(this, System.EventArgs.Empty)));
+        Hotkeys.Register("app.toggleWindow", () => Dispatcher.Invoke(() =>
+        {
+            if (MainWindow is MainWindow main) main.ToggleVisibility();
+        }));
         Hotkeys.LoadDefaults();
 
         // Keep the app alive when all windows are hidden (tray still running).

@@ -53,7 +53,11 @@ public partial class ShellViewModel : ObservableObject
     [RelayCommand]
     private void OpenSettings()
     {
-        // TODO: open settings flyout (hotkey bindings, theme, audio device)
+        var window = new HotkeySettingsWindow(_hotkeys)
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+        window.ShowDialog();
     }
 
     [RelayCommand]

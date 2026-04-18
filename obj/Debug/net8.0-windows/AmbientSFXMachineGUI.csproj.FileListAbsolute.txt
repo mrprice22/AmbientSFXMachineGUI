@@ -56,3 +56,7 @@ C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\refint\Ambien
 C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\AmbientSFXMachineGUI.pdb
 C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\AmbientSFXMachineGUI.genruntimeconfig.cache
 C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\ref\AmbientSFXMachineGUI.dll
+C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\HotkeyCaptureWindow.baml
+C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\HotkeySettingsWindow.baml
+C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\HotkeyCaptureWindow.g.cs
+C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\HotkeySettingsWindow.g.cs
