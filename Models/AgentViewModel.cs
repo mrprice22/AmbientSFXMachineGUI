@@ -31,11 +31,10 @@ public partial class AgentViewModel : ObservableObject
 
     public ObservableCollection<SoundFileViewModel> Files { get; }
 
+    public event EventHandler? ForcePlayRequested;
+
     [RelayCommand]
-    private void ForcePlay()
-    {
-        // TODO: route to AgentCoordinator.ForcePlay(this)
-    }
+    private void ForcePlay() => ForcePlayRequested?.Invoke(this, EventArgs.Empty);
 
     [RelayCommand]
     private void OpenConfigEditor()

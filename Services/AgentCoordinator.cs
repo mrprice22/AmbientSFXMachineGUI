@@ -40,7 +40,11 @@ public sealed class AgentCoordinator
 
     public void ForcePlay(AgentViewModel agent)
     {
-        // TODO: bypass wait timer on underlying SoundAgent.
+        if (!_runtime.TryGetValue(agent, out var rt)) return;
+        rt.ForcePlayPending = true;
+        agent.NextPlayIn = TimeSpan.Zero;
+        // When SoundAgent is wired up, the runtime tick will observe ForcePlayPending,
+        // clear it, and trigger the next sound immediately.
     }
 
     public void SetMasterVolume(double volume)
@@ -84,6 +88,7 @@ public sealed class AgentCoordinator
         if (_runtime.ContainsKey(agent)) return;
         _runtime[agent] = new AgentRuntime();
         agent.PropertyChanged += OnAgentPropertyChanged;
+        agent.ForcePlayRequested += OnAgentForcePlayRequested;
         ApplyEnabled(agent);
         ApplyEffectiveVolume(agent);
     }
@@ -91,7 +96,13 @@ public sealed class AgentCoordinator
     private void DetachAgent(AgentViewModel agent)
     {
         agent.PropertyChanged -= OnAgentPropertyChanged;
+        agent.ForcePlayRequested -= OnAgentForcePlayRequested;
         _runtime.Remove(agent);
+    }
+
+    private void OnAgentForcePlayRequested(object? sender, EventArgs e)
+    {
+        if (sender is AgentViewModel agent) ForcePlay(agent);
     }
 
     private void OnAgentPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -128,6 +139,7 @@ public sealed class AgentCoordinator
     {
         public bool Enabled { get; set; } = true;
         public float EffectiveGain { get; set; } = 1f;
+        public bool ForcePlayPending { get; set; }
     }
 }
 

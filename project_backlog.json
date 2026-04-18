@@ -89,7 +89,7 @@
       "title": "Force-play button per agent",
       "description": "Button on each agent card that immediately triggers the agent's next sound, bypassing the current wait timer.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["AGENT-01"]
     },
     {
