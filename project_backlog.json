@@ -15,7 +15,7 @@
       "title": "Dockable / collapsible panel layout",
       "description": "Implement a dockable, resizable, collapsible panel system using AvalonDock so all views (log, agents, soundboard, now-playing) can be arranged by the user and persisted across sessions.",
       "priority": "high",
-      "status": "backlog",
+HELL-02 (system tray integration)      "status": "done",
       "dependencies": []
     },
     {
@@ -323,6 +323,15 @@
       "priority": "low",
       "status": "backlog",
       "dependencies": ["PROF-02"]
+    },
+    {
+      "id": "S-BUG-001",
+      "feature": "F01_SHELL",
+      "title": "Missing agent.ico breaks build",
+      "description": "AmbientSFXMachineGUI.csproj references ApplicationIcon=agent.ico but the file is absent from the repo, causing CS7064 during build. Either add the icon or remove the csproj reference.",
+      "priority": "high",
+      "status": "done",
+      "dependencies": []
     },
     {
       "id": "PROF-05",
