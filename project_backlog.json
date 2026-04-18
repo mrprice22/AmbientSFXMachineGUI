@@ -15,7 +15,7 @@
       "title": "Dockable / collapsible panel layout",
       "description": "Implement a dockable, resizable, collapsible panel system using AvalonDock so all views (log, agents, soundboard, now-playing) can be arranged by the user and persisted across sessions.",
       "priority": "high",
-HELL-02 (system tray integration)      "status": "done",
+      "status": "done",
       "dependencies": []
     },
     {
