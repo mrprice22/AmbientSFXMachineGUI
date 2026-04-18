@@ -53,7 +53,7 @@
       "title": "Agent status cards",
       "description": "One card per agent showing: name, mode, enabled state, file count, last played file, next-play countdown timer, and turbo mode badge. Bound to AgentViewModel via INotifyPropertyChanged.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["SHELL-01"]
     },
     {

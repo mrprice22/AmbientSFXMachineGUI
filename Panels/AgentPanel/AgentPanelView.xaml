@@ -1,22 +1,54 @@
 <UserControl x:Class="AmbientSFXMachineGUI.Panels.AgentPanel.AgentPanelView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <ItemsControl ItemsSource="{Binding Agents}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Border Margin="6" Padding="8" BorderBrush="#444" BorderThickness="1" CornerRadius="4">
+                    <Border Margin="6" Padding="10" BorderBrush="#444" BorderThickness="1" CornerRadius="4">
                         <StackPanel>
-                            <DockPanel>
-                                <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                            <!-- Header row: name, mode badge, turbo badge, enable toggle -->
+                            <DockPanel LastChildFill="True">
                                 <ToggleButton DockPanel.Dock="Right" Content="On"
-                                              IsChecked="{Binding IsEnabled}"/>
+                                              IsChecked="{Binding IsEnabled}"
+                                              MinWidth="44" Margin="6,0,0,0"/>
+                                <Border DockPanel.Dock="Right" Background="#8C3A1F" CornerRadius="3"
+                                        Padding="6,2" Margin="4,0,0,0"
+                                        Visibility="{Binding IsInTurboMode, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="TURBO" Foreground="White" FontWeight="Bold" FontSize="10"/>
+                                        <TextBlock Text="{Binding RemainingTurboPlays, StringFormat= x{0}}"
+                                                   Foreground="White" FontSize="10" Margin="3,0,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border DockPanel.Dock="Right" Background="#333" CornerRadius="3"
+                                        Padding="6,2" Margin="4,0,0,0">
+                                    <TextBlock Text="{Binding Mode}" Foreground="#CCC" FontSize="10"/>
+                                </Border>
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"
+                                           VerticalAlignment="Center"/>
                             </DockPanel>
-                            <TextBlock Text="{Binding Mode}" Opacity="0.7"/>
-                            <Slider Minimum="0" Maximum="100" Value="{Binding Volume}"/>
-                            <TextBlock Text="{Binding NextPlayIn, StringFormat=Next in \{0:mm\\:ss\}}"/>
-                            <TextBlock Text="{Binding LastPlayedFile}" Opacity="0.6" TextTrimming="CharacterEllipsis"/>
-                            <DockPanel>
+
+                            <!-- Meta row: file count -->
+                            <TextBlock Opacity="0.65" FontSize="11" Margin="0,4,0,0">
+                                <Run Text="{Binding FileCount, Mode=OneWay}"/>
+                                <Run Text=" files"/>
+                            </TextBlock>
+
+                            <!-- Volume -->
+                            <Slider Minimum="0" Maximum="100" Value="{Binding Volume}" Margin="0,4,0,0"/>
+
+                            <!-- Countdown + last played -->
+                            <TextBlock Text="{Binding NextPlayIn, StringFormat=Next in \{0:mm\\:ss\}}"
+                                       Margin="0,4,0,0"/>
+                            <TextBlock Text="{Binding LastPlayedFile, TargetNullValue=—}"
+                                       Opacity="0.6" TextTrimming="CharacterEllipsis" ToolTip="{Binding LastPlayedFile}"/>
+
+                            <!-- Actions -->
+                            <DockPanel Margin="0,6,0,0">
                                 <Button DockPanel.Dock="Left" Content="Force Play"
                                         Command="{Binding ForcePlayCommand}"/>
                                 <Button DockPanel.Dock="Right" Content="Config"
