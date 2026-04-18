@@ -62,7 +62,7 @@
       "title": "Per-agent enable/disable toggle",
       "description": "Toggle switch on each agent card to enable or disable the agent at runtime without restarting the application.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["AGENT-01"]
     },
     {
@@ -71,7 +71,7 @@
       "title": "Per-agent volume slider",
       "description": "Live volume slider on each agent card that takes effect immediately without restarting.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["AGENT-01"]
     },
     {
@@ -80,7 +80,7 @@
       "title": "Master volume and mute",
       "description": "Global volume slider and mute toggle in the main toolbar that scales all machines simultaneously. Machine and agent volumes multiply into the app master: final = appMaster * machine.MasterVolume * agent.Volume * sound.VolumeOverride.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["SHELL-01"]
     },
     {
