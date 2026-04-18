@@ -4,6 +4,10 @@
 
 AmbientAgents UI is a graphical frontend for the existing AmbientAgents console application. The backend C# engine (`SoundAgent`, `Program`) continues to run unchanged as the audio runtime. The UI layer wraps it, communicates with it, and provides real-time control, monitoring, and configuration.
 
+The app hosts **multiple Machines**, each containing multiple **Agents**. A Machine is the unit the user toggles and volume-balances as a whole; an Agent is one scheduled sound source (a folder of related SFX plus its `.config`). Machines replace the old "one EXE per directory" pattern in which the user copied the console EXE into folders like `SpookyAudioMachine`, `ThursdayGameNightAudioSFX`, and `ThursdayPacmanAudioSFX` and balanced them via the Windows volume mixer — that balancing now happens inside the GUI via per-machine master volume.
+
+A process-wide **Audio Library** tracks every audio file referenced by any machine, keyed by content hash, so files can be reused across agents and machines, duplicates can be surfaced and merged, and orphan files can be found.
+
 ---
 
 ## 2. Technology Decision
@@ -50,24 +54,59 @@ AmbientAgents.sln
 │   │   ├── MainWindow.xaml     (AvalonDock host)
 │   │   └── ShellViewModel.cs
 │   ├── Panels/
+│   │   ├── MachinePanel/
 │   │   ├── AgentPanel/
 │   │   ├── LogPanel/
 │   │   ├── NowPlayingPanel/
-│   │   └── SoundboardPanel/
+│   │   ├── SoundboardPanel/
+│   │   └── LibraryPanel/
 │   ├── Services/
-│   │   ├── AgentCoordinator.cs (owns agent instances, exposes ObservableCollections)
+│   │   ├── MachineCoordinator.cs (owns ObservableCollection<MachineViewModel>, log, active playbacks)
+│   │   ├── AgentCoordinator.cs   (per-machine scheduler/playback engine, owned by a machine)
+│   │   ├── MachineImporter.cs    (reads appSettings.config + snd/ into a MachineViewModel)
+│   │   ├── AudioLibrary.cs       (path → AudioFileEntry registry with hash + usages index)
+│   │   ├── AudioFileHasher.cs    (SHA-256 streaming + NAudio duration/size probe)
 │   │   ├── ProfileService.cs
 │   │   ├── HotkeyService.cs
 │   │   └── TrayService.cs
 │   └── Models/
+│       ├── MachineViewModel.cs
 │       ├── AgentViewModel.cs
 │       ├── SoundFileViewModel.cs
+│       ├── AudioFileEntry.cs
 │       ├── LogEntryViewModel.cs
 │       ├── Profile.cs
 │       └── SoundboardItem.cs
 ```
 
-`SoundAgent` is made observable by wrapping it in `AgentViewModel`, which subscribes to events surfaced from the core and exposes `INotifyPropertyChanged` properties consumed by the UI.
+`SoundAgent` is made observable by wrapping it in `AgentViewModel`, which subscribes to events surfaced from the core and exposes `INotifyPropertyChanged` properties consumed by the UI. Each `AgentViewModel` is owned by a `MachineViewModel`; the coordinator role that held all agents in v1 is now split between `MachineCoordinator` (app-global state: machines list, log, active playbacks) and per-machine `AgentCoordinator` instances (scheduling and playback within one machine).
+
+### 3.1 Machine concept
+
+A Machine is a top-level grouping of agents modeling what used to be one copy of the console EXE.
+
+- Fields: `Id (Guid), Name, IconPath, IsEnabled, MasterVolume (0–100%), RootPath`.
+- Owns: `ObservableCollection<AgentViewModel> Agents`, plus per-machine Profiles / Soundboard / Hotkeys.
+- Persisted as `%AppData%\AmbientAgents\machines\<id>.json`. Agent `.config` files stay at `RootPath\snd\<agent>\*.config` and are not duplicated into the GUI's AppData.
+- Disabling a machine pauses all its agents as a group without tearing them down.
+- Volume chain (multiplier): `final = appMaster * machine.MasterVolume * agent.Volume * sound.VolumeOverride` (last term can go to 200%; the others are 0–100%).
+- The machine's icon appears on its machine card and in a per-machine tray submenu.
+
+### 3.2 Audio Library
+
+`AudioLibrary` is a process-wide singleton that tracks every audio file referenced by any machine.
+
+- **Keying:** primary key is SHA-256 content hash; secondary index by absolute path.
+- **Entry:** `AudioFileEntry { AbsolutePath, Sha256, Duration, ByteSize, FileName, Usages: IReadOnlyList<UsageRef> }`, where `UsageRef = { MachineId, AgentId }`.
+- **Hashing:** lazy, streamed SHA-256 on a background thread. Cached in `%AppData%\AmbientAgents\library.json` keyed by path with file size + mtime invalidation. Duration/size probed via NAudio.
+- **Usages:** maintained by subscribing to mutations on every `MachineViewModel.Agents[*].Files` collection; re-computed on machine import/remove.
+- **Decentralized ownership:** files stay wherever the user has them on disk; the library never copies or moves files. Adding a file creates/updates a library entry pointing at its current absolute path.
+- **Duplicate detection (tiered):**
+  1. **Exact duplicates** — identical SHA-256.
+  2. **Likely duplicates** — different hash but same filename (case/extension-insensitive) AND duration within ±1%.
+  Results group in the Duplicates tab; a merge action rewrites all agent references in a group to a chosen canonical library entry.
+- **Unused detection:** entries whose `Usages` is empty.
+- **Reuse:** a single library entry can belong to many agents and many machines.
 
 ---
 
@@ -83,19 +122,22 @@ The shell uses **AvalonDock** to provide:
 **Default layout:**
 
 ```
-┌────────────────────────────────────────────────────────┐
-│  Toolbar: Master Vol | Mute All | Profile Picker | ⚙   │
-├──────────────────┬─────────────────────────────────────┤
-│                  │                                     │
-│   Agent Cards    │         Live Playback Log           │
-│   (scrollable)   │         (auto-scroll)               │
-│                  │                                     │
-├──────────────────┴─────────────────────────────────────┤
-│  Now Playing (horizontal strip, collapses to 1 line)   │
-├────────────────────────────────────────────────────────┤
-│  Soundboard / Favorites (collapsible, dockable)        │
-└────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  Toolbar: App Master Vol | Mute All | Profile Picker | ⚙        │
+├──────────┬──────────────────────┬───────────────────────────────┤
+│          │                      │                               │
+│ Machines │   Agent Cards        │     Live Playback Log         │
+│  rail    │   (scoped to active  │     (auto-scroll)             │
+│ (cards)  │    machine)          │                               │
+│          │                      │                               │
+├──────────┴──────────────────────┴───────────────────────────────┤
+│  Now Playing  |  Audio Library  (tabbed bottom dock)            │
+├─────────────────────────────────────────────────────────────────┤
+│  Soundboard / Favorites (collapsible, dockable, per-machine)    │
+└─────────────────────────────────────────────────────────────────┘
 ```
+
+The Machines rail lives at the left edge. Each machine card shows icon, name, enable toggle, and master volume slider. Selecting a machine scopes the Agent Cards area to that machine (or shows all machines' agents grouped by machine header).
 
 All panels are independently resizable, detachable to floating windows, and can be tabbed together.
 
@@ -114,7 +156,7 @@ All panels are independently resizable, detachable to floating windows, and can 
 
 ### 5.2 Agent Management
 
-Each agent is represented by an **AgentCard** control bound to `AgentViewModel`.
+Each agent is owned by a **Machine**; the agent's volume and enable state compose through its parent machine (see §3.1). Each agent is represented by an **AgentCard** control bound to `AgentViewModel`.
 
 **AgentViewModel exposes:**
 - `Name`, `Mode`, `FileCount`, `IsEnabled`, `Volume`
@@ -223,14 +265,56 @@ A `Profile` is a JSON file containing:
 
 **Profile audition:** Hold-to-preview button applies a profile's settings temporarily. Release or timeout (configurable, default 30 s) reverts to previous state.
 
+### 5.8 Machine Management
+
+A dockable **Machines rail** lists every machine as a card with icon, name, enable toggle, and master volume slider.
+
+**Actions:**
+- **Create machine** — prompts for name, icon file, root folder; creates metadata and an empty `snd/` subfolder.
+- **Import machine** — point at an existing console-app directory. `MachineImporter` reads `appSettings.config` (`appName` → Machine.Name, `icon` → Machine.IconPath) and each `snd/<agent>/*.config` to produce `AgentViewModel`s. The folder is referenced in place, not copied. Validated against the three example machines in `C:\Users\homel\OneDrive\Projects\`.
+- **Remove machine** — unlinks from the index and rebuilds library usages. Audio files and `.config` files on disk are left untouched; the action clearly says so.
+- **Rename / change icon / reorder** — via context menu and drag-reorder.
+- **Per-machine tray submenu** — each machine gets a submenu in the tray with its own icon and entries for toggle mute, solo (mute all other machines), and show cards.
+
+### 5.9 Audio Library
+
+A dockable **LibraryPanel** with three tabs:
+
+- **All Files** — virtualized list (filename, duration, size, usage count, full path); sortable, text-filterable.
+- **Duplicates** — two grouped sections:
+  - Exact duplicates (same SHA-256).
+  - Likely duplicates (same filename, case/extension-insensitive, AND duration ±1%).
+  Each group lists candidate paths with their usage counts.
+- **Unused** — library entries with zero usages; multi-select + bulk "remove from library" (does not delete from disk).
+
+**Row actions (context menu):**
+- Reveal in Explorer
+- Copy full path
+- Show usages — opens a side drawer listing every `(machine, agent)` pair, each with a "navigate to" action that focuses the relevant agent card.
+- Add to additional agents/machines — multi-select picker that appends the file to every chosen agent's file list.
+- Merge duplicates (Duplicates tab only) — choose a canonical entry; every agent reference to any other group member is rewritten to the canonical path.
+
+**Ingest:**
+- Drop audio files from Explorer onto the Library panel to register them.
+- Drop onto an agent card to register and attach in one step.
+
+A progress indicator in the tab header shows hashing progress during initial scans; hashing is streamed on a background thread and cached in `library.json` with size + mtime invalidation.
+
 ---
 
 ## 6. State Management
 
-All runtime state lives in `AgentCoordinator` (singleton service):
+App-global state lives in `MachineCoordinator` (singleton):
+- `ObservableCollection<MachineViewModel> Machines`
+- `LogEntryViewModel` events published via a simple event bus (log is app-global, not per-machine)
+- Active playback tracked via a `ConcurrentDictionary<Guid, ActivePlayback>` (entries carry both machine and agent identity)
+
+Per-machine runtime state lives on `MachineViewModel`:
 - `ObservableCollection<AgentViewModel> Agents`
-- `LogEntryViewModel` events published via a simple event bus
-- Active playback tracked via a `ConcurrentDictionary<Guid, ActivePlayback>`
+- Owned `AgentCoordinator` instance driving scheduling within the machine
+- Per-machine Profiles / Soundboard / Hotkeys collections
+
+`AudioLibrary` is a separate singleton service (see §3.2) whose `Usages` index is derived from observing mutations across every `MachineViewModel.Agents[*].Files`.
 
 UI consumes state via standard WPF data binding. No additional state management library needed.
 
@@ -252,12 +336,16 @@ Rebinding flow: Settings UI captures `KeyDown`, validates no conflicts, calls `H
 
 | Data | Location | Format |
 |---|---|---|
-| Agent configs | `snd/<agent>/*.config` | Existing key=value (unchanged) |
-| Profiles | `%AppData%\AmbientAgents\profiles\` | JSON |
-| Default hotkeys | `%AppData%\AmbientAgents\hotkeys.json` | JSON |
+| Agent configs | `<machineRoot>\snd\<agent>\*.config` | Existing key=value (unchanged) |
+| Machine appSettings | `<machineRoot>\appSettings.config` | Existing key=value (read on import) |
+| Machine index | `%AppData%\AmbientAgents\machines\<id>.json` | JSON (id, name, iconPath, isEnabled, masterVolume, rootPath, order) |
+| Library cache | `%AppData%\AmbientAgents\library.json` | JSON (path → hash, duration, size, mtime) |
+| Profiles (per-machine) | `%AppData%\AmbientAgents\machines\<id>\profiles\*.json` | JSON |
+| Hotkeys (per-machine) | `%AppData%\AmbientAgents\machines\<id>\hotkeys.json` | JSON |
+| Hotkeys (global app actions) | `%AppData%\AmbientAgents\hotkeys.json` | JSON |
 | Panel layout | `%AppData%\AmbientAgents\layout.xml` | AvalonDock XML |
 | Sound overrides | Inside profile JSON | — |
-| Soundboard | Inside profile JSON | — |
+| Soundboard (per-machine) | Inside machine's profile JSON | — |
 
 ---
 
@@ -266,16 +354,19 @@ Rebinding flow: Settings UI captures `KeyDown`, validates no conflicts, calls `H
 | Phase | Stories | Goal |
 |---|---|---|
 | **1 — Foundation** | SHELL-01, SHELL-02, AGENT-01–04, LOG-01 | Usable replacement for console; agent cards, log, tray |
-| **2 — Control** | AGENT-05–09, SFX-01–02, LOG-02, NOW-01–02, PROF-01–03 | Per-sound control, now-playing, basic profiles |
-| **3 — Soundboard** | SB-01–04, LOG-03, SHELL-04, SFX-04 | Favorites, hotkeys, drag-drop |
-| **4 — Polish** | SHELL-03, SFX-03–05, NOW-03, PROF-04–05, LOG-04, AGENT-10–11 | Mini-mode, diffs, audition, heatmap, cooldowns |
+| **1.5 — Machines & Library** | MACHINE-01–04, MACHINE-08, MACHINE-10, LIB-01–05 | First-class machines; import console-app folders; library with dup detection |
+| **2 — Control** | AGENT-05–09, SFX-01–02, LOG-02, NOW-01–02, PROF-01–03, MACHINE-05–07 | Per-sound control, now-playing, basic profiles, machine CRUD |
+| **3 — Soundboard** | SB-01–04, LOG-03, SHELL-04, SFX-04, LIB-06–09 | Favorites, hotkeys, drag-drop, library usages + ingest |
+| **4 — Polish** | SHELL-03, SFX-03–05, NOW-03, PROF-04–05, LOG-04, AGENT-10–11, MACHINE-09, LIB-10–11 | Mini-mode, diffs, audition, heatmap, cooldowns, tray submenus, dup merge |
 
 ---
 
 ## 10. Out of Scope (v1)
 
 - macOS / Linux support
-- Cloud sync of profiles
+- Cloud sync of profiles or library
 - Audio DSP / effects (reverb, EQ)
 - Multiple simultaneous audio output devices
 - Plugin system for custom agent types
+- Cross-machine profile templates (profiles that apply to more than one machine at once)
+- Perceptual audio fingerprinting (Chromaprint-style near-duplicate detection beyond hash + filename + duration)

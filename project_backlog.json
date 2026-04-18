@@ -6,7 +6,9 @@
     "F04_LOG":     "F04 — Live Playback Log",
     "F05_NOW":     "F05 — Now Playing",
     "F06_SB":      "F06 — Soundboard / Favorites",
-    "F07_PROF":    "F07 — Profiles"
+    "F07_PROF":    "F07 — Profiles",
+    "F08_MACHINE": "F08 — Machine Management",
+    "F09_LIB":     "F09 — Audio Library"
   },
   "stories": [
     {
@@ -40,7 +42,7 @@
       "id": "SHELL-04",
       "feature": "F01_SHELL",
       "title": "Configurable global hotkey bindings",
-      "description": "In-app UI for binding keyboard shortcuts to actions: mute all, force-play an agent, toggle an agent, switch profile, show/hide window. Uses RegisterHotKey via P/Invoke.",
+      "description": "In-app UI for binding keyboard shortcuts to actions: mute all, toggle/solo a machine, force-play an agent, toggle an agent, switch profile, show/hide window. Uses RegisterHotKey via P/Invoke. Per-machine hotkey bindings override global app-level bindings when that machine is active.",
       "priority": "medium",
       "status": "backlog",
       "dependencies": ["SHELL-01"]
@@ -76,7 +78,7 @@
       "id": "AGENT-04",
       "feature": "F02_AGENTS",
       "title": "Master volume and mute",
-      "description": "Global volume slider and mute toggle in the main toolbar that scales all agents simultaneously.",
+      "description": "Global volume slider and mute toggle in the main toolbar that scales all machines simultaneously. Machine and agent volumes multiply into the app master: final = appMaster * machine.MasterVolume * agent.Volume * sound.VolumeOverride.",
       "priority": "high",
       "status": "backlog",
       "dependencies": ["SHELL-01"]
@@ -130,7 +132,7 @@
       "id": "AGENT-10",
       "feature": "F02_AGENTS",
       "title": "Drag-and-drop agent folder import",
-      "description": "User can drag a folder onto the UI to register it as a new agent without manual config editing.",
+      "description": "User can drag a folder onto a machine to register it as a new agent in that machine without manual config editing.",
       "priority": "low",
       "status": "backlog",
       "dependencies": ["AGENT-06"]
@@ -256,10 +258,10 @@
       "id": "SB-01",
       "feature": "F06_SB",
       "title": "Favorites soundboard panel",
-      "description": "Dockable grid of buttons for favorited sounds. Clicking a button plays the sound immediately in parallel with normal agent activity, independent of agent scheduling.",
+      "description": "Dockable grid of buttons for favorited sounds, scoped to the active machine. Clicking a button plays the sound immediately in parallel with normal agent activity, independent of agent scheduling.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["SHELL-01"]
+      "dependencies": ["SHELL-01", "MACHINE-10"]
     },
     {
       "id": "SB-02",
@@ -292,10 +294,10 @@
       "id": "PROF-01",
       "feature": "F07_PROF",
       "title": "Profile save and load",
-      "description": "Save the full current state (agent enable states, per-sound enable states, all volumes, soundboard layout, hotkeys) as a named JSON profile under %AppData%\\AmbientAgents\\profiles\\. Load restores all settings.",
+      "description": "Save the full current state of a machine (agent enable states, per-sound enable states, all volumes, machine master volume, soundboard layout, hotkeys) as a named JSON profile. Profiles are scoped per-machine and saved under %AppData%\\AmbientAgents\\machines\\<machineId>\\profiles\\. Load restores all settings for that machine.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["AGENT-02", "AGENT-03", "SFX-01", "SFX-02", "SB-01"]
+      "dependencies": ["AGENT-02", "AGENT-03", "SFX-01", "SFX-02", "SB-01", "MACHINE-10"]
     },
     {
       "id": "PROF-02",
@@ -341,6 +343,195 @@
       "priority": "low",
       "status": "backlog",
       "dependencies": ["PROF-02"]
+    },
+    {
+      "id": "MACHINE-01",
+      "feature": "F08_MACHINE",
+      "title": "Machine data model and coordinator",
+      "description": "Introduce MachineViewModel (Id, Name, IconPath, IsEnabled, MasterVolume, RootPath, Agents) and MachineCoordinator owning ObservableCollection<MachineViewModel>. Refactor AgentCoordinator so its Agents collection lives on a MachineViewModel; playback/log/active-playback state stays on the coordinator (now MachineCoordinator) since the log is app-global.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": ["SHELL-01"]
+    },
+    {
+      "id": "MACHINE-02",
+      "feature": "F08_MACHINE",
+      "title": "Machines rail and machine card UI",
+      "description": "Left-edge dockable rail showing a vertical list of machine cards. Each card shows icon, name, enable toggle, master volume slider, and expands to reveal its agents. Selecting a machine scopes the agent panel to it.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": ["MACHINE-01", "AGENT-01"]
+    },
+    {
+      "id": "MACHINE-03",
+      "feature": "F08_MACHINE",
+      "title": "Per-machine master volume and group enable",
+      "description": "Implement the multiplier volume chain: final = appMaster * machine.MasterVolume * agent.Volume * sound.VolumeOverride. Disabling a machine pauses all of its agents as a group without restarting them.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": ["MACHINE-02", "AGENT-03", "AGENT-04"]
+    },
+    {
+      "id": "MACHINE-04",
+      "feature": "F08_MACHINE",
+      "title": "Import existing console-app machine folder",
+      "description": "File > Import Machine picker that accepts a directory containing appSettings.config and snd/. Reads appName and icon from appSettings.config, then scans snd/<agent>/*.config to materialize AgentViewModels. References the folder in place (no copying). Validate against C:\\Users\\homel\\OneDrive\\Projects\\SpookyAudioMachine, ThursdayGameNightAudioSFX, and ThursdayPacmanAudioSFX.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": ["MACHINE-01"]
+    },
+    {
+      "id": "MACHINE-05",
+      "feature": "F08_MACHINE",
+      "title": "Create new empty machine",
+      "description": "Dialog to create a new machine: prompts for name, icon file, and root folder (new or existing empty directory). Creates the machine metadata and an empty snd/ subfolder.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["MACHINE-01"]
+    },
+    {
+      "id": "MACHINE-06",
+      "feature": "F08_MACHINE",
+      "title": "Rename, change icon, and reorder machines",
+      "description": "Context menu and drag-reorder on machine cards. Rename updates the persisted index; icon picker accepts .ico/.png and stores path relative to machine root when possible.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["MACHINE-02"]
+    },
+    {
+      "id": "MACHINE-07",
+      "feature": "F08_MACHINE",
+      "title": "Remove machine (unlink, do not delete files)",
+      "description": "Remove action on a machine card that deletes the machine's entry from the index and unhooks its agents/library usages. Warns explicitly that audio files and .config files on disk are not touched.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["MACHINE-02"]
+    },
+    {
+      "id": "MACHINE-08",
+      "feature": "F08_MACHINE",
+      "title": "Persist machine index to %AppData%",
+      "description": "Serialize MachineCoordinator state to %AppData%\\AmbientAgents\\machines\\<id>.json (id, name, iconPath, isEnabled, masterVolume, rootPath, order). Restore on startup. Agent/sound configs remain at RootPath and are not duplicated here.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": ["MACHINE-01"]
+    },
+    {
+      "id": "MACHINE-09",
+      "feature": "F08_MACHINE",
+      "title": "System tray submenu per machine",
+      "description": "Extend TrayService so each machine appears as a submenu in the tray context menu with its own icon and entries: toggle mute, solo (mute all others), show cards.",
+      "priority": "low",
+      "status": "backlog",
+      "dependencies": ["MACHINE-02", "SHELL-02"]
+    },
+    {
+      "id": "MACHINE-10",
+      "feature": "F08_MACHINE",
+      "title": "Scope profiles, soundboard, and hotkeys per-machine",
+      "description": "Move profile/soundboard/hotkey storage under %AppData%\\AmbientAgents\\machines\\<machineId>\\ so each machine owns its own. Profiles apply only to their parent machine; soundboard buttons and hotkey bindings are machine-scoped. Global app-level hotkeys (mute all, show window) remain in the app-level hotkeys.json.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["MACHINE-01"]
+    },
+    {
+      "id": "LIB-01",
+      "feature": "F09_LIB",
+      "title": "AudioFileEntry and AudioLibrary registry",
+      "description": "Introduce AudioFileEntry (AbsolutePath, Sha256, Duration, ByteSize, FileName, Usages) and AudioLibrary as a process-wide singleton keyed by content hash with a secondary index by absolute path. Usages list is maintained by subscribing to mutations on every MachineViewModel.Agents[*].Files collection.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": ["MACHINE-01"]
+    },
+    {
+      "id": "LIB-02",
+      "feature": "F09_LIB",
+      "title": "Background SHA-256 hasher with cache",
+      "description": "Stream each referenced audio file through SHA-256 on a background thread; cache results in %AppData%\\AmbientAgents\\library.json keyed by path with file size+mtime invalidation. Surface a progress indicator for initial scans.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": ["LIB-01"]
+    },
+    {
+      "id": "LIB-03",
+      "feature": "F09_LIB",
+      "title": "Audio duration and size metadata probe",
+      "description": "Probe audio duration via NAudio (AudioFileReader.TotalTime) and file size; cache in library.json alongside the hash. Required for duration-based likely-duplicate matching.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["LIB-01"]
+    },
+    {
+      "id": "LIB-04",
+      "feature": "F09_LIB",
+      "title": "Library panel: All Files tab",
+      "description": "New dockable LibraryPanel with a virtualized ListView showing filename, duration, size, usage count, and full path. Sortable by any column. Text filter in the tab header.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": ["LIB-01"]
+    },
+    {
+      "id": "LIB-05",
+      "feature": "F09_LIB",
+      "title": "Library panel: Duplicates tab",
+      "description": "Two grouped sections: (1) Exact duplicates grouped by identical SHA-256. (2) Likely duplicates grouped by case/extension-insensitive filename match AND duration within \u00b11%. Each group shows all candidate paths with usage counts.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": ["LIB-02", "LIB-03"]
+    },
+    {
+      "id": "LIB-06",
+      "feature": "F09_LIB",
+      "title": "Library panel: Unused tab",
+      "description": "Lists library entries whose Usages collection is empty. Provides multi-select and a bulk remove-from-library action (does not delete files from disk).",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["LIB-04"]
+    },
+    {
+      "id": "LIB-07",
+      "feature": "F09_LIB",
+      "title": "Show usages for a library file",
+      "description": "Clicking a file in any library tab opens a side drawer listing every (machine, agent) pair that references it. Each row has a 'navigate to' action that focuses the corresponding agent card in the main panel.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["LIB-04"]
+    },
+    {
+      "id": "LIB-08",
+      "feature": "F09_LIB",
+      "title": "OS drag-drop audio ingest",
+      "description": "Drop audio files from Explorer onto the Library panel to register them (library entry only) or onto an agent card to register and attach to that agent in one step.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["LIB-01", "AGENT-10"]
+    },
+    {
+      "id": "LIB-09",
+      "feature": "F09_LIB",
+      "title": "Add library file to additional agents/machines",
+      "description": "Action on a library row that opens a multi-select picker of machines and agents and appends the file to each chosen agent's file list. The same library entry can belong to many agents/machines.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["LIB-04"]
+    },
+    {
+      "id": "LIB-10",
+      "feature": "F09_LIB",
+      "title": "Merge duplicates action",
+      "description": "In a duplicates group, select a canonical library entry and rewrite every agent reference that points at any other member of the group to point at the canonical one. Non-canonical entries become unused and appear in the Unused tab for optional cleanup.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["LIB-05", "LIB-07"]
+    },
+    {
+      "id": "LIB-11",
+      "feature": "F09_LIB",
+      "title": "Reveal-in-Explorer and copy-path actions",
+      "description": "Row context menu on any library entry: open containing folder in Explorer, copy full path to clipboard.",
+      "priority": "low",
+      "status": "backlog",
+      "dependencies": ["LIB-04"]
     }
   ]
 }
