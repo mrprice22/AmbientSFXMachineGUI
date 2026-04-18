@@ -35,7 +35,7 @@
       "title": "Dockable mini-mode strip",
       "description": "A compact floating strip showing per-agent status lights and master volume. Can be docked to a screen edge via Win32 AppBar or float freely.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["SHELL-01", "AGENT-01"]
     },
     {

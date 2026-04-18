@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\Git\AudioMachines\AmbientSFXMachineGUI\App.xaml
-71231560558
+81674289717
 
-18-1980660451
+201325765915
 216-663881597
-Panels\AgentPanel\AgentPanelView.xaml;Panels\LogPanel\LogPanelView.xaml;Panels\NowPlayingPanel\NowPlayingPanelView.xaml;Panels\SoundboardPanel\SoundboardPanelView.xaml;Shell\HotkeyCaptureWindow.xaml;Shell\HotkeySettingsWindow.xaml;Shell\MainWindow.xaml;
+Panels\AgentPanel\AgentPanelView.xaml;Panels\LogPanel\LogPanelView.xaml;Panels\NowPlayingPanel\NowPlayingPanelView.xaml;Panels\SoundboardPanel\SoundboardPanelView.xaml;Shell\HotkeyCaptureWindow.xaml;Shell\HotkeySettingsWindow.xaml;Shell\MainWindow.xaml;Shell\MiniModeWindow.xaml;
 
 False
 

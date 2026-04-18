@@ -60,3 +60,5 @@ C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\HotkeyC
 C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\HotkeySettingsWindow.baml
 C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\HotkeyCaptureWindow.g.cs
 C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\HotkeySettingsWindow.g.cs
+C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\MiniModeWindow.baml
+C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\MiniModeWindow.g.cs

@@ -50,6 +50,25 @@ public partial class ShellViewModel : ObservableObject
         // TODO: prompt for name, snapshot current state via ProfileService.SnapshotCurrent()
     }
 
+    private MiniModeWindow? _miniWindow;
+
+    [RelayCommand]
+    private void ToggleMiniMode()
+    {
+        if (_miniWindow is { IsVisible: true })
+        {
+            _miniWindow.Close();
+            _miniWindow = null;
+            if (System.Windows.Application.Current.MainWindow is { } main) main.Show();
+            return;
+        }
+
+        _miniWindow = new MiniModeWindow(this);
+        _miniWindow.Closed += (_, _) => _miniWindow = null;
+        _miniWindow.Show();
+        if (System.Windows.Application.Current.MainWindow is { } m) m.Hide();
+    }
+
     [RelayCommand]
     private void OpenSettings()
     {
