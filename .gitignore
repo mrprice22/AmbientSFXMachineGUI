@@ -1,0 +1,40 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docobj
+
+# Rider
+.idea/
+
+# NuGet
+*.nupkg
+*.snupkg
+project.assets.json
+project.nuget.cache
+*.packages/
+packages/
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+
+# Publish output
+publish/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local secrets / env overrides
+*.env
+appsettings.Local.json
+
+# Audio data (large, user-specific)
+snd/

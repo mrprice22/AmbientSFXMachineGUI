@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AmbientSFXMachineGUI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5eb1fe8e1a02e2f3d4fac909ffd905651ab70dd6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2e69420ba24109a892ba867a98ba881980b82ae5")]
 [assembly: System.Reflection.AssemblyProductAttribute("AmbientSFXMachineGUI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AmbientSFXMachineGUI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

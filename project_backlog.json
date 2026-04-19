@@ -116,7 +116,7 @@
       "title": "Balance visualizer",
       "description": "Small L/R panning arc indicator on each agent card that updates to reflect where the last sound was panned.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["AGENT-01"]
     },
     {
