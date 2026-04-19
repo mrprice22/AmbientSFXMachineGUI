@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using AmbientSFXMachineGUI.Models;
 
 namespace AmbientSFXMachineGUI.Services;
@@ -25,6 +27,25 @@ public sealed class AgentCoordinator
     public AgentCoordinator()
     {
         Agents.CollectionChanged += OnAgentsCollectionChanged;
+    }
+
+    public void RegisterAgentFromFolder(string folderPath)
+    {
+        if (Agents.Any(a => a.FolderPath.Equals(folderPath, StringComparison.OrdinalIgnoreCase)))
+            return;
+
+        if (!Directory.GetFiles(folderPath, "*.config").Any())
+            new AgentConfigModel().WriteToDisk(folderPath);
+
+        var vm = new AgentViewModel(folderPath);
+        var cfg = AgentConfigModel.ReadFromDisk(folderPath);
+        vm.IsEnabled = cfg.Enabled;
+        vm.Volume    = cfg.Volume;
+        vm.Mode      = cfg.Mode;
+        vm.FileCount = Directory.GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly)
+                                .Count(f => !f.EndsWith(".config", StringComparison.OrdinalIgnoreCase));
+
+        Agents.Add(vm);
     }
 
     public void LoadAgentsFromDisk()

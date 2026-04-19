@@ -85,6 +85,9 @@ public partial class ShellViewModel : ObservableObject
         // TODO: write Log collection to timestamped CSV via SaveFileDialog.
     }
 
+    public void ImportAgentFolder(string folderPath)
+        => _coordinator.RegisterAgentFromFolder(folderPath);
+
     [RelayCommand]
     private void Clear() => Log.Clear();
 

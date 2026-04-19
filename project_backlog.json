@@ -157,7 +157,7 @@
       "title": "Drag-and-drop agent folder import",
       "description": "User can drag a folder onto a machine to register it as a new agent in that machine without manual config editing.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "AGENT-06"
       ]
