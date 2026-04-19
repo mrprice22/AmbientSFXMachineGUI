@@ -8,6 +8,7 @@ This file governs how Claude Code should approach work in this repository. Read 
 
 Goal is to build a graphical audio machine with multiple sound agents described in `design-document.md`
 The backlog tracking that journey lives in `project_backlog.json`.
+The sibling project that this project is working with and should play nice with is in C:\GIT\AudioMachines\AmbientSFXMachineConsole
 
 ---
 
@@ -32,7 +33,8 @@ The backlog is a JSON object with this structure:
       "feature":      "F01_CONTEXT",
       "priority":     "high",
       "status":       "backlog",
-      "dependencies": ["S-xxx", "S-yyy"]
+      "dependencies": ["S-xxx", "S-yyy"],
+      "references":   ["§3.1 Machine concept", "§5.2 Agent Management — Config Editor"]
     }
   ]
 }
@@ -49,6 +51,14 @@ The backlog is a JSON object with this structure:
 ### Priority Values
 
 `"high"` → `"medium"` → `"low"`. The tools use this for ordering suggestions.
+
+### References Field
+
+Each story carries a `"references"` array that points to the sections of `design-document.md` it implements. Use these when implementing a story:
+
+1. **Read the referenced sections first.** They are the authoritative spec for behaviour, field names, and edge cases.
+2. **When the story description is ambiguous, the referenced design-doc section wins.**
+3. **When adding a new story**, populate `references` with the most specific section(s) — prefer subsection anchors like `§5.2 Agent Management — Config Editor` over a broad `§5 Epics and Features`.
 
 ---
 

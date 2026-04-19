@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(py next_task.py)",
+      "Bash(py critical_path.py AGENT-11)"
+    ]
+  }
+}
