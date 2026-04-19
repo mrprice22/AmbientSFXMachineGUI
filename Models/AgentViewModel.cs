@@ -39,7 +39,11 @@ public partial class AgentViewModel : ObservableObject
     [RelayCommand]
     private void OpenConfigEditor()
     {
-        // TODO: surface config editor sheet
+        var window = new AmbientSFXMachineGUI.Shell.ConfigEditorWindow(this)
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+        window.ShowDialog();
     }
 
     [RelayCommand]

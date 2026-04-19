@@ -98,7 +98,7 @@
       "title": "In-app config editor",
       "description": "Slide-over form editor for all agent .config values (intervals, mode, volume, balance, turbo settings) with validation. Saves back to disk and hot-applies to the running SoundAgent.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["AGENT-01"]
     },
     {

@@ -683,11 +683,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Git\\AudioMachines\\AmbientSFXMachineGUI\\AmbientSFXMachineGUI.csproj",
+      "projectUniqueName": "C:\\GIT\\AudioMachines\\AmbientSFXMachineGUI\\AmbientSFXMachineGUI.csproj",
       "projectName": "AmbientSFXMachineGUI",
-      "projectPath": "C:\\Git\\AudioMachines\\AmbientSFXMachineGUI\\AmbientSFXMachineGUI.csproj",
+      "projectPath": "C:\\GIT\\AudioMachines\\AmbientSFXMachineGUI\\AmbientSFXMachineGUI.csproj",
       "packagesPath": "C:\\Users\\homel\\.nuget\\packages\\",
-      "outputPath": "C:\\Git\\AudioMachines\\AmbientSFXMachineGUI\\obj\\",
+      "outputPath": "C:\\GIT\\AudioMachines\\AmbientSFXMachineGUI\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -751,24 +751,6 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[8.0.26, 8.0.26]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Host.win-x64",
-            "version": "[8.0.26, 8.0.26]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Ref",
-            "version": "[8.0.26, 8.0.26]"
-          },
-          {
-            "name": "Microsoft.WindowsDesktop.App.Ref",
-            "version": "[8.0.26, 8.0.26]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
@@ -777,7 +759,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.313/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.311/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

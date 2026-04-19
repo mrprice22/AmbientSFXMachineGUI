@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\
+C:\GIT\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\
 AmbientSFXMachineGUI
 none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
-C:\Git\AudioMachines\AmbientSFXMachineGUI\App.xaml
-81674289717
+C:\GIT\AudioMachines\AmbientSFXMachineGUI\App.xaml
+91744080817
 
-201325765915
-216-663881597
-Panels\AgentPanel\AgentPanelView.xaml;Panels\LogPanel\LogPanelView.xaml;Panels\NowPlayingPanel\NowPlayingPanelView.xaml;Panels\SoundboardPanel\SoundboardPanelView.xaml;Shell\HotkeyCaptureWindow.xaml;Shell\HotkeySettingsWindow.xaml;Shell\MainWindow.xaml;Shell\MiniModeWindow.xaml;
+22-1281002617
+216-1417102301
+Panels\AgentPanel\AgentPanelView.xaml;Panels\LogPanel\LogPanelView.xaml;Panels\NowPlayingPanel\NowPlayingPanelView.xaml;Panels\SoundboardPanel\SoundboardPanelView.xaml;Shell\ConfigEditorWindow.xaml;Shell\HotkeyCaptureWindow.xaml;Shell\HotkeySettingsWindow.xaml;Shell\MainWindow.xaml;Shell\MiniModeWindow.xaml;
 
 False
 
