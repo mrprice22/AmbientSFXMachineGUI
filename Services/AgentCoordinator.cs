@@ -12,26 +12,24 @@ namespace AmbientSFXMachineGUI.Services;
 
 public sealed class AgentCoordinator
 {
-    public ObservableCollection<AgentViewModel> Agents { get; } = new();
-    public ObservableCollection<LogEntryViewModel> Log { get; } = new();
-
+    private readonly ObservableCollection<AgentViewModel> _agents;
+    private readonly Action<LogEntryViewModel> _publishLog;
     private readonly ConcurrentDictionary<Guid, ActivePlayback> _active = new();
     private readonly Dictionary<AgentViewModel, AgentRuntime> _runtime = new();
-    private const int LogCap = 500;
 
     private double _masterVolume = 100;
     private bool _mutedAll;
 
-    public event EventHandler<LogEntryViewModel>? SoundPlayed;
-
-    public AgentCoordinator()
+    public AgentCoordinator(ObservableCollection<AgentViewModel> agents, Action<LogEntryViewModel> publishLog)
     {
-        Agents.CollectionChanged += OnAgentsCollectionChanged;
+        _agents = agents;
+        _publishLog = publishLog;
+        _agents.CollectionChanged += OnAgentsCollectionChanged;
     }
 
     public void RegisterAgentFromFolder(string folderPath)
     {
-        if (Agents.Any(a => a.FolderPath.Equals(folderPath, StringComparison.OrdinalIgnoreCase)))
+        if (_agents.Any(a => a.FolderPath.Equals(folderPath, StringComparison.OrdinalIgnoreCase)))
             return;
 
         if (!Directory.GetFiles(folderPath, "*.config").Any())
@@ -45,13 +43,13 @@ public sealed class AgentCoordinator
         vm.FileCount = Directory.GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly)
                                 .Count(f => !f.EndsWith(".config", StringComparison.OrdinalIgnoreCase));
 
-        Agents.Add(vm);
+        _agents.Add(vm);
     }
 
     public void LoadAgentsFromDisk()
     {
         // TODO: scan snd/ directory, construct SoundAgent per folder,
-        //       wrap each with AgentViewModel (via RegisterAgent), hook playback events → PublishLog.
+        //       wrap each with AgentViewModel (via RegisterAgentFromFolder), hook playback events → PublishLog.
     }
 
     public void Shutdown()
@@ -64,37 +62,31 @@ public sealed class AgentCoordinator
         if (!_runtime.TryGetValue(agent, out var rt)) return;
         rt.ForcePlayPending = true;
         agent.NextPlayIn = TimeSpan.Zero;
-        // When SoundAgent is wired up, the runtime tick will observe ForcePlayPending,
-        // clear it, and trigger the next sound immediately.
     }
 
     public void SetMasterVolume(double volume)
     {
         _masterVolume = Clamp01to100(volume);
-        foreach (var agent in Agents) ApplyEffectiveVolume(agent);
+        foreach (var agent in _agents) ApplyEffectiveVolume(agent);
     }
 
     public void SetMuteAll(bool muted)
     {
         _mutedAll = muted;
-        foreach (var agent in Agents) ApplyEffectiveVolume(agent);
+        foreach (var agent in _agents) ApplyEffectiveVolume(agent);
     }
 
-    /// <summary>Effective gain in [0,1] = appMaster * agent.Volume * (mute? 0 : 1), both sliders 0-100.</summary>
+    /// <summary>Effective gain in [0,1] = masterVolume * agent.Volume * (mute? 0 : 1), both sliders 0–100.</summary>
     public float GetEffectiveVolume(AgentViewModel agent)
     {
         if (_mutedAll) return 0f;
         return (float)((_masterVolume / 100.0) * (agent.Volume / 100.0));
     }
 
-    internal void PublishLog(LogEntryViewModel entry)
-    {
-        Log.Add(entry);
-        while (Log.Count > LogCap) Log.RemoveAt(0);
-        SoundPlayed?.Invoke(this, entry);
-    }
+    internal IReadOnlyCollection<ActivePlayback> ActivePlaybacks
+        => (IReadOnlyCollection<ActivePlayback>)_active.Values;
 
-    internal IReadOnlyCollection<ActivePlayback> ActivePlaybacks => (IReadOnlyCollection<ActivePlayback>)_active.Values;
+    internal void PublishLog(LogEntryViewModel entry) => _publishLog(entry);
 
     private void OnAgentsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
@@ -167,6 +159,7 @@ public sealed class AgentCoordinator
 public sealed class ActivePlayback
 {
     public Guid Id { get; init; } = Guid.NewGuid();
+    public Guid MachineId { get; init; }
     public string AgentName { get; init; } = string.Empty;
     public string FilePath { get; init; } = string.Empty;
     public TimeSpan Position { get; set; }

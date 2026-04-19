@@ -6,7 +6,7 @@ namespace AmbientSFXMachineGUI;
 
 public partial class App : Application
 {
-    public static AgentCoordinator Coordinator { get; } = new();
+    public static MachineCoordinator MachineCoordinator { get; } = new();
     public static ProfileService Profiles { get; } = new();
     public static HotkeyService Hotkeys { get; } = new();
     public static TrayService Tray { get; } = new();
@@ -16,7 +16,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        Coordinator.LoadAgentsFromDisk();
+        MachineCoordinator.LoadMachinesFromDisk();
 
         Tray.Initialize();
         Tray.SetWindowVisibleState(true);
@@ -46,7 +46,7 @@ public partial class App : Application
     private void OnTrayMuteAllToggled(object? sender, System.EventArgs e)
     {
         _muted = !_muted;
-        Coordinator.SetMuteAll(_muted);
+        MachineCoordinator.SetMuteAll(_muted);
         Tray.SetMutedState(_muted);
     }
 
@@ -63,7 +63,7 @@ public partial class App : Application
     {
         Tray.Dispose();
         Hotkeys.Dispose();
-        Coordinator.Shutdown();
+        MachineCoordinator.Shutdown();
         base.OnExit(e);
     }
 }

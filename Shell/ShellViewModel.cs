@@ -8,37 +8,53 @@ namespace AmbientSFXMachineGUI.Shell;
 
 public partial class ShellViewModel : ObservableObject
 {
-    private readonly AgentCoordinator _coordinator;
+    private readonly MachineCoordinator _machineCoordinator;
     private readonly ProfileService _profileService;
     private readonly HotkeyService _hotkeys;
+    private static readonly ObservableCollection<AgentViewModel> _emptyAgents = new();
 
-    public ShellViewModel(AgentCoordinator coordinator, ProfileService profileService, HotkeyService hotkeys)
+    public ShellViewModel(MachineCoordinator machineCoordinator, ProfileService profileService, HotkeyService hotkeys)
     {
-        _coordinator = coordinator;
+        _machineCoordinator = machineCoordinator;
         _profileService = profileService;
         _hotkeys = hotkeys;
 
-        Agents = _coordinator.Agents;
-        Log = _coordinator.Log;
+        Machines = _machineCoordinator.Machines;
+        Log = _machineCoordinator.Log;
         Profiles = _profileService.Profiles;
         ActivePlaybacks = new ObservableCollection<ActivePlayback>();
         Items = new ObservableCollection<SoundboardItem>();
+
+        if (Machines.Count > 0)
+            SelectedMachine = Machines[0];
+        Machines.CollectionChanged += (_, _) =>
+        {
+            if (SelectedMachine is null && Machines.Count > 0)
+                SelectedMachine = Machines[0];
+        };
     }
 
-    public ObservableCollection<AgentViewModel> Agents { get; }
+    public ObservableCollection<MachineViewModel> Machines { get; }
     public ObservableCollection<LogEntryViewModel> Log { get; }
     public ObservableCollection<Profile> Profiles { get; }
     public ObservableCollection<ActivePlayback> ActivePlaybacks { get; }
     public ObservableCollection<SoundboardItem> Items { get; }
 
+    public ObservableCollection<AgentViewModel> Agents
+        => SelectedMachine?.Agents ?? _emptyAgents;
+
+    [ObservableProperty] private MachineViewModel? _selectedMachine;
     [ObservableProperty] private double _masterVolume = 100;
     [ObservableProperty] private bool _isMutedAll;
     [ObservableProperty] private Profile? _activeProfile;
     [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private bool _isEditMode;
 
-    partial void OnMasterVolumeChanged(double value) => _coordinator.SetMasterVolume(value);
-    partial void OnIsMutedAllChanged(bool value) => _coordinator.SetMuteAll(value);
+    partial void OnSelectedMachineChanged(MachineViewModel? value)
+        => OnPropertyChanged(nameof(Agents));
+
+    partial void OnMasterVolumeChanged(double value) => _machineCoordinator.SetMasterVolume(value);
+    partial void OnIsMutedAllChanged(bool value) => _machineCoordinator.SetMuteAll(value);
     partial void OnActiveProfileChanged(Profile? value)
     {
         if (value is not null) _profileService.Apply(value);
@@ -86,7 +102,10 @@ public partial class ShellViewModel : ObservableObject
     }
 
     public void ImportAgentFolder(string folderPath)
-        => _coordinator.RegisterAgentFromFolder(folderPath);
+    {
+        if (SelectedMachine is not null)
+            _machineCoordinator.RegisterAgentFromFolder(SelectedMachine, folderPath);
+    }
 
     [RelayCommand]
     private void Clear() => Log.Clear();

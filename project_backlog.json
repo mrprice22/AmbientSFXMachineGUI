@@ -167,7 +167,7 @@
       "title": "Machine data model and coordinator",
       "description": "Introduce MachineViewModel (Id, Name, IconPath, IsEnabled, MasterVolume, RootPath, Agents) and MachineCoordinator owning ObservableCollection<MachineViewModel>. Refactor AgentCoordinator so its Agents collection lives on a MachineViewModel; playback/log/active-playback state stays on the coordinator (now MachineCoordinator) since the log is app-global.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["SHELL-01"],
       "references": ["§3 Architecture (MachineCoordinator, AgentCoordinator, MachineViewModel)", "§3.1 Machine concept", "§6 State Management"]
     },
