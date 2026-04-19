@@ -1,6 +1,7 @@
 <Window x:Class="AmbientSFXMachineGUI.Shell.ConfigEditorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:AmbientSFXMachineGUI.Controls"
         Title="Agent Config"
         Width="380"
         WindowStyle="ToolWindow"
@@ -91,29 +92,18 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Text="Min Minutes"
-                                   VerticalAlignment="Center" Margin="0,4"/>
-                        <TextBox x:Name="MinMinutesBox" Grid.Row="0" Grid.Column="1" Margin="0,4"/>
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+                                   Text="Interval window (0 – 30 min)"
+                                   Margin="0,0,0,2" Foreground="#CCCCCC" FontSize="11"/>
+                        <controls:RangeSlider x:Name="IntervalSlider"
+                                              Grid.Row="1" Grid.ColumnSpan="2"
+                                              Margin="0,0,0,6"/>
 
-                        <TextBlock Grid.Row="1" Text="Max Minutes"
+                        <TextBlock Grid.Row="2" Text="Override Startup (s)"
                                    VerticalAlignment="Center" Margin="0,4"/>
-                        <TextBox x:Name="MaxMinutesBox" Grid.Row="1" Grid.Column="1" Margin="0,4"/>
-
-                        <TextBlock Grid.Row="2" Text="Min Seconds"
-                                   VerticalAlignment="Center" Margin="0,4"/>
-                        <TextBox x:Name="MinSecondsBox" Grid.Row="2" Grid.Column="1" Margin="0,4"/>
-
-                        <TextBlock Grid.Row="3" Text="Max Seconds"
-                                   VerticalAlignment="Center" Margin="0,4"/>
-                        <TextBox x:Name="MaxSecondsBox" Grid.Row="3" Grid.Column="1" Margin="0,4"/>
-
-                        <TextBlock Grid.Row="4" Text="Override Startup (s)"
-                                   VerticalAlignment="Center" Margin="0,4"/>
-                        <TextBox x:Name="OverrideStartupBox" Grid.Row="4" Grid.Column="1" Margin="0,4"/>
+                        <TextBox x:Name="OverrideStartupBox" Grid.Row="2" Grid.Column="1" Margin="0,4"/>
                     </Grid>
                 </GroupBox>
 

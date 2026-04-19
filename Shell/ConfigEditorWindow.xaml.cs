@@ -66,10 +66,9 @@ public partial class ConfigEditorWindow : Window
         VolumeBox.Text     = _cfg.Volume.ToString();
 
         // Timing
-        MinMinutesBox.Text     = _cfg.MinMinutes.ToString();
-        MaxMinutesBox.Text     = _cfg.MaxMinutes.ToString();
-        MinSecondsBox.Text     = _cfg.MinSeconds.ToString();
-        MaxSecondsBox.Text     = _cfg.MaxSeconds.ToString();
+        int lowSec  = _cfg.MinMinutes * 60 + _cfg.MinSeconds;
+        int highSec = _cfg.MaxMinutes * 60 + _cfg.MaxSeconds;
+        IntervalSlider.SetValues(lowSec, highSec);
         OverrideStartupBox.Text = _cfg.OverrideStartupSeconds.ToString();
 
         // Balance
@@ -199,19 +198,9 @@ public partial class ConfigEditorWindow : Window
         if (mode is not ("random" or "sequential" or "shuffle"))
             { error = "Mode must be random, sequential, or shuffle."; return false; }
 
-        if (!int.TryParse(MinMinutesBox.Text, out int minMin) || minMin < 0)
-            { error = "Min Minutes must be a non-negative integer."; return false; }
-        if (!int.TryParse(MaxMinutesBox.Text, out int maxMin) || maxMin < 0)
-            { error = "Max Minutes must be a non-negative integer."; return false; }
-        if (minMin > maxMin)
-            { error = "Min Minutes must be ≤ Max Minutes."; return false; }
-
-        if (!int.TryParse(MinSecondsBox.Text, out int minSec) || minSec < 0)
-            { error = "Min Seconds must be a non-negative integer."; return false; }
-        if (!int.TryParse(MaxSecondsBox.Text, out int maxSec) || maxSec < 0)
-            { error = "Max Seconds must be a non-negative integer."; return false; }
-        if (minSec > maxSec && minMin == maxMin)
-            { error = "Min Seconds must be ≤ Max Seconds when minutes are equal."; return false; }
+        int minTotalSec = IntervalSlider.LowValue;
+        int maxTotalSec = IntervalSlider.HighValue;
+        // RangeSlider enforces low ≤ high, so no further interval check needed.
 
         if (!int.TryParse(OverrideStartupBox.Text, out int startup) || startup < 0)
             { error = "Override Startup Seconds must be a non-negative integer."; return false; }
@@ -232,10 +221,10 @@ public partial class ConfigEditorWindow : Window
         _cfg.Enabled                = EnabledCheck.IsChecked == true;
         _cfg.Volume                 = vol;
         _cfg.Mode                   = mode!;
-        _cfg.MinMinutes             = minMin;
-        _cfg.MaxMinutes             = maxMin;
-        _cfg.MinSeconds             = minSec;
-        _cfg.MaxSeconds             = maxSec;
+        _cfg.MinMinutes             = minTotalSec / 60;
+        _cfg.MinSeconds             = minTotalSec % 60;
+        _cfg.MaxMinutes             = maxTotalSec / 60;
+        _cfg.MaxSeconds             = maxTotalSec % 60;
         _cfg.OverrideStartupSeconds = startup;
         _cfg.BalanceMin             = balMin;
         _cfg.BalanceMax             = balMax;

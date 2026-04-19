@@ -64,3 +64,5 @@ C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\MiniMod
 C:\Git\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\MiniModeWindow.g.cs
 C:\GIT\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\ConfigEditorWindow.baml
 C:\GIT\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Shell\ConfigEditorWindow.g.cs
+C:\GIT\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Controls\RangeSlider.baml
+C:\GIT\AudioMachines\AmbientSFXMachineGUI\obj\Debug\net8.0-windows\Controls\RangeSlider.g.cs

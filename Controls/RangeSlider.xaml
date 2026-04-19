@@ -1,0 +1,73 @@
+<UserControl x:Class="AmbientSFXMachineGUI.Controls.RangeSlider"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <!-- Slider with invisible track; only the thumb is rendered -->
+        <Style x:Key="ThumbOnlySlider" TargetType="Slider">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Track x:Name="PART_Track">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="Slider.DecreaseLarge"
+                                              Background="Transparent" BorderThickness="0"
+                                              Focusable="False" IsTabStop="False"/>
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb x:Name="Thumb">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Ellipse Width="14" Height="14"
+                                                     Fill="#4A9EFF" Stroke="#2278CC" StrokeThickness="1"/>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="Slider.IncreaseLarge"
+                                              Background="Transparent" BorderThickness="0"
+                                              Focusable="False" IsTabStop="False"/>
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Value readout -->
+        <Grid Grid.Row="0" Margin="0,0,0,3">
+            <TextBlock x:Name="LowLabel"  HorizontalAlignment="Left"
+                       FontSize="11" Foreground="#AAAAAA"/>
+            <TextBlock x:Name="HighLabel" HorizontalAlignment="Right"
+                       FontSize="11" Foreground="#AAAAAA"/>
+        </Grid>
+
+        <!-- Track area: background, fill, and two overlaid sliders -->
+        <Grid Grid.Row="1" x:Name="TrackArea" Height="22"
+              SizeChanged="OnTrackSizeChanged">
+            <!-- Full-width background track -->
+            <Border Background="#444" Height="4" VerticalAlignment="Center"
+                    CornerRadius="2" Margin="7,0"/>
+            <!-- Selected range fill (positioned in code) -->
+            <Border x:Name="RangeFill" Background="#4A9EFF" Height="4"
+                    VerticalAlignment="Center" CornerRadius="1"/>
+            <!-- Low handle -->
+            <Slider x:Name="LowSlider"  Minimum="0" Maximum="1800"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ThumbOnlySlider}"
+                    ValueChanged="OnLowChanged"/>
+            <!-- High handle (rendered on top so it wins when handles coincide) -->
+            <Slider x:Name="HighSlider" Minimum="0" Maximum="1800"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ThumbOnlySlider}"
+                    ValueChanged="OnHighChanged"/>
+        </Grid>
+    </Grid>
+</UserControl>

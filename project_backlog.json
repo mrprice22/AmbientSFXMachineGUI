@@ -107,7 +107,7 @@
       "title": "Min/max interval range sliders",
       "description": "Replace raw minute/second config fields in the config editor with a dual-handle range slider for the interval window.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["AGENT-06"]
     },
     {
