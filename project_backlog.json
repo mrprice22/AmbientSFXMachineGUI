@@ -261,7 +261,7 @@
       "title": "Per-machine master volume and group enable",
       "description": "Implement the multiplier volume chain: final = appMaster * machine.MasterVolume * agent.Volume * sound.VolumeOverride. Disabling a machine pauses all of its agents as a group without restarting them.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "MACHINE-02",
         "AGENT-03",
@@ -292,7 +292,7 @@
       "title": "Create new empty machine",
       "description": "Dialog to create a new machine: prompts for name, icon file, and root folder (new or existing empty directory). Creates the machine metadata and an empty snd/ subfolder.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "MACHINE-01"
       ],
@@ -306,7 +306,7 @@
       "title": "Rename, change icon, and reorder machines",
       "description": "Context menu and drag-reorder on machine cards. Rename updates the persisted index; icon picker accepts .ico/.png and stores path relative to machine root when possible.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "MACHINE-02"
       ],

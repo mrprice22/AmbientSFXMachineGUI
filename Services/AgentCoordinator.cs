@@ -18,7 +18,9 @@ public sealed class AgentCoordinator
     private readonly Dictionary<AgentViewModel, AgentRuntime> _runtime = new();
 
     private double _masterVolume = 100;
+    private double _machineMasterVolume = 100;
     private bool _mutedAll;
+    private bool _groupEnabled = true;
 
     public AgentCoordinator(ObservableCollection<AgentViewModel> agents, Action<LogEntryViewModel> publishLog)
     {
@@ -70,17 +72,29 @@ public sealed class AgentCoordinator
         foreach (var agent in _agents) ApplyEffectiveVolume(agent);
     }
 
+    public void SetMachineVolume(double volume)
+    {
+        _machineMasterVolume = Clamp01to100(volume);
+        foreach (var agent in _agents) ApplyEffectiveVolume(agent);
+    }
+
     public void SetMuteAll(bool muted)
     {
         _mutedAll = muted;
         foreach (var agent in _agents) ApplyEffectiveVolume(agent);
     }
 
-    /// <summary>Effective gain in [0,1] = masterVolume * agent.Volume * (mute? 0 : 1), both sliders 0–100.</summary>
+    public void SetGroupEnabled(bool enabled)
+    {
+        _groupEnabled = enabled;
+        foreach (var agent in _agents) { ApplyEnabled(agent); ApplyEffectiveVolume(agent); }
+    }
+
+    /// <summary>Effective gain in [0,1] = appMaster * machineMaster * agent.Volume (all 0–100 sliders).</summary>
     public float GetEffectiveVolume(AgentViewModel agent)
     {
-        if (_mutedAll) return 0f;
-        return (float)((_masterVolume / 100.0) * (agent.Volume / 100.0));
+        if (_mutedAll || !_groupEnabled) return 0f;
+        return (float)((_masterVolume / 100.0) * (_machineMasterVolume / 100.0) * (agent.Volume / 100.0));
     }
 
     internal IReadOnlyCollection<ActivePlayback> ActivePlaybacks
@@ -135,7 +149,7 @@ public sealed class AgentCoordinator
     private void ApplyEnabled(AgentViewModel agent)
     {
         if (!_runtime.TryGetValue(agent, out var rt)) return;
-        rt.Enabled = agent.IsEnabled;
+        rt.Enabled = _groupEnabled && agent.IsEnabled;
         // TODO: when SoundAgent is wired up, pause/resume its loop here.
     }
 

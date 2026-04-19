@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -31,6 +32,7 @@ public sealed class MachineCoordinator
 
     public void RemoveMachine(MachineViewModel machine)
     {
+        machine.PropertyChanged -= OnMachinePropertyChanged;
         if (_coordinators.Remove(machine, out var coordinator))
             coordinator.Shutdown();
         Machines.Remove(machine);
@@ -151,10 +153,28 @@ public sealed class MachineCoordinator
         });
     }
 
+    private void OnMachinePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not MachineViewModel machine) return;
+        if (!_coordinators.TryGetValue(machine, out var coordinator)) return;
+        switch (e.PropertyName)
+        {
+            case nameof(MachineViewModel.MasterVolume):
+                coordinator.SetMachineVolume(machine.MasterVolume);
+                break;
+            case nameof(MachineViewModel.IsEnabled):
+                coordinator.SetGroupEnabled(machine.IsEnabled);
+                break;
+        }
+    }
+
     private MachineViewModel AttachMachine(MachineViewModel machine)
     {
         var coordinator = new AgentCoordinator(machine.Agents, PublishLog);
+        coordinator.SetMachineVolume(machine.MasterVolume);
+        coordinator.SetGroupEnabled(machine.IsEnabled);
         _coordinators[machine] = coordinator;
+        machine.PropertyChanged += OnMachinePropertyChanged;
         Machines.Add(machine);
         return machine;
     }

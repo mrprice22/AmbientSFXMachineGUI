@@ -6,17 +6,47 @@
         <controls:StringToImageSourceConverter x:Key="PathToImage"/>
     </UserControl.Resources>
     <DockPanel>
-        <Button DockPanel.Dock="Bottom" Content="+ Import Machine"
-                Command="{Binding ImportMachineCommand}"
-                Margin="4,4,4,6" Padding="4,3"/>
-        <ListBox ItemsSource="{Binding Machines}"
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="4,4,4,6">
+            <Button Content="+ New"    Command="{Binding CreateMachineCommand}"
+                    Padding="4,3" Margin="0,0,4,0" MinWidth="52"/>
+            <Button Content="+ Import" Command="{Binding ImportMachineCommand}"
+                    Padding="4,3"/>
+        </StackPanel>
+        <ListBox x:Name="MachinesList"
+                 ItemsSource="{Binding Machines}"
                  SelectedItem="{Binding SelectedMachine, Mode=TwoWay}"
                  HorizontalContentAlignment="Stretch"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 BorderThickness="0">
+                 BorderThickness="0"
+                 AllowDrop="True"
+                 PreviewMouseLeftButtonDown="OnListPreviewMouseLeftButtonDown"
+                 MouseMove="OnListMouseMove"
+                 Drop="OnListDrop">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Border Padding="6,5" Margin="2,1">
+                    <!-- Tag carries ShellViewModel so the context menu can reach its commands -->
+                    <Border Padding="6,5" Margin="2,1"
+                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <Border.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Rename…"
+                                          Command="{Binding PlacementTarget.Tag.RenameMachineCommand,
+                                                   RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext,
+                                                   RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <MenuItem Header="Change icon…"
+                                          Command="{Binding PlacementTarget.Tag.ChangeIconCommand,
+                                                   RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext,
+                                                   RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <Separator/>
+                                <MenuItem Header="Remove machine"
+                                          Command="{Binding PlacementTarget.Tag.DeleteMachineCommand,
+                                                   RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext,
+                                                   RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                            </ContextMenu>
+                        </Border.ContextMenu>
                         <StackPanel>
                             <!-- Icon + Name + Enable toggle -->
                             <DockPanel LastChildFill="True">
@@ -24,7 +54,7 @@
                                               Content="On" IsChecked="{Binding IsEnabled}"
                                               MinWidth="34" FontSize="10" Padding="3,1"/>
                                 <Image DockPanel.Dock="Left"
-                                       Source="{Binding IconPath, Converter={StaticResource PathToImage}}"
+                                       Source="{Binding ResolvedIconPath, Converter={StaticResource PathToImage}}"
                                        Width="20" Height="20" Margin="0,0,5,0"
                                        VerticalAlignment="Center">
                                     <Image.Style>

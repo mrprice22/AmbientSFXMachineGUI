@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using AmbientSFXMachineGUI.Models;
@@ -121,6 +122,70 @@ public partial class ShellViewModel : ObservableObject
         var machine = MachineImporter.Import(dialog.SelectedPath, _machineCoordinator);
         SelectedMachine = machine;
         _machineCoordinator.SaveMachinesToDisk();
+    }
+
+    [RelayCommand]
+    private void CreateMachine()
+    {
+        var dialog = new CreateMachineDialog { Owner = System.Windows.Application.Current.MainWindow };
+        if (dialog.ShowDialog() != true) return;
+
+        Directory.CreateDirectory(Path.Combine(dialog.RootPath, "snd"));
+
+        var machine = _machineCoordinator.CreateMachine(dialog.MachineName, dialog.RootPath);
+        machine.IconPath = RelativeIfPossible(dialog.IconPath, dialog.RootPath);
+        SelectedMachine  = machine;
+        _machineCoordinator.SaveMachinesToDisk();
+    }
+
+    [RelayCommand]
+    private void RenameMachine(MachineViewModel machine)
+    {
+        var dialog = new InputDialog("Rename Machine", "Name:", machine.Name)
+            { Owner = System.Windows.Application.Current.MainWindow };
+        if (dialog.ShowDialog() != true || string.IsNullOrWhiteSpace(dialog.Value)) return;
+        machine.Name = dialog.Value.Trim();
+        _machineCoordinator.SaveMachinesToDisk();
+    }
+
+    [RelayCommand]
+    private void ChangeIcon(MachineViewModel machine)
+    {
+        using var ofd = new OpenFileDialog { Title = "Select icon", Filter = "Images|*.ico;*.png|All files|*.*" };
+        if (ofd.ShowDialog() != DialogResult.OK) return;
+        machine.IconPath = RelativeIfPossible(ofd.FileName, machine.RootPath);
+        _machineCoordinator.SaveMachinesToDisk();
+    }
+
+    [RelayCommand]
+    private void DeleteMachine(MachineViewModel machine)
+    {
+        var result = System.Windows.MessageBox.Show(
+            $"Remove '{machine.Name}'? Audio files and config files on disk are not deleted.",
+            "Remove Machine",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+        if (result != System.Windows.MessageBoxResult.Yes) return;
+        _machineCoordinator.RemoveMachine(machine);
+        _machineCoordinator.SaveMachinesToDisk();
+    }
+
+    public void MoveMachine(int fromIndex, int toIndex)
+    {
+        _machineCoordinator.Machines.Move(fromIndex, toIndex);
+        _machineCoordinator.SaveMachinesToDisk();
+    }
+
+    private static string RelativeIfPossible(string path, string rootPath)
+    {
+        if (string.IsNullOrEmpty(path) || string.IsNullOrEmpty(rootPath)) return path;
+        try
+        {
+            if (path.StartsWith(rootPath, System.StringComparison.OrdinalIgnoreCase))
+                return Path.GetRelativePath(rootPath, path);
+        }
+        catch { }
+        return path;
     }
 
     [RelayCommand]
