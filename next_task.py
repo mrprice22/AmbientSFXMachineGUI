@@ -186,21 +186,25 @@ def print_tasks(tasks: list[dict], phase: int,
         pri   = story.get("priority", "medium")
         pc    = PRIORITY_COLOR.get(pri, RESET)
         deps  = parse_deps(story)
+        desc  = story.get("description") or ""
+        ref   = story.get("references") or ""
 
         print(f"\n  {BOLD}{CYAN}#{rank}{RESET}")
         print(f"  {DIM}ID:          {RESET}{BOLD}{CYAN}{story['id']}{RESET}")
         print(f"  {DIM}Title:       {RESET}{BOLD}{story.get('title', '—')}{RESET}")
-        print(f"  {DIM}Priority:    {RESET}{pc}{pri}{RESET}")
-        print(f"  {DIM}Feature:     {RESET}{story.get('feature', '—')}")
-        if deps:
-            print(f"  {DIM}Depends on:  {RESET}{', '.join(deps)}")
+        if ref:
+            print(f"  {DIM}References:    {RESET}{ref}{RESET}")
 
-        desc = story.get("description") or ""
         if desc:
             print(f"  {DIM}Description:{RESET}")
             for line in _wrap(desc, width=70, indent=4):
                 print(line)
-
+        print(f"  {DIM}Priority:    {RESET}{pc}{pri}{RESET}")
+        print(f"  {DIM}Feature:     {RESET}{story.get('feature', '—')}")
+        if deps:
+            print(f"  {DIM}Depends on:  {RESET}{', '.join(deps)}")
+        
+    
         if rank < len(tasks):
             print(f"\n  {DIM}{'·' * 56}{RESET}")
 

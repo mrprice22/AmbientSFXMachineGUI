@@ -95,6 +95,8 @@ When a story is fully implemented and working:
 1. Set its `status` to `"done"` in `project_backlog.json`.
 2. Run `py next_task.py` again to get the next story.
 3. Commit both the implementation and the updated `project_backlog.json` together.
+4. Output a completion line in this exact format (no word wrap — one line only):
+   `<StoryId>: <git-commit-friendly summary of what changed>`
 
 **Never mark a story done if:**
 - The code compiles but hasn't been tested against the test data
