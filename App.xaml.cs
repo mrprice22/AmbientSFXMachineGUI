@@ -61,6 +61,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        MachineCoordinator.SaveMachinesToDisk();
         Tray.Dispose();
         Hotkeys.Dispose();
         MachineCoordinator.Shutdown();

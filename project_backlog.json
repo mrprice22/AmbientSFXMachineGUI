@@ -1,14 +1,14 @@
 {
   "features": {
-    "F01_SHELL":   "F01 \u2014 Core Shell",
-    "F02_AGENTS":  "F02 \u2014 Agent Management",
+    "F01_SHELL": "F01 \u2014 Core Shell",
+    "F02_AGENTS": "F02 \u2014 Agent Management",
     "F03_MACHINE": "F03 \u2014 Machine Management",
-    "F04_LIB":     "F04 \u2014 Audio Library",
-    "F05_LOG":     "F05 \u2014 Live Playback Log",
-    "F06_SFX":     "F06 \u2014 Sound File Management",
-    "F07_NOW":     "F07 \u2014 Now Playing",
-    "F08_SB":      "F08 \u2014 Soundboard / Favorites",
-    "F09_PROF":    "F09 \u2014 Profiles"
+    "F04_LIB": "F04 \u2014 Audio Library",
+    "F05_LOG": "F05 \u2014 Live Playback Log",
+    "F06_SFX": "F06 \u2014 Sound File Management",
+    "F07_NOW": "F07 \u2014 Now Playing",
+    "F08_SB": "F08 \u2014 Soundboard / Favorites",
+    "F09_PROF": "F09 \u2014 Profiles"
   },
   "stories": [
     {
@@ -19,7 +19,11 @@
       "priority": "high",
       "status": "done",
       "dependencies": [],
-      "references": ["§4 Panel Layout System", "§5.1 Core Shell \u2014 SHELL-01", "§8 Persistence (Panel layout \u2192 layout.xml)"]
+      "references": [
+        "\u00c2\u00a74 Panel Layout System",
+        "\u00c2\u00a75.1 Core Shell \u2014 SHELL-01",
+        "\u00c2\u00a78 Persistence (Panel layout \u2192 layout.xml)"
+      ]
     },
     {
       "id": "SHELL-02",
@@ -29,7 +33,9 @@
       "priority": "high",
       "status": "done",
       "dependencies": [],
-      "references": ["§5.1 Core Shell \u2014 SHELL-02"]
+      "references": [
+        "\u00c2\u00a75.1 Core Shell \u2014 SHELL-02"
+      ]
     },
     {
       "id": "SHELL-03",
@@ -38,8 +44,13 @@
       "description": "A compact floating strip showing per-agent status lights and master volume. Can be docked to a screen edge via Win32 AppBar or float freely.",
       "priority": "low",
       "status": "done",
-      "dependencies": ["SHELL-01", "AGENT-01"],
-      "references": ["§5.1 Core Shell \u2014 SHELL-03"]
+      "dependencies": [
+        "SHELL-01",
+        "AGENT-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.1 Core Shell \u2014 SHELL-03"
+      ]
     },
     {
       "id": "SHELL-04",
@@ -48,8 +59,13 @@
       "description": "In-app UI for binding keyboard shortcuts to actions: mute all, toggle/solo a machine, force-play an agent, toggle an agent, switch profile, show/hide window. Uses RegisterHotKey via P/Invoke. Per-machine hotkey bindings override global app-level bindings when that machine is active.",
       "priority": "medium",
       "status": "done",
-      "dependencies": ["SHELL-01"],
-      "references": ["§5.1 Core Shell \u2014 SHELL-04", "§7 Hotkey Architecture"]
+      "dependencies": [
+        "SHELL-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.1 Core Shell \u2014 SHELL-04",
+        "\u00c2\u00a77 Hotkey Architecture"
+      ]
     },
     {
       "id": "S-BUG-001",
@@ -59,7 +75,9 @@
       "priority": "high",
       "status": "done",
       "dependencies": [],
-      "references": ["§2 Technology Decision (NuGet dependencies, build setup)"]
+      "references": [
+        "\u00c2\u00a72 Technology Decision (NuGet dependencies, build setup)"
+      ]
     },
     {
       "id": "AGENT-01",
@@ -68,8 +86,13 @@
       "description": "One card per agent showing: name, mode, enabled state, file count, last played file, next-play countdown timer, and turbo mode badge. Bound to AgentViewModel via INotifyPropertyChanged.",
       "priority": "high",
       "status": "done",
-      "dependencies": ["SHELL-01"],
-      "references": ["§5.2 Agent Management \u2014 AgentCard UI elements", "§3 Architecture (AgentViewModel exposes)"]
+      "dependencies": [
+        "SHELL-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard UI elements",
+        "\u00c2\u00a73 Architecture (AgentViewModel exposes)"
+      ]
     },
     {
       "id": "AGENT-02",
@@ -78,8 +101,12 @@
       "description": "Toggle switch on each agent card to enable or disable the agent at runtime without restarting the application.",
       "priority": "high",
       "status": "done",
-      "dependencies": ["AGENT-01"],
-      "references": ["§5.2 Agent Management \u2014 AgentCard: Toggle switch \u2192 IsEnabled"]
+      "dependencies": [
+        "AGENT-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: Toggle switch \u2192 IsEnabled"
+      ]
     },
     {
       "id": "AGENT-03",
@@ -88,8 +115,13 @@
       "description": "Live volume slider on each agent card that takes effect immediately without restarting.",
       "priority": "high",
       "status": "done",
-      "dependencies": ["AGENT-01"],
-      "references": ["§5.2 Agent Management \u2014 AgentCard: Volume slider \u2192 Volume", "§3.1 Machine concept (volume chain)"]
+      "dependencies": [
+        "AGENT-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: Volume slider \u2192 Volume",
+        "\u00c2\u00a73.1 Machine concept (volume chain)"
+      ]
     },
     {
       "id": "AGENT-04",
@@ -98,8 +130,13 @@
       "description": "Global volume slider and mute toggle in the main toolbar that scales all machines simultaneously. Machine and agent volumes multiply into the app master: final = appMaster * machine.MasterVolume * agent.Volume * sound.VolumeOverride.",
       "priority": "high",
       "status": "done",
-      "dependencies": ["SHELL-01"],
-      "references": ["§4 Panel Layout System (Toolbar: App Master Vol | Mute All)", "§3.1 Machine concept (volume chain)"]
+      "dependencies": [
+        "SHELL-01"
+      ],
+      "references": [
+        "\u00c2\u00a74 Panel Layout System (Toolbar: App Master Vol | Mute All)",
+        "\u00c2\u00a73.1 Machine concept (volume chain)"
+      ]
     },
     {
       "id": "AGENT-05",
@@ -108,8 +145,12 @@
       "description": "Button on each agent card that immediately triggers the agent's next sound, bypassing the current wait timer.",
       "priority": "medium",
       "status": "done",
-      "dependencies": ["AGENT-01"],
-      "references": ["§5.2 Agent Management \u2014 AgentCard: Force-play button"]
+      "dependencies": [
+        "AGENT-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: Force-play button"
+      ]
     },
     {
       "id": "AGENT-06",
@@ -118,8 +159,12 @@
       "description": "Slide-over form editor for all agent .config values (intervals, mode, volume, balance, turbo settings) with validation. Saves back to disk and hot-applies to the running SoundAgent.",
       "priority": "medium",
       "status": "done",
-      "dependencies": ["AGENT-01"],
-      "references": ["§5.2 Agent Management \u2014 Config Editor (slide-over sheet, not a modal)"]
+      "dependencies": [
+        "AGENT-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.2 Agent Management \u2014 Config Editor (slide-over sheet, not a modal)"
+      ]
     },
     {
       "id": "AGENT-07",
@@ -128,8 +173,12 @@
       "description": "Replace raw minute/second config fields in the config editor with a dual-handle range slider for the interval window.",
       "priority": "low",
       "status": "done",
-      "dependencies": ["AGENT-06"],
-      "references": ["§5.2 Agent Management \u2014 Config Editor (Dual-handle RangeSlider for min/max intervals)"]
+      "dependencies": [
+        "AGENT-06"
+      ],
+      "references": [
+        "\u00c2\u00a75.2 Agent Management \u2014 Config Editor (Dual-handle RangeSlider for min/max intervals)"
+      ]
     },
     {
       "id": "AGENT-08",
@@ -138,8 +187,12 @@
       "description": "Small L/R panning arc indicator on each agent card that updates to reflect where the last sound was panned.",
       "priority": "low",
       "status": "done",
-      "dependencies": ["AGENT-01"],
-      "references": ["§5.2 Agent Management \u2014 AgentCard: L/R balance arc indicator \u2192 LastPanValue"]
+      "dependencies": [
+        "AGENT-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: L/R balance arc indicator \u2192 LastPanValue"
+      ]
     },
     {
       "id": "AGENT-09",
@@ -148,8 +201,12 @@
       "description": "Animated pulse badge on the agent card when turbo mode is active, showing remaining turbo play count.",
       "priority": "low",
       "status": "done",
-      "dependencies": ["AGENT-01"],
-      "references": ["§5.2 Agent Management \u2014 AgentCard: Turbo badge (animated pulse ring) \u2192 IsInTurboMode, RemainingTurboPlays"]
+      "dependencies": [
+        "AGENT-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: Turbo badge (animated pulse ring) \u2192 IsInTurboMode, RemainingTurboPlays"
+      ]
     },
     {
       "id": "AGENT-10",
@@ -158,8 +215,13 @@
       "description": "User can drag a folder onto a machine to register it as a new agent in that machine without manual config editing.",
       "priority": "low",
       "status": "done",
-      "dependencies": ["AGENT-06"],
-      "references": ["§5.2 Agent Management \u2014 AgentCard UI", "§5.8 Machine Management (Import machine \u2014 folder referenced in place)"]
+      "dependencies": [
+        "AGENT-06"
+      ],
+      "references": [
+        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard UI",
+        "\u00c2\u00a75.8 Machine Management (Import machine \u2014 folder referenced in place)"
+      ]
     },
     {
       "id": "MACHINE-01",
@@ -168,8 +230,14 @@
       "description": "Introduce MachineViewModel (Id, Name, IconPath, IsEnabled, MasterVolume, RootPath, Agents) and MachineCoordinator owning ObservableCollection<MachineViewModel>. Refactor AgentCoordinator so its Agents collection lives on a MachineViewModel; playback/log/active-playback state stays on the coordinator (now MachineCoordinator) since the log is app-global.",
       "priority": "high",
       "status": "done",
-      "dependencies": ["SHELL-01"],
-      "references": ["§3 Architecture (MachineCoordinator, AgentCoordinator, MachineViewModel)", "§3.1 Machine concept", "§6 State Management"]
+      "dependencies": [
+        "SHELL-01"
+      ],
+      "references": [
+        "\u00c2\u00a73 Architecture (MachineCoordinator, AgentCoordinator, MachineViewModel)",
+        "\u00c2\u00a73.1 Machine concept",
+        "\u00c2\u00a76 State Management"
+      ]
     },
     {
       "id": "MACHINE-02",
@@ -177,9 +245,15 @@
       "title": "Machines rail and machine card UI",
       "description": "Left-edge dockable rail showing a vertical list of machine cards. Each card shows icon, name, enable toggle, master volume slider, and expands to reveal its agents. Selecting a machine scopes the agent panel to it.",
       "priority": "high",
-      "status": "backlog",
-      "dependencies": ["MACHINE-01", "AGENT-01"],
-      "references": ["§4 Panel Layout System (Default layout \u2014 Machines rail left edge)", "§5.8 Machine Management (Machines rail)"]
+      "status": "done",
+      "dependencies": [
+        "MACHINE-01",
+        "AGENT-01"
+      ],
+      "references": [
+        "\u00c2\u00a74 Panel Layout System (Default layout \u2014 Machines rail left edge)",
+        "\u00c2\u00a75.8 Machine Management (Machines rail)"
+      ]
     },
     {
       "id": "MACHINE-03",
@@ -188,8 +262,15 @@
       "description": "Implement the multiplier volume chain: final = appMaster * machine.MasterVolume * agent.Volume * sound.VolumeOverride. Disabling a machine pauses all of its agents as a group without restarting them.",
       "priority": "high",
       "status": "backlog",
-      "dependencies": ["MACHINE-02", "AGENT-03", "AGENT-04"],
-      "references": ["§3.1 Machine concept (volume chain, disable behavior)", "§5.8 Machine Management (machine card: enable toggle, master volume slider)"]
+      "dependencies": [
+        "MACHINE-02",
+        "AGENT-03",
+        "AGENT-04"
+      ],
+      "references": [
+        "\u00c2\u00a73.1 Machine concept (volume chain, disable behavior)",
+        "\u00c2\u00a75.8 Machine Management (machine card: enable toggle, master volume slider)"
+      ]
     },
     {
       "id": "MACHINE-04",
@@ -197,9 +278,13 @@
       "title": "Import existing console-app machine folder",
       "description": "File > Import Machine picker that accepts a directory containing appSettings.config and snd/. Reads appName and icon from appSettings.config, then scans snd/<agent>/*.config to materialize AgentViewModels. References the folder in place (no copying). Validate against C:\\Users\\homel\\OneDrive\\Projects\\SpookyAudioMachine, ThursdayGameNightAudioSFX, and ThursdayPacmanAudioSFX.",
       "priority": "high",
-      "status": "backlog",
-      "dependencies": ["MACHINE-01"],
-      "references": ["§5.8 Machine Management \u2014 Import machine (MachineImporter.cs)"]
+      "status": "done",
+      "dependencies": [
+        "MACHINE-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.8 Machine Management \u2014 Import machine (MachineImporter.cs)"
+      ]
     },
     {
       "id": "MACHINE-05",
@@ -208,8 +293,12 @@
       "description": "Dialog to create a new machine: prompts for name, icon file, and root folder (new or existing empty directory). Creates the machine metadata and an empty snd/ subfolder.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["MACHINE-01"],
-      "references": ["§5.8 Machine Management \u2014 Create machine"]
+      "dependencies": [
+        "MACHINE-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.8 Machine Management \u2014 Create machine"
+      ]
     },
     {
       "id": "MACHINE-06",
@@ -218,8 +307,12 @@
       "description": "Context menu and drag-reorder on machine cards. Rename updates the persisted index; icon picker accepts .ico/.png and stores path relative to machine root when possible.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["MACHINE-02"],
-      "references": ["§5.8 Machine Management \u2014 Rename / change icon / reorder"]
+      "dependencies": [
+        "MACHINE-02"
+      ],
+      "references": [
+        "\u00c2\u00a75.8 Machine Management \u2014 Rename / change icon / reorder"
+      ]
     },
     {
       "id": "MACHINE-07",
@@ -228,8 +321,12 @@
       "description": "Remove action on a machine card that deletes the machine's entry from the index and unhooks its agents/library usages. Warns explicitly that audio files and .config files on disk are not touched.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["MACHINE-02"],
-      "references": ["§5.8 Machine Management \u2014 Remove machine"]
+      "dependencies": [
+        "MACHINE-02"
+      ],
+      "references": [
+        "\u00c2\u00a75.8 Machine Management \u2014 Remove machine"
+      ]
     },
     {
       "id": "MACHINE-08",
@@ -237,9 +334,13 @@
       "title": "Persist machine index to %AppData%",
       "description": "Serialize MachineCoordinator state to %AppData%\\AmbientAgents\\machines\\<id>.json (id, name, iconPath, isEnabled, masterVolume, rootPath, order). Restore on startup. Agent/sound configs remain at RootPath and are not duplicated here.",
       "priority": "high",
-      "status": "backlog",
-      "dependencies": ["MACHINE-01"],
-      "references": ["§8 Persistence (Machine index \u2192 %AppData%\\AmbientAgents\\machines\\<id>.json)"]
+      "status": "done",
+      "dependencies": [
+        "MACHINE-01"
+      ],
+      "references": [
+        "\u00c2\u00a78 Persistence (Machine index \u2192 %AppData%\\AmbientAgents\\machines\\<id>.json)"
+      ]
     },
     {
       "id": "MACHINE-09",
@@ -248,8 +349,13 @@
       "description": "Extend TrayService so each machine appears as a submenu in the tray context menu with its own icon and entries: toggle mute, solo (mute all others), show cards.",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["MACHINE-02", "SHELL-02"],
-      "references": ["§5.8 Machine Management \u2014 Per-machine tray submenu"]
+      "dependencies": [
+        "MACHINE-02",
+        "SHELL-02"
+      ],
+      "references": [
+        "\u00c2\u00a75.8 Machine Management \u2014 Per-machine tray submenu"
+      ]
     },
     {
       "id": "MACHINE-10",
@@ -258,8 +364,12 @@
       "description": "Move profile/soundboard/hotkey storage under %AppData%\\AmbientAgents\\machines\\<machineId>\\ so each machine owns its own. Profiles apply only to their parent machine; soundboard buttons and hotkey bindings are machine-scoped. Global app-level hotkeys (mute all, show window) remain in the app-level hotkeys.json.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["MACHINE-01"],
-      "references": ["§8 Persistence (Profiles, Soundboard, Hotkeys \u2014 per-machine paths)"]
+      "dependencies": [
+        "MACHINE-01"
+      ],
+      "references": [
+        "\u00c2\u00a78 Persistence (Profiles, Soundboard, Hotkeys \u2014 per-machine paths)"
+      ]
     },
     {
       "id": "LIB-01",
@@ -268,8 +378,13 @@
       "description": "Introduce AudioFileEntry (AbsolutePath, Sha256, Duration, ByteSize, FileName, Usages) and AudioLibrary as a process-wide singleton keyed by content hash with a secondary index by absolute path. Usages list is maintained by subscribing to mutations on every MachineViewModel.Agents[*].Files collection.",
       "priority": "high",
       "status": "backlog",
-      "dependencies": ["MACHINE-01"],
-      "references": ["§3.2 Audio Library (AudioFileEntry, keying, usages, decentralized ownership)", "§6 State Management (AudioLibrary singleton)"]
+      "dependencies": [
+        "MACHINE-01"
+      ],
+      "references": [
+        "\u00c2\u00a73.2 Audio Library (AudioFileEntry, keying, usages, decentralized ownership)",
+        "\u00c2\u00a76 State Management (AudioLibrary singleton)"
+      ]
     },
     {
       "id": "LIB-02",
@@ -278,8 +393,14 @@
       "description": "Stream each referenced audio file through SHA-256 on a background thread; cache results in %AppData%\\AmbientAgents\\library.json keyed by path with file size+mtime invalidation. Surface a progress indicator for initial scans.",
       "priority": "high",
       "status": "backlog",
-      "dependencies": ["LIB-01"],
-      "references": ["§3.2 Audio Library (Hashing: lazy, streamed SHA-256)", "§8 Persistence (Library cache \u2192 library.json)", "§5.9 Audio Library (progress indicator in tab header)"]
+      "dependencies": [
+        "LIB-01"
+      ],
+      "references": [
+        "\u00c2\u00a73.2 Audio Library (Hashing: lazy, streamed SHA-256)",
+        "\u00c2\u00a78 Persistence (Library cache \u2192 library.json)",
+        "\u00c2\u00a75.9 Audio Library (progress indicator in tab header)"
+      ]
     },
     {
       "id": "LIB-03",
@@ -288,8 +409,13 @@
       "description": "Probe audio duration via NAudio (AudioFileReader.TotalTime) and file size; cache in library.json alongside the hash. Required for duration-based likely-duplicate matching.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["LIB-01"],
-      "references": ["§3.2 Audio Library (entry: Duration, ByteSize probed via NAudio)", "§5.9 Audio Library \u2014 Duplicates tab (likely duplicates: duration within \u00b11%)"]
+      "dependencies": [
+        "LIB-01"
+      ],
+      "references": [
+        "\u00c2\u00a73.2 Audio Library (entry: Duration, ByteSize probed via NAudio)",
+        "\u00c2\u00a75.9 Audio Library \u2014 Duplicates tab (likely duplicates: duration within \u00b11%)"
+      ]
     },
     {
       "id": "LIB-04",
@@ -298,8 +424,13 @@
       "description": "New dockable LibraryPanel with a virtualized ListView showing filename, duration, size, usage count, and full path. Sortable by any column. Text filter in the tab header.",
       "priority": "high",
       "status": "backlog",
-      "dependencies": ["LIB-01"],
-      "references": ["§5.9 Audio Library \u2014 All Files tab", "§4 Panel Layout System (tabbed bottom dock)"]
+      "dependencies": [
+        "LIB-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.9 Audio Library \u2014 All Files tab",
+        "\u00c2\u00a74 Panel Layout System (tabbed bottom dock)"
+      ]
     },
     {
       "id": "LIB-05",
@@ -308,8 +439,14 @@
       "description": "Two grouped sections: (1) Exact duplicates grouped by identical SHA-256. (2) Likely duplicates grouped by case/extension-insensitive filename match AND duration within \u00b11%. Each group shows all candidate paths with usage counts.",
       "priority": "high",
       "status": "backlog",
-      "dependencies": ["LIB-02", "LIB-03"],
-      "references": ["§3.2 Audio Library (Duplicate detection: tiered \u2014 exact and likely)", "§5.9 Audio Library \u2014 Duplicates tab"]
+      "dependencies": [
+        "LIB-02",
+        "LIB-03"
+      ],
+      "references": [
+        "\u00c2\u00a73.2 Audio Library (Duplicate detection: tiered \u2014 exact and likely)",
+        "\u00c2\u00a75.9 Audio Library \u2014 Duplicates tab"
+      ]
     },
     {
       "id": "LIB-06",
@@ -318,8 +455,13 @@
       "description": "Lists library entries whose Usages collection is empty. Provides multi-select and a bulk remove-from-library action (does not delete files from disk).",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["LIB-04"],
-      "references": ["§3.2 Audio Library (Unused detection: entries with empty Usages)", "§5.9 Audio Library \u2014 Unused tab"]
+      "dependencies": [
+        "LIB-04"
+      ],
+      "references": [
+        "\u00c2\u00a73.2 Audio Library (Unused detection: entries with empty Usages)",
+        "\u00c2\u00a75.9 Audio Library \u2014 Unused tab"
+      ]
     },
     {
       "id": "LIB-07",
@@ -328,8 +470,12 @@
       "description": "Clicking a file in any library tab opens a side drawer listing every (machine, agent) pair that references it. Each row has a 'navigate to' action that focuses the corresponding agent card in the main panel.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["LIB-04"],
-      "references": ["§5.9 Audio Library \u2014 Row actions: Show usages (side drawer)"]
+      "dependencies": [
+        "LIB-04"
+      ],
+      "references": [
+        "\u00c2\u00a75.9 Audio Library \u2014 Row actions: Show usages (side drawer)"
+      ]
     },
     {
       "id": "LIB-08",
@@ -338,8 +484,13 @@
       "description": "Drop audio files from Explorer onto the Library panel to register them (library entry only) or onto an agent card to register and attach to that agent in one step.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["LIB-01", "AGENT-10"],
-      "references": ["§5.9 Audio Library \u2014 Ingest (drag from Explorer)"]
+      "dependencies": [
+        "LIB-01",
+        "AGENT-10"
+      ],
+      "references": [
+        "\u00c2\u00a75.9 Audio Library \u2014 Ingest (drag from Explorer)"
+      ]
     },
     {
       "id": "LIB-09",
@@ -348,8 +499,13 @@
       "description": "Action on a library row that opens a multi-select picker of machines and agents and appends the file to each chosen agent's file list. The same library entry can belong to many agents/machines.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["LIB-04"],
-      "references": ["§3.2 Audio Library (Reuse: single entry in many agents/machines)", "§5.9 Audio Library \u2014 Row actions: Add to additional agents/machines"]
+      "dependencies": [
+        "LIB-04"
+      ],
+      "references": [
+        "\u00c2\u00a73.2 Audio Library (Reuse: single entry in many agents/machines)",
+        "\u00c2\u00a75.9 Audio Library \u2014 Row actions: Add to additional agents/machines"
+      ]
     },
     {
       "id": "LIB-10",
@@ -358,8 +514,13 @@
       "description": "In a duplicates group, select a canonical library entry and rewrite every agent reference that points at any other member of the group to point at the canonical one. Non-canonical entries become unused and appear in the Unused tab for optional cleanup.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["LIB-05", "LIB-07"],
-      "references": ["§5.9 Audio Library \u2014 Row actions: Merge duplicates (Duplicates tab only)"]
+      "dependencies": [
+        "LIB-05",
+        "LIB-07"
+      ],
+      "references": [
+        "\u00c2\u00a75.9 Audio Library \u2014 Row actions: Merge duplicates (Duplicates tab only)"
+      ]
     },
     {
       "id": "LIB-11",
@@ -368,8 +529,12 @@
       "description": "Row context menu on any library entry: open containing folder in Explorer, copy full path to clipboard.",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["LIB-04"],
-      "references": ["§5.9 Audio Library \u2014 Row actions: Reveal in Explorer, Copy full path"]
+      "dependencies": [
+        "LIB-04"
+      ],
+      "references": [
+        "\u00c2\u00a75.9 Audio Library \u2014 Row actions: Reveal in Explorer, Copy full path"
+      ]
     },
     {
       "id": "LOG-01",
@@ -378,8 +543,13 @@
       "description": "Virtualised auto-scrolling ListView showing timestamp, agent name, and filename for every sound that fires. Capped at 500 entries with oldest pruned.",
       "priority": "high",
       "status": "backlog",
-      "dependencies": ["SHELL-01"],
-      "references": ["§5.4 Live Playback Log (LogEntryViewModel: Timestamp, AgentName, FileName, FilePath)", "§6 State Management (ObservableCollection<LogEntryViewModel> capped at 500)"]
+      "dependencies": [
+        "SHELL-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.4 Live Playback Log (LogEntryViewModel: Timestamp, AgentName, FileName, FilePath)",
+        "\u00c2\u00a76 State Management (ObservableCollection<LogEntryViewModel> capped at 500)"
+      ]
     },
     {
       "id": "LOG-04",
@@ -388,8 +558,12 @@
       "description": "Toolbar button serialises the full current-session log to a timestamped CSV file (timestamp, agent, filename).",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["LOG-01"],
-      "references": ["§5.4 Live Playback Log \u2014 Export (Toolbar button \u2192 .csv)"]
+      "dependencies": [
+        "LOG-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.4 Live Playback Log \u2014 Export (Toolbar button \u2192 .csv)"
+      ]
     },
     {
       "id": "SFX-01",
@@ -398,8 +572,13 @@
       "description": "Expand an agent card to reveal its file list. Each file has an enable/disable toggle preventing it from being selected during playback.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["AGENT-01"],
-      "references": ["§5.3 Sound File Management (expanded file list: Enable/disable checkbox)", "§5.2 Agent Management \u2014 AgentCard: Expand/collapse chevron reveals file list"]
+      "dependencies": [
+        "AGENT-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.3 Sound File Management (expanded file list: Enable/disable checkbox)",
+        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: Expand/collapse chevron reveals file list"
+      ]
     },
     {
       "id": "SFX-02",
@@ -408,8 +587,13 @@
       "description": "Set a volume multiplier on an individual sound file that stacks with the agent-level volume. Editable from the expanded file list on the agent card.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["SFX-01"],
-      "references": ["§5.3 Sound File Management (Volume override slider, defaults hidden, appears on hover)", "§3.1 Machine concept (volume chain: sound.VolumeOverride up to 200%)"]
+      "dependencies": [
+        "SFX-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.3 Sound File Management (Volume override slider, defaults hidden, appears on hover)",
+        "\u00c2\u00a73.1 Machine concept (volume chain: sound.VolumeOverride up to 200%)"
+      ]
     },
     {
       "id": "SFX-03",
@@ -418,8 +602,12 @@
       "description": "Set a minimum re-fire interval on a specific file to prevent back-to-back repeats of annoying sounds.",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["SFX-01"],
-      "references": ["§5.3 Sound File Management (Cooldown override field)"]
+      "dependencies": [
+        "SFX-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.3 Sound File Management (Cooldown override field)"
+      ]
     },
     {
       "id": "SFX-04",
@@ -428,8 +616,12 @@
       "description": "Fuzzy search bar in the toolbar that filters across all agents and all sound files by filename.",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["AGENT-01"],
-      "references": ["§5.3 Sound File Management \u2014 global search bar in toolbar"]
+      "dependencies": [
+        "AGENT-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.3 Sound File Management \u2014 global search bar in toolbar"
+      ]
     },
     {
       "id": "SFX-05",
@@ -438,8 +630,13 @@
       "description": "Visual indicator (dot intensity or play count badge) on each file row showing how many times it has fired this session.",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["SFX-01", "LOG-01"],
-      "references": ["§5.3 Sound File Management (Session play count heatmap dot \u2014 color intensity scales with count)"]
+      "dependencies": [
+        "SFX-01",
+        "LOG-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.3 Sound File Management (Session play count heatmap dot \u2014 color intensity scales with count)"
+      ]
     },
     {
       "id": "LOG-02",
@@ -448,8 +645,13 @@
       "description": "Right-click any log row to: add to soundboard, disable that file, set a volume override, or open the containing folder in Explorer.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["LOG-01", "SFX-01"],
-      "references": ["§5.4 Live Playback Log \u2014 Right-click context menu (disable file and set volume override require SFX-01/SFX-02 model)"]
+      "dependencies": [
+        "LOG-01",
+        "SFX-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.4 Live Playback Log \u2014 Right-click context menu (disable file and set volume override require SFX-01/SFX-02 model)"
+      ]
     },
     {
       "id": "NOW-01",
@@ -458,8 +660,15 @@
       "description": "Collapsible dockable panel listing every sound currently playing, with agent name, filename, and a live progress bar driven by polling AudioFileReader.Position on a 100ms timer.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["SHELL-01", "LOG-01"],
-      "references": ["§5.5 Now Playing Panel", "§4 Panel Layout System (tabbed bottom dock)", "§6 State Management (ConcurrentDictionary<Guid, ActivePlayback>)"]
+      "dependencies": [
+        "SHELL-01",
+        "LOG-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.5 Now Playing Panel",
+        "\u00c2\u00a74 Panel Layout System (tabbed bottom dock)",
+        "\u00c2\u00a76 State Management (ConcurrentDictionary<Guid, ActivePlayback>)"
+      ]
     },
     {
       "id": "NOW-02",
@@ -468,8 +677,12 @@
       "description": "Inline rotary volume control next to each active sound in the now-playing panel for quick in-the-moment adjustment.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["NOW-01"],
-      "references": ["§5.5 Now Playing Panel (Inline volume knob \u2014 rotary Slider style)"]
+      "dependencies": [
+        "NOW-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.5 Now Playing Panel (Inline volume knob \u2014 rotary Slider style)"
+      ]
     },
     {
       "id": "NOW-03",
@@ -478,8 +691,13 @@
       "description": "Button in the now-playing panel to temporarily mute all other agents while one sound finishes, then auto-unmute on playback end.",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["NOW-01", "AGENT-04"],
-      "references": ["§5.5 Now Playing Panel (Solo button \u2014 mutes all other agents; auto-unmutes on playback end)"]
+      "dependencies": [
+        "NOW-01",
+        "AGENT-04"
+      ],
+      "references": [
+        "\u00c2\u00a75.5 Now Playing Panel (Solo button \u2014 mutes all other agents; auto-unmutes on playback end)"
+      ]
     },
     {
       "id": "SB-01",
@@ -488,8 +706,14 @@
       "description": "Dockable grid of buttons for favorited sounds, scoped to the active machine. Clicking a button plays the sound immediately in parallel with normal agent activity, independent of agent scheduling.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["SHELL-01", "MACHINE-01"],
-      "references": ["§5.6 Soundboard / Favorites", "§4 Panel Layout System (Soundboard / Favorites collapsible dockable)"]
+      "dependencies": [
+        "SHELL-01",
+        "MACHINE-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.6 Soundboard / Favorites",
+        "\u00c2\u00a74 Panel Layout System (Soundboard / Favorites collapsible dockable)"
+      ]
     },
     {
       "id": "SB-02",
@@ -498,8 +722,14 @@
       "description": "One-click star button on a log entry adds the sound to the soundboard without file browsing.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["SB-01", "LOG-01"],
-      "references": ["§5.4 Live Playback Log \u2014 Right-click context menu: Add to Soundboard", "§5.6 Soundboard / Favorites"]
+      "dependencies": [
+        "SB-01",
+        "LOG-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.4 Live Playback Log \u2014 Right-click context menu: Add to Soundboard",
+        "\u00c2\u00a75.6 Soundboard / Favorites"
+      ]
     },
     {
       "id": "SB-03",
@@ -508,8 +738,12 @@
       "description": "Edit-mode toggle that enables drag-to-reorder buttons, double-click rename, right-click delete, and group section dividers.",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["SB-01"],
-      "references": ["§5.6 Soundboard / Favorites \u2014 Layout editor mode"]
+      "dependencies": [
+        "SB-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.6 Soundboard / Favorites \u2014 Layout editor mode"
+      ]
     },
     {
       "id": "SB-04",
@@ -518,8 +752,14 @@
       "description": "Assign a keyboard shortcut to any soundboard button via right-click so favorites can be triggered without focusing the window.",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["SB-01", "SHELL-04"],
-      "references": ["§5.6 Soundboard / Favorites \u2014 Hotkey assignment", "§7 Hotkey Architecture (HotkeyService)"]
+      "dependencies": [
+        "SB-01",
+        "SHELL-04"
+      ],
+      "references": [
+        "\u00c2\u00a75.6 Soundboard / Favorites \u2014 Hotkey assignment",
+        "\u00c2\u00a77 Hotkey Architecture (HotkeyService)"
+      ]
     },
     {
       "id": "SFX-06",
@@ -528,8 +768,14 @@
       "description": "Star button on each file row in an expanded agent card adds the file to the active machine's soundboard in one click. This is a second entry point to soundboard creation distinct from the log-row star (SB-02) and from log drag-drop (LOG-03).",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["SFX-01", "SB-01"],
-      "references": ["§5.3 Sound File Management (Star button \u2192 adds to soundboard)", "§5.6 Soundboard / Favorites (entry points to creating a SoundboardItem)"]
+      "dependencies": [
+        "SFX-01",
+        "SB-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.3 Sound File Management (Star button \u2192 adds to soundboard)",
+        "\u00c2\u00a75.6 Soundboard / Favorites (entry points to creating a SoundboardItem)"
+      ]
     },
     {
       "id": "LOG-03",
@@ -538,8 +784,13 @@
       "description": "Log rows are drag sources; the soundboard panel is a drop target. Dropping a log entry creates a new soundboard button for that file.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["LOG-01", "SB-01"],
-      "references": ["§5.4 Live Playback Log \u2014 Drag from log to soundboard (log rows are drag sources; soundboard is drop target)"]
+      "dependencies": [
+        "LOG-01",
+        "SB-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.4 Live Playback Log \u2014 Drag from log to soundboard (log rows are drag sources; soundboard is drop target)"
+      ]
     },
     {
       "id": "PROF-01",
@@ -548,8 +799,18 @@
       "description": "Save the full current state of a machine (agent enable states, per-sound enable states, all volumes, machine master volume, soundboard layout, hotkeys, pinned agents) as a named JSON profile. Profiles are scoped per-machine and saved under %AppData%\\AmbientAgents\\machines\\<machineId>\\profiles\\. Load restores all settings for that machine.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["AGENT-02", "AGENT-03", "SFX-01", "SFX-02", "SB-01", "MACHINE-10"],
-      "references": ["§5.7 Profiles (Profile JSON schema: agents, soundOverrides, soundboard, hotkeys, pinnedAgents)", "§8 Persistence (Profiles per-machine \u2192 %AppData%\\AmbientAgents\\machines\\<id>\\profiles\\*.json)"]
+      "dependencies": [
+        "AGENT-02",
+        "AGENT-03",
+        "SFX-01",
+        "SFX-02",
+        "SB-01",
+        "MACHINE-10"
+      ],
+      "references": [
+        "\u00c2\u00a75.7 Profiles (Profile JSON schema: agents, soundOverrides, soundboard, hotkeys, pinnedAgents)",
+        "\u00c2\u00a78 Persistence (Profiles per-machine \u2192 %AppData%\\AmbientAgents\\machines\\<id>\\profiles\\*.json)"
+      ]
     },
     {
       "id": "PROF-02",
@@ -558,8 +819,13 @@
       "description": "Switch between profiles at runtime from a toolbar dropdown or hotkey. All settings apply immediately without restart. Skips any agent marked as pinned.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["PROF-01"],
-      "references": ["§5.7 Profiles \u2014 Profile picker (dropdown in main toolbar)", "§6 State Management (ProfileService.Apply iterates agents, raises ProfileChanged)"]
+      "dependencies": [
+        "PROF-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.7 Profiles \u2014 Profile picker (dropdown in main toolbar)",
+        "\u00c2\u00a76 State Management (ProfileService.Apply iterates agents, raises ProfileChanged)"
+      ]
     },
     {
       "id": "PROF-03",
@@ -568,8 +834,12 @@
       "description": "One-click snapshot of the current state saved as a new named profile. Prompts for a name then saves immediately.",
       "priority": "medium",
       "status": "backlog",
-      "dependencies": ["PROF-01"],
-      "references": ["§5.7 Profiles \u2014 Quick-save (floppy/snapshot icon next to picker)"]
+      "dependencies": [
+        "PROF-01"
+      ],
+      "references": [
+        "\u00c2\u00a75.7 Profiles \u2014 Quick-save (floppy/snapshot icon next to picker)"
+      ]
     },
     {
       "id": "PROF-04",
@@ -578,8 +848,12 @@
       "description": "Before applying a profile, show a collapsible summary of what will change (agents toggled, volumes shifted, sounds enabled/disabled) with confirm and cancel actions.",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["PROF-02"],
-      "references": ["§5.7 Profiles \u2014 Profile picker (Diff view: collapsible summary, Confirm / Cancel)"]
+      "dependencies": [
+        "PROF-02"
+      ],
+      "references": [
+        "\u00c2\u00a75.7 Profiles \u2014 Profile picker (Diff view: collapsible summary, Confirm / Cancel)"
+      ]
     },
     {
       "id": "PROF-05",
@@ -588,8 +862,12 @@
       "description": "Hold-to-preview button that temporarily applies a profile's audio settings for a configurable duration (default 30s), then auto-reverts to the previous state.",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["PROF-02"],
-      "references": ["§5.7 Profiles \u2014 Profile audition (hold-to-preview, configurable timeout default 30s, auto-reverts)"]
+      "dependencies": [
+        "PROF-02"
+      ],
+      "references": [
+        "\u00c2\u00a75.7 Profiles \u2014 Profile audition (hold-to-preview, configurable timeout default 30s, auto-reverts)"
+      ]
     },
     {
       "id": "AGENT-11",
@@ -598,8 +876,14 @@
       "description": "Pin toggle on an agent card to lock its enabled state and volume so profile hot-swaps do not affect it. Stored in the pinnedAgents list within the active profile JSON.",
       "priority": "low",
       "status": "backlog",
-      "dependencies": ["AGENT-01", "PROF-02"],
-      "references": ["§5.7 Profiles (pinnedAgents field in profile JSON)", "§5.2 Agent Management \u2014 AgentCard UI elements"]
+      "dependencies": [
+        "AGENT-01",
+        "PROF-02"
+      ],
+      "references": [
+        "\u00c2\u00a75.7 Profiles (pinnedAgents field in profile JSON)",
+        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard UI elements"
+      ]
     }
   ]
 }

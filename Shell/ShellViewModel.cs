@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using AmbientSFXMachineGUI.Models;
 using AmbientSFXMachineGUI.Services;
+using System.Windows.Forms;
 
 namespace AmbientSFXMachineGUI.Shell;
 
@@ -105,6 +106,21 @@ public partial class ShellViewModel : ObservableObject
     {
         if (SelectedMachine is not null)
             _machineCoordinator.RegisterAgentFromFolder(SelectedMachine, folderPath);
+    }
+
+    [RelayCommand]
+    private void ImportMachine()
+    {
+        using var dialog = new FolderBrowserDialog
+        {
+            Description        = "Select machine folder (must contain appSettings.config)",
+            UseDescriptionForTitle = true,
+        };
+        if (dialog.ShowDialog() != DialogResult.OK) return;
+
+        var machine = MachineImporter.Import(dialog.SelectedPath, _machineCoordinator);
+        SelectedMachine = machine;
+        _machineCoordinator.SaveMachinesToDisk();
     }
 
     [RelayCommand]

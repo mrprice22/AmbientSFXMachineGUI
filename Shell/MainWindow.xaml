@@ -6,6 +6,7 @@
         xmlns:log="clr-namespace:AmbientSFXMachineGUI.Panels.LogPanel"
         xmlns:now="clr-namespace:AmbientSFXMachineGUI.Panels.NowPlayingPanel"
         xmlns:sb="clr-namespace:AmbientSFXMachineGUI.Panels.SoundboardPanel"
+        xmlns:machines="clr-namespace:AmbientSFXMachineGUI.Panels.MachinesRailPanel"
         Title="AmbientAgents" Height="720" Width="1200">
     <DockPanel>
         <!-- Toolbar: Master Vol | Mute All | Profile Picker | Settings -->
@@ -29,6 +30,8 @@
                 <Button Content="Mini" Command="{Binding ToggleMiniModeCommand}"
                         ToolTip="Toggle dockable mini-mode strip"/>
                 <Button Content="Settings" Command="{Binding OpenSettingsCommand}"/>
+                <Separator/>
+                <Button Content="Import Machine" Command="{Binding ImportMachineCommand}"/>
             </ToolBar>
         </ToolBarTray>
 
@@ -37,6 +40,11 @@
             <avalon:LayoutRoot>
                 <avalon:LayoutPanel Orientation="Vertical">
                     <avalon:LayoutPanel Orientation="Horizontal">
+                        <avalon:LayoutAnchorablePane DockWidth="200">
+                            <avalon:LayoutAnchorable ContentId="machines" Title="Machines" CanClose="False">
+                                <machines:MachinesRailView/>
+                            </avalon:LayoutAnchorable>
+                        </avalon:LayoutAnchorablePane>
                         <avalon:LayoutAnchorablePane DockWidth="*">
                             <avalon:LayoutAnchorable ContentId="agents" Title="Agents" CanClose="False">
                                 <agent:AgentPanelView/>

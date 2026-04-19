@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Windows;
 using AmbientSFXMachineGUI.Models;
 
@@ -16,13 +19,14 @@ public sealed class MachineCoordinator
 
     public event EventHandler<LogEntryViewModel>? SoundPlayed;
 
+    private static string MachinesDir => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "AmbientAgents", "machines");
+
     public MachineViewModel CreateMachine(string name = "New Machine", string rootPath = "")
     {
         var machine = new MachineViewModel { Name = name, RootPath = rootPath };
-        var coordinator = new AgentCoordinator(machine.Agents, PublishLog);
-        _coordinators[machine] = coordinator;
-        Machines.Add(machine);
-        return machine;
+        return AttachMachine(machine);
     }
 
     public void RemoveMachine(MachineViewModel machine)
@@ -38,6 +42,15 @@ public sealed class MachineCoordinator
     public void RegisterAgentFromFolder(MachineViewModel machine, string folderPath)
         => GetCoordinator(machine).RegisterAgentFromFolder(folderPath);
 
+    public void ScanAgentsFromDisk(MachineViewModel machine)
+    {
+        if (string.IsNullOrEmpty(machine.RootPath)) return;
+        var sndDir = Path.Combine(machine.RootPath, "snd");
+        if (!Directory.Exists(sndDir)) return;
+        foreach (var dir in Directory.GetDirectories(sndDir))
+            RegisterAgentFromFolder(machine, dir);
+    }
+
     public void SetMasterVolume(double volume)
     {
         foreach (var coordinator in _coordinators.Values)
@@ -52,9 +65,74 @@ public sealed class MachineCoordinator
 
     public void LoadMachinesFromDisk()
     {
-        // Persistence implemented in MACHINE-08; seed a default machine for now.
-        var machine = CreateMachine("Default");
-        GetCoordinator(machine).LoadAgentsFromDisk();
+        var dir = MachinesDir;
+        if (!Directory.Exists(dir))
+        {
+            CreateMachine("Default");
+            return;
+        }
+
+        var records = Directory.GetFiles(dir, "*.json")
+            .Select(f =>
+            {
+                try { return JsonSerializer.Deserialize<MachineRecord>(File.ReadAllText(f)); }
+                catch { return null; }
+            })
+            .Where(r => r is not null)
+            .OrderBy(r => r!.Order)
+            .ToList();
+
+        if (records.Count == 0)
+        {
+            CreateMachine("Default");
+            return;
+        }
+
+        foreach (var r in records)
+        {
+            var machine = new MachineViewModel
+            {
+                Id           = r!.Id,
+                Name         = r.Name,
+                IconPath     = r.IconPath,
+                IsEnabled    = r.IsEnabled,
+                MasterVolume = r.MasterVolume,
+                RootPath     = r.RootPath,
+            };
+            AttachMachine(machine);
+            ScanAgentsFromDisk(machine);
+        }
+    }
+
+    public void SaveMachinesToDisk()
+    {
+        var dir = MachinesDir;
+        Directory.CreateDirectory(dir);
+
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        for (int i = 0; i < Machines.Count; i++)
+        {
+            var m = Machines[i];
+            var record = new MachineRecord
+            {
+                Id           = m.Id,
+                Name         = m.Name,
+                IconPath     = m.IconPath,
+                IsEnabled    = m.IsEnabled,
+                MasterVolume = m.MasterVolume,
+                RootPath     = m.RootPath,
+                Order        = i,
+            };
+            File.WriteAllText(Path.Combine(dir, $"{m.Id}.json"),
+                              JsonSerializer.Serialize(record, options));
+        }
+
+        var activeIds = Machines.Select(m => $"{m.Id}.json").ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var file in Directory.GetFiles(dir, "*.json"))
+        {
+            if (!activeIds.Contains(Path.GetFileName(file)))
+                File.Delete(file);
+        }
     }
 
     public void Shutdown()
@@ -71,5 +149,24 @@ public sealed class MachineCoordinator
             while (Log.Count > LogCap) Log.RemoveAt(0);
             SoundPlayed?.Invoke(this, entry);
         });
+    }
+
+    private MachineViewModel AttachMachine(MachineViewModel machine)
+    {
+        var coordinator = new AgentCoordinator(machine.Agents, PublishLog);
+        _coordinators[machine] = coordinator;
+        Machines.Add(machine);
+        return machine;
+    }
+
+    private sealed class MachineRecord
+    {
+        public Guid   Id           { get; set; }
+        public string Name         { get; set; } = string.Empty;
+        public string IconPath     { get; set; } = string.Empty;
+        public bool   IsEnabled    { get; set; } = true;
+        public double MasterVolume { get; set; } = 100;
+        public string RootPath     { get; set; } = string.Empty;
+        public int    Order        { get; set; }
     }
 }

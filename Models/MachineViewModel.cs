@@ -6,7 +6,7 @@ namespace AmbientSFXMachineGUI.Models;
 
 public partial class MachineViewModel : ObservableObject
 {
-    public Guid Id { get; } = Guid.NewGuid();
+    public Guid Id { get; init; } = Guid.NewGuid();
 
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private string _iconPath = string.Empty;

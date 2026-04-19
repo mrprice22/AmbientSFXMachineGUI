@@ -194,17 +194,10 @@ def print_tasks(tasks: list[dict], phase: int,
         print(f"  {DIM}Title:       {RESET}{BOLD}{story.get('title', '—')}{RESET}")
         if ref:
             print(f"  {DIM}References:    {RESET}{ref}{RESET}")
-
         if desc:
             print(f"  {DIM}Description:{RESET}")
             for line in _wrap(desc, width=70, indent=4):
                 print(line)
-        print(f"  {DIM}Priority:    {RESET}{pc}{pri}{RESET}")
-        print(f"  {DIM}Feature:     {RESET}{story.get('feature', '—')}")
-        if deps:
-            print(f"  {DIM}Depends on:  {RESET}{', '.join(deps)}")
-        
-    
         if rank < len(tasks):
             print(f"\n  {DIM}{'·' * 56}{RESET}")
 
