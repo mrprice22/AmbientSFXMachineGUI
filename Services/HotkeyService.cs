@@ -102,9 +102,9 @@ public sealed class HotkeyService : IDisposable
 
     public event EventHandler<string>? HotkeyTriggered;
 
-    public static string ConfigPath => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "AmbientAgents", "hotkeys.json");
+    public static string GlobalConfigPath => MachinePaths.GlobalHotkeysPath;
+
+    public static string MachineConfigPath(Guid machineId) => MachinePaths.MachineHotkeysPath(machineId);
 
     public HotkeyService()
     {
@@ -157,23 +157,32 @@ public sealed class HotkeyService : IDisposable
 
     public void Rebind(string actionId, string? keyCombo)
     {
-        _globalBindings[actionId] = string.IsNullOrWhiteSpace(keyCombo) ? null : keyCombo;
+        var combo = string.IsNullOrWhiteSpace(keyCombo) ? null : keyCombo;
+        var scope = _actions.TryGetValue(actionId, out var action) ? action.Scope : HotkeyScope.Global;
+
+        if (scope == HotkeyScope.Machine && _activeMachine is { } mid)
+        {
+            _machineBindings[actionId] = combo;
+            SaveMachineBindings(mid);
+        }
+        else
+        {
+            _globalBindings[actionId] = combo;
+            SaveGlobalBindings();
+        }
 
         var binding = Bindings.FirstOrDefault(b => b.ActionId == actionId);
-        if (binding != null) binding.Combo = _globalBindings[actionId];
+        if (binding != null) binding.Combo = combo;
 
         ApplyAll();
-        SaveToDisk();
     }
 
-    public void SetActiveMachineBindings(Guid? machineId, IReadOnlyDictionary<string, string?>? bindings)
+    public void SetActiveMachine(Guid? machineId)
     {
         _activeMachine = machineId;
         _machineBindings.Clear();
-        if (bindings != null)
-        {
-            foreach (var kv in bindings) _machineBindings[kv.Key] = kv.Value;
-        }
+        if (machineId is { } id) LoadMachineBindings(id);
+        RefreshBindingsCollection();
         ApplyAll();
     }
 
@@ -261,22 +270,27 @@ public sealed class HotkeyService : IDisposable
         public Dictionary<string, string?> Global { get; set; } = new();
     }
 
+    private sealed class PersistedMachineBindings
+    {
+        public Dictionary<string, string?> Machine { get; set; } = new();
+    }
+
     private void LoadFromDisk()
     {
         try
         {
-            if (!File.Exists(ConfigPath)) return;
-            var json = File.ReadAllText(ConfigPath);
+            if (!File.Exists(GlobalConfigPath)) return;
+            var json = File.ReadAllText(GlobalConfigPath);
             var data = JsonSerializer.Deserialize<PersistedBindings>(json);
             if (data?.Global == null) return;
 
             foreach (var kv in data.Global)
             {
-                if (!_actions.ContainsKey(kv.Key)) continue;
+                if (!_actions.TryGetValue(kv.Key, out var action)) continue;
+                if (action.Scope != HotkeyScope.Global) continue; // machine-scope lives in per-machine files
                 _globalBindings[kv.Key] = string.IsNullOrWhiteSpace(kv.Value) ? null : kv.Value;
-                var binding = Bindings.FirstOrDefault(b => b.ActionId == kv.Key);
-                if (binding != null) binding.Combo = _globalBindings[kv.Key];
             }
+            RefreshBindingsCollection();
         }
         catch
         {
@@ -284,17 +298,71 @@ public sealed class HotkeyService : IDisposable
         }
     }
 
-    private void SaveToDisk()
+    private void LoadMachineBindings(Guid machineId)
     {
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(ConfigPath)!);
-            var data = new PersistedBindings { Global = new Dictionary<string, string?>(_globalBindings) };
-            File.WriteAllText(ConfigPath, JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true }));
+            var path = MachineConfigPath(machineId);
+            if (!File.Exists(path)) return;
+            var data = JsonSerializer.Deserialize<PersistedMachineBindings>(File.ReadAllText(path));
+            if (data?.Machine == null) return;
+            foreach (var kv in data.Machine)
+            {
+                if (!_actions.TryGetValue(kv.Key, out var action)) continue;
+                if (action.Scope != HotkeyScope.Machine) continue;
+                _machineBindings[kv.Key] = string.IsNullOrWhiteSpace(kv.Value) ? null : kv.Value;
+            }
+        }
+        catch
+        {
+            // Corrupt file — ignore; machine-scope bindings stay empty.
+        }
+    }
+
+    private void SaveGlobalBindings()
+    {
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(GlobalConfigPath)!);
+            var global = _globalBindings
+                .Where(kv => _actions.TryGetValue(kv.Key, out var a) && a.Scope == HotkeyScope.Global)
+                .ToDictionary(kv => kv.Key, kv => kv.Value);
+            var data = new PersistedBindings { Global = global };
+            File.WriteAllText(GlobalConfigPath, JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true }));
         }
         catch
         {
             // Best-effort persistence.
+        }
+    }
+
+    private void SaveMachineBindings(Guid machineId)
+    {
+        try
+        {
+            var path = MachineConfigPath(machineId);
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            var data = new PersistedMachineBindings
+            {
+                Machine = new Dictionary<string, string?>(_machineBindings)
+            };
+            File.WriteAllText(path, JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true }));
+        }
+        catch
+        {
+            // Best-effort persistence.
+        }
+    }
+
+    private void RefreshBindingsCollection()
+    {
+        foreach (var b in Bindings)
+        {
+            var scope = _actions.TryGetValue(b.ActionId, out var a) ? a.Scope : HotkeyScope.Global;
+            if (scope == HotkeyScope.Machine)
+                b.Combo = _machineBindings.TryGetValue(b.ActionId, out var m) ? m : null;
+            else
+                b.Combo = _globalBindings.TryGetValue(b.ActionId, out var g) ? g : null;
         }
     }
 

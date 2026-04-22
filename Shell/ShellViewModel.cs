@@ -53,7 +53,10 @@ public partial class ShellViewModel : ObservableObject
     [ObservableProperty] private bool _isEditMode;
 
     partial void OnSelectedMachineChanged(MachineViewModel? value)
-        => OnPropertyChanged(nameof(Agents));
+    {
+        OnPropertyChanged(nameof(Agents));
+        _hotkeys.SetActiveMachine(value?.Id);
+    }
 
     partial void OnMasterVolumeChanged(double value) => _machineCoordinator.SetMasterVolume(value);
     partial void OnIsMutedAllChanged(bool value) => _machineCoordinator.SetMuteAll(value);
@@ -161,7 +164,8 @@ public partial class ShellViewModel : ObservableObject
     private void DeleteMachine(MachineViewModel machine)
     {
         var result = System.Windows.MessageBox.Show(
-            $"Remove '{machine.Name}'? Audio files and config files on disk are not deleted.",
+            $"Remove '{machine.Name}' from the app?\n\n" +
+            "This only unlinks the machine. Audio files and .config files on disk are NOT touched.",
             "Remove Machine",
             System.Windows.MessageBoxButton.YesNo,
             System.Windows.MessageBoxImage.Question);

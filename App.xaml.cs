@@ -23,6 +23,10 @@ public partial class App : Application
         Tray.ShowHideToggled += OnTrayShowHideToggled;
         Tray.MuteAllToggled += OnTrayMuteAllToggled;
         Tray.ExitRequested += OnTrayExitRequested;
+        Tray.MachineMuteToggled += OnTrayMachineMuteToggled;
+        Tray.MachineSoloRequested += OnTrayMachineSoloRequested;
+        Tray.MachineShowCardsRequested += OnTrayMachineShowCardsRequested;
+        Tray.AttachMachines(MachineCoordinator.Machines);
 
         Hotkeys.Register("app.muteAll", () => Dispatcher.Invoke(() => OnTrayMuteAllToggled(this, System.EventArgs.Empty)));
         Hotkeys.Register("app.toggleWindow", () => Dispatcher.Invoke(() =>
@@ -48,6 +52,39 @@ public partial class App : Application
         _muted = !_muted;
         MachineCoordinator.SetMuteAll(_muted);
         Tray.SetMutedState(_muted);
+    }
+
+    private void OnTrayMachineMuteToggled(object? sender, System.Guid id)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            foreach (var m in MachineCoordinator.Machines)
+                if (m.Id == id) { m.IsEnabled = !m.IsEnabled; return; }
+        });
+    }
+
+    private void OnTrayMachineSoloRequested(object? sender, System.Guid id)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            foreach (var m in MachineCoordinator.Machines)
+                m.IsEnabled = m.Id == id;
+        });
+    }
+
+    private void OnTrayMachineShowCardsRequested(object? sender, System.Guid id)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            if (MainWindow is not MainWindow main) return;
+            if (main.DataContext is Shell.ShellViewModel vm)
+            {
+                foreach (var m in MachineCoordinator.Machines)
+                    if (m.Id == id) { vm.SelectedMachine = m; break; }
+            }
+            if (!main.IsVisible || main.WindowState == WindowState.Minimized) main.ToggleVisibility();
+            else main.Activate();
+        });
     }
 
     private void OnTrayExitRequested(object? sender, System.EventArgs e)

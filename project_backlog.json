@@ -320,7 +320,7 @@
       "title": "Remove machine (unlink, do not delete files)",
       "description": "Remove action on a machine card that deletes the machine's entry from the index and unhooks its agents/library usages. Warns explicitly that audio files and .config files on disk are not touched.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "MACHINE-02"
       ],
@@ -348,7 +348,7 @@
       "title": "System tray submenu per machine",
       "description": "Extend TrayService so each machine appears as a submenu in the tray context menu with its own icon and entries: toggle mute, solo (mute all others), show cards.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "MACHINE-02",
         "SHELL-02"
@@ -363,7 +363,7 @@
       "title": "Scope profiles, soundboard, and hotkeys per-machine",
       "description": "Move profile/soundboard/hotkey storage under %AppData%\\AmbientAgents\\machines\\<machineId>\\ so each machine owns its own. Profiles apply only to their parent machine; soundboard buttons and hotkey bindings are machine-scoped. Global app-level hotkeys (mute all, show window) remain in the app-level hotkeys.json.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "MACHINE-01"
       ],
