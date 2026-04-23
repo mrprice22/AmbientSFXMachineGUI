@@ -833,7 +833,7 @@
       "title": "Quick-save current state as profile",
       "description": "One-click snapshot of the current state saved as a new named profile. Prompts for a name then saves immediately.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "PROF-01"
       ],

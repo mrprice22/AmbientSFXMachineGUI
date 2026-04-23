@@ -26,7 +26,8 @@
                           ItemsSource="{Binding Profiles}"
                           SelectedItem="{Binding ActiveProfile, Mode=TwoWay}"
                           DisplayMemberPath="Name"/>
-                <Button Content="Save" Command="{Binding QuickSaveProfileCommand}"/>
+                <Button Content="Save" Command="{Binding QuickSaveProfileCommand}"
+                        ToolTip="Quick-save current state as a named profile"/>
                 <Separator/>
                 <TextBox Width="200" Tag="Search sounds..."
                          Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"/>
