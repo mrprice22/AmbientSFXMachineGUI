@@ -27,6 +27,7 @@ public partial class SoundFileViewModel : ObservableObject
 
     [ObservableProperty] private int _playCountThisSession;
     [ObservableProperty] private bool _isFavorite;
+    [ObservableProperty] private bool _isHiddenBySearch;
 
     public bool IsVolumeOverridden => System.Math.Abs(VolumeOverride - 100) > 0.5;
     public bool IsCooldownOverridden => CooldownOverrideSeconds is int s && s > 0;

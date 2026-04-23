@@ -29,6 +29,7 @@ public partial class AgentViewModel : ObservableObject
     [ObservableProperty] private float _lastPanValue;
     [ObservableProperty] private bool _isPinned;
     [ObservableProperty] private bool _isExpanded;
+    [ObservableProperty] private bool _isHiddenBySearch;
 
     public ObservableCollection<SoundFileViewModel> Files { get; }
 

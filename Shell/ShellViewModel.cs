@@ -124,6 +124,43 @@ public partial class ShellViewModel : ObservableObject
 
     partial void OnLibraryFilterChanged(string value) => LibraryView.Refresh();
 
+    partial void OnSearchQueryChanged(string value) => ApplySearchFilter();
+
+    private void ApplySearchFilter()
+    {
+        var query = SearchQuery?.Trim() ?? string.Empty;
+        var hasQuery = query.Length > 0;
+        foreach (var machine in Machines)
+        {
+            foreach (var agent in machine.Agents)
+            {
+                var anyMatch = false;
+                foreach (var file in agent.Files)
+                {
+                    var match = !hasQuery || FuzzyMatch(file.FileName, query);
+                    file.IsHiddenBySearch = !match;
+                    if (match) anyMatch = true;
+                }
+                agent.IsHiddenBySearch = hasQuery && !anyMatch;
+                if (hasQuery && anyMatch) agent.IsExpanded = true;
+            }
+        }
+    }
+
+    private static bool FuzzyMatch(string source, string query)
+    {
+        if (string.IsNullOrEmpty(query)) return true;
+        if (string.IsNullOrEmpty(source)) return false;
+        if (source.Contains(query, StringComparison.OrdinalIgnoreCase)) return true;
+        int si = 0, qi = 0;
+        while (si < source.Length && qi < query.Length)
+        {
+            if (char.ToLowerInvariant(source[si]) == char.ToLowerInvariant(query[qi])) qi++;
+            si++;
+        }
+        return qi == query.Length;
+    }
+
     private void OnLibraryEntriesChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.OldItems != null)

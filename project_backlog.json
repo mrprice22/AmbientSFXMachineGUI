@@ -615,7 +615,7 @@
       "title": "Sound file search and filter",
       "description": "Fuzzy search bar in the toolbar that filters across all agents and all sound files by filename.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "AGENT-01"
       ],
