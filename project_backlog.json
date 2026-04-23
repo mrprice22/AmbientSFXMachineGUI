@@ -737,7 +737,7 @@
       "title": "Soundboard grid layout editor",
       "description": "Edit-mode toggle that enables drag-to-reorder buttons, double-click rename, right-click delete, and group section dividers.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "SB-01"
       ],

@@ -559,7 +559,8 @@ public partial class ShellViewModel : ObservableObject
     [RelayCommand]
     private void PlaySoundboardItem(SoundboardItem? item)
     {
-        if (item is null || string.IsNullOrEmpty(item.FilePath)) return;
+        if (item is null || item.IsDivider || string.IsNullOrEmpty(item.FilePath)) return;
+        if (IsEditMode) return;
         if (!File.Exists(item.FilePath)) return;
         try
         {
@@ -656,7 +657,52 @@ public partial class ShellViewModel : ObservableObject
     [RelayCommand]
     private void AddGroup()
     {
-        // TODO: insert a labeled soundboard section divider.
+        if (SelectedMachine is null) return;
+        var dialog = new InputDialog("Add Group", "Label:", "Group")
+            { Owner = System.Windows.Application.Current.MainWindow };
+        if (dialog.ShowDialog() != true || string.IsNullOrWhiteSpace(dialog.Value)) return;
+        SelectedMachine.SoundboardItems.Add(new SoundboardItem
+        {
+            Label      = dialog.Value.Trim(),
+            IsDivider  = true,
+        });
+    }
+
+    [RelayCommand]
+    private void RenameSoundboardItem(SoundboardItem? item)
+    {
+        if (item is null) return;
+        var dialog = new InputDialog(item.IsDivider ? "Rename Group" : "Rename Button", "Label:", item.Label)
+            { Owner = System.Windows.Application.Current.MainWindow };
+        if (dialog.ShowDialog() != true || string.IsNullOrWhiteSpace(dialog.Value)) return;
+        item.Label = dialog.Value.Trim();
+    }
+
+    [RelayCommand]
+    private void DeleteSoundboardItem(SoundboardItem? item)
+    {
+        if (item is null || SelectedMachine is null) return;
+        var items = SelectedMachine.SoundboardItems;
+        var index = items.IndexOf(item);
+        if (index < 0) return;
+        items.RemoveAt(index);
+        if (!item.IsDivider)
+        {
+            foreach (var file in EnumerateMatchingFiles(item.FilePath))
+                file.IsFavorite = false;
+        }
+    }
+
+    public void MoveSoundboardItem(SoundboardItem source, SoundboardItem? target)
+    {
+        if (SelectedMachine is null || ReferenceEquals(source, target)) return;
+        var items = SelectedMachine.SoundboardItems;
+        var from = items.IndexOf(source);
+        if (from < 0) return;
+        int to = target is null ? items.Count - 1 : items.IndexOf(target);
+        if (to < 0) return;
+        if (from == to) return;
+        items.Move(from, to);
     }
 
     private ActivePlayback? _soloedPlayback;

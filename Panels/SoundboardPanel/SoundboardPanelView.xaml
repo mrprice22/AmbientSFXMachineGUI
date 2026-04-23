@@ -8,10 +8,11 @@
                        Text="{Binding SelectedMachine.Name, StringFormat='Soundboard — {0}', FallbackValue='Soundboard'}"/>
             <Separator/>
             <ToggleButton Content="Edit layout" IsChecked="{Binding IsEditMode}"/>
-            <Button Content="Add group" Command="{Binding AddGroupCommand}"/>
+            <Button Content="+ Add group" Command="{Binding AddGroupCommand}"
+                    IsEnabled="{Binding IsEditMode}"/>
         </ToolBar>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding SoundboardItems}">
+        <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto">
+            <ItemsControl x:Name="ItemsHost" ItemsSource="{Binding SoundboardItems}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel/>
@@ -19,12 +20,63 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Button Margin="4" MinWidth="100" MinHeight="60"
-                                Content="{Binding Label}"
-                                ToolTip="{Binding FilePath}"
-                                Command="{Binding DataContext.PlaySoundboardItemCommand,
-                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                CommandParameter="{Binding}"/>
+                        <Grid x:Name="ItemRoot"
+                              Tag="{Binding}"
+                              PreviewMouseLeftButtonDown="OnItemPreviewMouseDown"
+                              PreviewMouseMove="OnItemPreviewMouseMove"
+                              AllowDrop="True"
+                              DragOver="OnItemDragOver"
+                              Drop="OnItemDrop">
+                            <Button x:Name="SoundButton"
+                                    Margin="4" MinWidth="100" MinHeight="60"
+                                    Content="{Binding Label}"
+                                    ToolTip="{Binding FilePath}"
+                                    Command="{Binding DataContext.PlaySoundboardItemCommand,
+                                                      RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CommandParameter="{Binding}"
+                                    MouseDoubleClick="OnItemDoubleClick">
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Rename..."
+                                                  Command="{Binding PlacementTarget.Tag.DataContext.RenameSoundboardItemCommand,
+                                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                  CommandParameter="{Binding}"/>
+                                        <MenuItem Header="Delete"
+                                                  Command="{Binding PlacementTarget.Tag.DataContext.DeleteSoundboardItemCommand,
+                                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                  CommandParameter="{Binding}"/>
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
+                            <Border x:Name="DividerBlock"
+                                    Visibility="Collapsed"
+                                    Margin="4,10,4,2"
+                                    Padding="6,2"
+                                    BorderBrush="#888" BorderThickness="0,0,0,1"
+                                    MouseLeftButtonDown="OnDividerMouseDown">
+                                <Border.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Rename group..."
+                                                  Command="{Binding PlacementTarget.Tag.DataContext.RenameSoundboardItemCommand,
+                                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                  CommandParameter="{Binding}"/>
+                                        <MenuItem Header="Delete"
+                                                  Command="{Binding PlacementTarget.Tag.DataContext.DeleteSoundboardItemCommand,
+                                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                  CommandParameter="{Binding}"/>
+                                    </ContextMenu>
+                                </Border.ContextMenu>
+                                <TextBlock Text="{Binding Label}" FontWeight="Bold" Foreground="#666"/>
+                            </Border>
+                        </Grid>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsDivider}" Value="True">
+                                <Setter TargetName="SoundButton" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="DividerBlock" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="ItemRoot" Property="Width"
+                                        Value="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=WrapPanel}}"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

@@ -9,4 +9,5 @@ public partial class SoundboardItem : ObservableObject
     [ObservableProperty] private string? _group;
     [ObservableProperty] private string? _hotkey;
     [ObservableProperty] private double _volume = 100;
+    [ObservableProperty] private bool _isDivider;
 }
