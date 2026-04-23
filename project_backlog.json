@@ -542,7 +542,7 @@
       "title": "Scrolling live playback log",
       "description": "Virtualised auto-scrolling ListView showing timestamp, agent name, and filename for every sound that fires. Capped at 500 entries with oldest pruned.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "SHELL-01"
       ],

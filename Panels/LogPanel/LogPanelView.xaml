@@ -6,7 +6,10 @@
             <Button Content="Export CSV" Command="{Binding ExportCsvCommand}"/>
             <Button Content="Clear" Command="{Binding ClearCommand}"/>
         </ToolBar>
-        <ListView ItemsSource="{Binding Log}" VirtualizingStackPanel.IsVirtualizing="True">
+        <ListView x:Name="LogList" ItemsSource="{Binding Log}"
+                  VirtualizingStackPanel.IsVirtualizing="True"
+                  VirtualizingStackPanel.VirtualizationMode="Recycling"
+                  ScrollViewer.IsDeferredScrollingEnabled="False">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Time"  Width="90"  DisplayMemberBinding="{Binding Timestamp, StringFormat=HH:mm:ss}"/>
