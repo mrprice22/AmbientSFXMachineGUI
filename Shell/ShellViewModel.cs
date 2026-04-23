@@ -21,6 +21,7 @@ public partial class ShellViewModel : ObservableObject
     private readonly ProfileService _profileService;
     private readonly HotkeyService _hotkeys;
     private static readonly ObservableCollection<AgentViewModel> _emptyAgents = new();
+    private static readonly ObservableCollection<SoundboardItem> _emptySoundboard = new();
 
     public ShellViewModel(MachineCoordinator machineCoordinator, ProfileService profileService, HotkeyService hotkeys, LibraryHasher libraryHasher, AudioLibrary audioLibrary, LibraryDuplicates libraryDuplicates)
     {
@@ -35,7 +36,6 @@ public partial class ShellViewModel : ObservableObject
         Log = _machineCoordinator.Log;
         Profiles = _profileService.Profiles;
         ActivePlaybacks = new ObservableCollection<ActivePlayback>();
-        Items = new ObservableCollection<SoundboardItem>();
 
         _machineCoordinator.PlaybackStarted += (_, p) => { if (!ActivePlaybacks.Contains(p)) ActivePlaybacks.Add(p); };
         _machineCoordinator.PlaybackEnded   += (_, p) =>
@@ -73,10 +73,12 @@ public partial class ShellViewModel : ObservableObject
     public ObservableCollection<LogEntryViewModel> Log { get; }
     public ObservableCollection<Profile> Profiles { get; }
     public ObservableCollection<ActivePlayback> ActivePlaybacks { get; }
-    public ObservableCollection<SoundboardItem> Items { get; }
 
     public ObservableCollection<AgentViewModel> Agents
         => SelectedMachine?.Agents ?? _emptyAgents;
+
+    public ObservableCollection<SoundboardItem> SoundboardItems
+        => SelectedMachine?.SoundboardItems ?? _emptySoundboard;
 
     [ObservableProperty] private MachineViewModel? _selectedMachine;
     [ObservableProperty] private double _masterVolume = 100;
@@ -308,6 +310,7 @@ public partial class ShellViewModel : ObservableObject
     partial void OnSelectedMachineChanged(MachineViewModel? value)
     {
         OnPropertyChanged(nameof(Agents));
+        OnPropertyChanged(nameof(SoundboardItems));
         _hotkeys.SetActiveMachine(value?.Id);
     }
 
@@ -523,13 +526,40 @@ public partial class ShellViewModel : ObservableObject
     private void AddLogEntryToSoundboard(LogEntryViewModel? entry)
     {
         if (entry is null || string.IsNullOrEmpty(entry.FilePath)) return;
-        if (Items.Any(i => string.Equals(i.FilePath, entry.FilePath, StringComparison.OrdinalIgnoreCase)))
+        if (SelectedMachine is null) return;
+        var items = SelectedMachine.SoundboardItems;
+        if (items.Any(i => string.Equals(i.FilePath, entry.FilePath, StringComparison.OrdinalIgnoreCase)))
             return;
-        Items.Add(new SoundboardItem
+        items.Add(new SoundboardItem
         {
             Label    = Path.GetFileNameWithoutExtension(entry.FileName),
             FilePath = entry.FilePath,
         });
+    }
+
+    [RelayCommand]
+    private void PlaySoundboardItem(SoundboardItem? item)
+    {
+        if (item is null || string.IsNullOrEmpty(item.FilePath)) return;
+        if (!File.Exists(item.FilePath)) return;
+        try
+        {
+            var reader = new NAudio.Wave.AudioFileReader(item.FilePath)
+            {
+                Volume = IsMutedAll
+                    ? 0f
+                    : (float)(Math.Clamp(item.Volume, 0, 200) / 100.0 * (MasterVolume / 100.0)),
+            };
+            var output = new NAudio.Wave.WaveOutEvent();
+            output.Init(reader);
+            output.PlaybackStopped += (_, _) =>
+            {
+                try { output.Dispose(); } catch { }
+                try { reader.Dispose(); } catch { }
+            };
+            output.Play();
+        }
+        catch { }
     }
 
     [RelayCommand]

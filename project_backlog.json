@@ -705,7 +705,7 @@
       "title": "Favorites soundboard panel",
       "description": "Dockable grid of buttons for favorited sounds, scoped to the active machine. Clicking a button plays the sound immediately in parallel with normal agent activity, independent of agent scheduling.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "SHELL-01",
         "MACHINE-01"

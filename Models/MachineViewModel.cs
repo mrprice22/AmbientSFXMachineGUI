@@ -16,6 +16,7 @@ public partial class MachineViewModel : ObservableObject
     [ObservableProperty] private string _rootPath = string.Empty;
 
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
+    public ObservableCollection<SoundboardItem> SoundboardItems { get; } = new();
 
     /// <summary>Resolves a relative IconPath against RootPath so the image converter always receives an absolute path.</summary>
     public string ResolvedIconPath
