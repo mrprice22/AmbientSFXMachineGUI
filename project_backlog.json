@@ -690,7 +690,7 @@
       "title": "Push-to-solo on active sound",
       "description": "Button in the now-playing panel to temporarily mute all other agents while one sound finishes, then auto-unmute on playback end.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "NOW-01",
         "AGENT-04"

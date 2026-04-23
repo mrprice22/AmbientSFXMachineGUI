@@ -62,7 +62,17 @@
                                                FontSize="10" Opacity="0.8"/>
                                 </Grid>
                                 <StackPanel>
-                                    <TextBlock Text="{Binding AgentName}" FontWeight="Bold"/>
+                                    <DockPanel LastChildFill="True">
+                                        <ToggleButton DockPanel.Dock="Right"
+                                                      Content="Solo"
+                                                      Width="44" Height="20" Padding="0"
+                                                      FontSize="10"
+                                                      IsChecked="{Binding IsSoloed, Mode=OneWay}"
+                                                      Command="{Binding DataContext.ToggleSoloCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}"
+                                                      ToolTip="Mute all other agents until this sound ends"/>
+                                        <TextBlock Text="{Binding AgentName}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    </DockPanel>
                                     <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" Opacity="0.8"/>
                                     <ProgressBar Minimum="0"
                                                  Maximum="{Binding Duration.TotalMilliseconds}"

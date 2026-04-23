@@ -114,6 +114,7 @@ public sealed class AgentCoordinator
     {
         var playback = new ActivePlayback
         {
+            Agent     = agent,
             AgentName = agent.Name,
             FilePath  = filePath,
             Reader    = reader,
@@ -204,6 +205,7 @@ public sealed partial class ActivePlayback : ObservableObject
 {
     public Guid Id { get; init; } = Guid.NewGuid();
     public Guid MachineId { get; init; }
+    public AgentViewModel? Agent { get; init; }
     public string AgentName { get; init; } = string.Empty;
     public string FilePath { get; init; } = string.Empty;
     public string FileName => string.IsNullOrEmpty(FilePath) ? string.Empty : Path.GetFileName(FilePath);
@@ -214,6 +216,7 @@ public sealed partial class ActivePlayback : ObservableObject
     [ObservableProperty] private TimeSpan _position;
     [ObservableProperty] private TimeSpan _duration;
     [ObservableProperty] private double _volume = 100;
+    [ObservableProperty] private bool _isSoloed;
 
     partial void OnVolumeChanged(double value)
     {

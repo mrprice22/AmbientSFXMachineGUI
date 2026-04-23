@@ -38,7 +38,11 @@ public partial class ShellViewModel : ObservableObject
         Items = new ObservableCollection<SoundboardItem>();
 
         _machineCoordinator.PlaybackStarted += (_, p) => { if (!ActivePlaybacks.Contains(p)) ActivePlaybacks.Add(p); };
-        _machineCoordinator.PlaybackEnded   += (_, p) => ActivePlaybacks.Remove(p);
+        _machineCoordinator.PlaybackEnded   += (_, p) =>
+        {
+            ActivePlaybacks.Remove(p);
+            if (ReferenceEquals(_soloedPlayback, p)) ClearSolo();
+        };
 
         LibraryView = CollectionViewSource.GetDefaultView(AudioLibrary.Entries);
         LibraryView.Filter = MatchesLibraryFilter;
@@ -604,5 +608,53 @@ public partial class ShellViewModel : ObservableObject
     private void AddGroup()
     {
         // TODO: insert a labeled soundboard section divider.
+    }
+
+    private ActivePlayback? _soloedPlayback;
+    private readonly Dictionary<AgentViewModel, bool> _preSoloAgentState = new();
+
+    [RelayCommand]
+    private void ToggleSolo(ActivePlayback? playback)
+    {
+        if (playback is null) return;
+        if (ReferenceEquals(_soloedPlayback, playback)) { ClearSolo(); return; }
+        if (_soloedPlayback is not null) ClearSolo();
+
+        _preSoloAgentState.Clear();
+        foreach (var machine in Machines)
+            foreach (var agent in machine.Agents)
+            {
+                _preSoloAgentState[agent] = agent.IsEnabled;
+                if (!ReferenceEquals(agent, playback.Agent) && agent.IsEnabled)
+                    agent.IsEnabled = false;
+            }
+
+        foreach (var other in ActivePlaybacks)
+        {
+            if (ReferenceEquals(other, playback) || other.Reader is null) continue;
+            try { other.Reader.Volume = 0f; } catch { }
+        }
+
+        playback.IsSoloed = true;
+        _soloedPlayback = playback;
+    }
+
+    private void ClearSolo()
+    {
+        if (_soloedPlayback is null) return;
+        foreach (var (agent, wasEnabled) in _preSoloAgentState)
+        {
+            if (agent.IsEnabled != wasEnabled) agent.IsEnabled = wasEnabled;
+        }
+        _preSoloAgentState.Clear();
+
+        foreach (var other in ActivePlaybacks)
+        {
+            if (ReferenceEquals(other, _soloedPlayback) || other.Reader is null) continue;
+            try { other.Reader.Volume = (float)(Math.Clamp(other.Volume, 0, 200) / 100.0); } catch { }
+        }
+
+        _soloedPlayback.IsSoloed = false;
+        _soloedPlayback = null;
     }
 }
