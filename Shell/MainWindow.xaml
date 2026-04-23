@@ -6,6 +6,7 @@
         xmlns:log="clr-namespace:AmbientSFXMachineGUI.Panels.LogPanel"
         xmlns:now="clr-namespace:AmbientSFXMachineGUI.Panels.NowPlayingPanel"
         xmlns:sb="clr-namespace:AmbientSFXMachineGUI.Panels.SoundboardPanel"
+        xmlns:lib="clr-namespace:AmbientSFXMachineGUI.Panels.LibraryPanel"
         xmlns:machines="clr-namespace:AmbientSFXMachineGUI.Panels.MachinesRailPanel"
         Title="AmbientAgents" Height="720" Width="1200">
     <Window.Resources>
@@ -70,9 +71,12 @@
                             </avalon:LayoutAnchorable>
                         </avalon:LayoutAnchorablePane>
                     </avalon:LayoutPanel>
-                    <avalon:LayoutAnchorablePane DockHeight="120">
+                    <avalon:LayoutAnchorablePane DockHeight="200">
                         <avalon:LayoutAnchorable ContentId="now" Title="Now Playing" CanClose="False">
                             <now:NowPlayingPanelView/>
+                        </avalon:LayoutAnchorable>
+                        <avalon:LayoutAnchorable ContentId="library" Title="Audio Library" CanClose="False">
+                            <lib:LibraryPanelView/>
                         </avalon:LayoutAnchorable>
                     </avalon:LayoutAnchorablePane>
                     <avalon:LayoutAnchorablePane DockHeight="160">

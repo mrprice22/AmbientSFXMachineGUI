@@ -423,7 +423,7 @@
       "title": "Library panel: All Files tab",
       "description": "New dockable LibraryPanel with a virtualized ListView showing filename, duration, size, usage count, and full path. Sortable by any column. Text filter in the tab header.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LIB-01"
       ],

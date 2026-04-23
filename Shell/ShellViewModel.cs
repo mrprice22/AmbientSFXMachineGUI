@@ -1,5 +1,8 @@
+using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using AmbientSFXMachineGUI.Models;
@@ -15,18 +18,23 @@ public partial class ShellViewModel : ObservableObject
     private readonly HotkeyService _hotkeys;
     private static readonly ObservableCollection<AgentViewModel> _emptyAgents = new();
 
-    public ShellViewModel(MachineCoordinator machineCoordinator, ProfileService profileService, HotkeyService hotkeys, LibraryHasher libraryHasher)
+    public ShellViewModel(MachineCoordinator machineCoordinator, ProfileService profileService, HotkeyService hotkeys, LibraryHasher libraryHasher, AudioLibrary audioLibrary)
     {
         _machineCoordinator = machineCoordinator;
         _profileService = profileService;
         _hotkeys = hotkeys;
         LibraryHasher = libraryHasher;
+        AudioLibrary = audioLibrary;
 
         Machines = _machineCoordinator.Machines;
         Log = _machineCoordinator.Log;
         Profiles = _profileService.Profiles;
         ActivePlaybacks = new ObservableCollection<ActivePlayback>();
         Items = new ObservableCollection<SoundboardItem>();
+
+        LibraryView = CollectionViewSource.GetDefaultView(AudioLibrary.Entries);
+        LibraryView.Filter = MatchesLibraryFilter;
+        LibraryView.SortDescriptions.Add(new SortDescription(nameof(AudioFileEntry.FileName), ListSortDirection.Ascending));
 
         if (Machines.Count > 0)
             SelectedMachine = Machines[0];
@@ -38,6 +46,8 @@ public partial class ShellViewModel : ObservableObject
     }
 
     public LibraryHasher LibraryHasher { get; }
+    public AudioLibrary AudioLibrary { get; }
+    public ICollectionView LibraryView { get; }
     public ObservableCollection<MachineViewModel> Machines { get; }
     public ObservableCollection<LogEntryViewModel> Log { get; }
     public ObservableCollection<Profile> Profiles { get; }
@@ -52,7 +62,19 @@ public partial class ShellViewModel : ObservableObject
     [ObservableProperty] private bool _isMutedAll;
     [ObservableProperty] private Profile? _activeProfile;
     [ObservableProperty] private string _searchQuery = string.Empty;
+    [ObservableProperty] private string _libraryFilter = string.Empty;
     [ObservableProperty] private bool _isEditMode;
+
+    partial void OnLibraryFilterChanged(string value) => LibraryView.Refresh();
+
+    private bool MatchesLibraryFilter(object obj)
+    {
+        if (string.IsNullOrWhiteSpace(LibraryFilter)) return true;
+        if (obj is not AudioFileEntry entry) return false;
+        var q = LibraryFilter.Trim();
+        return entry.FileName.Contains(q, StringComparison.OrdinalIgnoreCase)
+            || entry.AbsolutePath.Contains(q, StringComparison.OrdinalIgnoreCase);
+    }
 
     partial void OnSelectedMachineChanged(MachineViewModel? value)
     {
