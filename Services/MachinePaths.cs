@@ -24,4 +24,6 @@ public static class MachinePaths
         Path.Combine(MachineDir(machineId), "hotkeys.json");
 
     public static string GlobalHotkeysPath => Path.Combine(Root, "hotkeys.json");
+
+    public static string LibraryCachePath => Path.Combine(Root, "library.json");
 }

@@ -8,6 +8,9 @@
         xmlns:sb="clr-namespace:AmbientSFXMachineGUI.Panels.SoundboardPanel"
         xmlns:machines="clr-namespace:AmbientSFXMachineGUI.Panels.MachinesRailPanel"
         Title="AmbientAgents" Height="720" Width="1200">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
     <DockPanel>
         <!-- Toolbar: Master Vol | Mute All | Profile Picker | Settings -->
         <ToolBarTray DockPanel.Dock="Top">
@@ -32,6 +35,17 @@
                 <Button Content="Settings" Command="{Binding OpenSettingsCommand}"/>
                 <Separator/>
                 <Button Content="Import Machine" Command="{Binding ImportMachineCommand}"/>
+                <Separator/>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                            Visibility="{Binding LibraryHasher.IsScanning, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="Hashing" VerticalAlignment="Center" Margin="4,0,4,0"/>
+                    <ProgressBar Width="100" Height="12"
+                                 Minimum="0" Maximum="1"
+                                 Value="{Binding LibraryHasher.Progress, Mode=OneWay}"/>
+                    <TextBlock VerticalAlignment="Center" Margin="6,0,0,0">
+                        <Run Text="{Binding LibraryHasher.ProcessedCount, Mode=OneWay}"/><Run Text="/"/><Run Text="{Binding LibraryHasher.TotalCount, Mode=OneWay}"/>
+                    </TextBlock>
+                </StackPanel>
             </ToolBar>
         </ToolBarTray>
 

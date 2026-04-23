@@ -8,6 +8,9 @@ public partial class App : Application
 {
     public static MachineCoordinator MachineCoordinator { get; } = new();
     public static AudioLibrary AudioLibrary { get; } = new();
+    public static LibraryCacheStore LibraryCache { get; } = new(MachinePaths.LibraryCachePath);
+    public static LibraryHasher LibraryHasher { get; } =
+        new(AudioLibrary, LibraryCache, Current.Dispatcher);
     public static ProfileService Profiles { get; } = new();
     public static HotkeyService Hotkeys { get; } = new();
     public static TrayService Tray { get; } = new();
@@ -101,6 +104,8 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         MachineCoordinator.SaveMachinesToDisk();
+        LibraryHasher.Dispose();
+        LibraryCache.Dispose();
         Tray.Dispose();
         Hotkeys.Dispose();
         MachineCoordinator.Shutdown();

@@ -392,7 +392,7 @@
       "title": "Background SHA-256 hasher with cache",
       "description": "Stream each referenced audio file through SHA-256 on a background thread; cache results in %AppData%\\AmbientAgents\\library.json keyed by path with file size+mtime invalidation. Surface a progress indicator for initial scans.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LIB-01"
       ],
