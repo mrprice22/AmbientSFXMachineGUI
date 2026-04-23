@@ -408,7 +408,7 @@
       "title": "Audio duration and size metadata probe",
       "description": "Probe audio duration via NAudio (AudioFileReader.TotalTime) and file size; cache in library.json alongside the hash. Required for duration-based likely-duplicate matching.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LIB-01"
       ],

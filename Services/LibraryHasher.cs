@@ -96,7 +96,10 @@ public sealed partial class LibraryHasher : ObservableObject, IDisposable
         long size = fi.Length;
         long mtime = fi.LastWriteTimeUtc.Ticks;
 
-        var hash = _cache.TryGet(path, size, mtime);
+        var cached = _cache.TryGet(path, size, mtime);
+        string? hash = cached?.Hash;
+        long durationTicks = cached?.DurationTicks ?? 0;
+
         if (hash is null)
         {
             using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read,
@@ -104,10 +107,24 @@ public sealed partial class LibraryHasher : ObservableObject, IDisposable
             using var sha = SHA256.Create();
             var bytes = sha.ComputeHash(stream);
             hash = Convert.ToHexString(bytes);
-            _cache.Set(path, hash, size, mtime);
         }
 
-        if (entry.ByteSize == 0) entry.ByteSize = size;
+        if (durationTicks == 0)
+        {
+            try
+            {
+                using var reader = new NAudio.Wave.AudioFileReader(path);
+                durationTicks = reader.TotalTime.Ticks;
+            }
+            catch { /* duration probe best-effort */ }
+        }
+
+        if (cached is null || cached.Hash != hash || cached.DurationTicks != durationTicks)
+            _cache.Set(path, hash, size, mtime, durationTicks);
+
+        entry.ByteSize = size;
+        if (entry.Duration.Ticks == 0 && durationTicks != 0)
+            entry.Duration = TimeSpan.FromTicks(durationTicks);
         _library.AssignHash(entry, hash);
     }
 

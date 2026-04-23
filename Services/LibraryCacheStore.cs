@@ -13,7 +13,7 @@ namespace AmbientSFXMachineGUI.Services;
 /// </summary>
 public sealed class LibraryCacheStore : IDisposable
 {
-    public sealed record CachedEntry(string Hash, long Size, long MtimeUtcTicks);
+    public sealed record CachedEntry(string Hash, long Size, long MtimeUtcTicks, long DurationTicks = 0);
 
     private static readonly JsonSerializerOptions JsonOpts = new() { WriteIndented = false };
 
@@ -31,21 +31,21 @@ public sealed class LibraryCacheStore : IDisposable
         _saveTimer = new Timer(_ => Flush(), null, Timeout.Infinite, Timeout.Infinite);
     }
 
-    public string? TryGet(string path, long size, long mtimeUtcTicks)
+    public CachedEntry? TryGet(string path, long size, long mtimeUtcTicks)
     {
         lock (_lock)
         {
             if (_entries.TryGetValue(path, out var e) && e.Size == size && e.MtimeUtcTicks == mtimeUtcTicks)
-                return e.Hash;
+                return e;
         }
         return null;
     }
 
-    public void Set(string path, string hash, long size, long mtimeUtcTicks)
+    public void Set(string path, string hash, long size, long mtimeUtcTicks, long durationTicks)
     {
         lock (_lock)
         {
-            _entries[path] = new CachedEntry(hash, size, mtimeUtcTicks);
+            _entries[path] = new CachedEntry(hash, size, mtimeUtcTicks, durationTicks);
             _dirty = true;
         }
         _saveTimer.Change(2000, Timeout.Infinite);
