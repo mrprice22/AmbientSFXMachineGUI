@@ -154,10 +154,48 @@ public sealed class ProfileService
         return profile;
     }
 
-    public ProfileDiff Diff(Profile target)
+    public ProfileDiff Diff(MachineViewModel machine, Profile target)
     {
-        // TODO (PROF-04): compute summary of changes versus current state.
-        return new ProfileDiff();
+        var diff = new ProfileDiff();
+
+        if (Math.Abs(machine.MasterVolume - target.MachineMasterVolume) > 0.001)
+        {
+            diff.MasterVolumeFrom = machine.MasterVolume;
+            diff.MasterVolumeTo   = target.MachineMasterVolume;
+        }
+
+        var agentStates = target.Agents.ToDictionary(a => a.Name, StringComparer.OrdinalIgnoreCase);
+        foreach (var agent in machine.Agents)
+        {
+            if (agent.IsPinned) continue;
+            if (!agentStates.TryGetValue(agent.Name, out var state)) continue;
+            if (agent.IsEnabled != state.Enabled)
+                diff.AgentsToggled.Add(new AgentToggleChange(agent.Name, agent.IsEnabled, state.Enabled));
+            if (Math.Abs(agent.Volume - state.Volume) > 0.001)
+                diff.AgentVolumeChanges.Add(new AgentVolumeChange(agent.Name, agent.Volume, state.Volume));
+        }
+
+        var overrides = target.SoundOverrides
+            .GroupBy(o => o.Path, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+        foreach (var agent in machine.Agents)
+        {
+            if (agent.IsPinned) continue;
+            foreach (var file in agent.Files)
+            {
+                if (!overrides.TryGetValue(file.FilePath, out var o)) continue;
+                if (file.IsEnabled != o.Enabled)
+                    diff.SoundsToggled.Add(new SoundToggleChange(agent.Name, file.FileName, file.IsEnabled, o.Enabled));
+            }
+        }
+
+        var currentSb = machine.SoundboardItems.Select(i => i.FilePath + "|" + i.Label).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var targetSb  = target.Soundboard.Select(i => i.FilePath + "|" + i.Label).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        diff.SoundboardAdded   = targetSb.Except(currentSb, StringComparer.OrdinalIgnoreCase).Count();
+        diff.SoundboardRemoved = currentSb.Except(targetSb, StringComparer.OrdinalIgnoreCase).Count();
+
+        return diff;
     }
 
     public IDisposable Audition(Profile profile, TimeSpan duration)
@@ -176,7 +214,23 @@ public sealed class ProfileService
 
 public sealed class ProfileDiff
 {
-    public int AgentsToggled { get; set; }
-    public int VolumesChanged { get; set; }
-    public int SoundsEnabledChanged { get; set; }
+    public double? MasterVolumeFrom { get; set; }
+    public double? MasterVolumeTo { get; set; }
+    public List<AgentToggleChange> AgentsToggled { get; } = new();
+    public List<AgentVolumeChange> AgentVolumeChanges { get; } = new();
+    public List<SoundToggleChange> SoundsToggled { get; } = new();
+    public int SoundboardAdded { get; set; }
+    public int SoundboardRemoved { get; set; }
+
+    public bool HasChanges =>
+        MasterVolumeFrom.HasValue
+        || AgentsToggled.Count > 0
+        || AgentVolumeChanges.Count > 0
+        || SoundsToggled.Count > 0
+        || SoundboardAdded > 0
+        || SoundboardRemoved > 0;
 }
+
+public sealed record AgentToggleChange(string AgentName, bool From, bool To);
+public sealed record AgentVolumeChange(string AgentName, double From, double To);
+public sealed record SoundToggleChange(string AgentName, string FileName, bool From, bool To);

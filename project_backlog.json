@@ -847,7 +847,7 @@
       "title": "Profile diff viewer before swap",
       "description": "Before applying a profile, show a collapsible summary of what will change (agents toggled, volumes shifted, sounds enabled/disabled) with confirm and cancel actions.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "PROF-02"
       ],

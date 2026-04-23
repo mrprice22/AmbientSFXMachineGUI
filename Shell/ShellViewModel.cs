@@ -406,11 +406,28 @@ public partial class ShellViewModel : ObservableObject
 
     partial void OnMasterVolumeChanged(double value) => _machineCoordinator.SetMasterVolume(value);
     partial void OnIsMutedAllChanged(bool value) => _machineCoordinator.SetMuteAll(value);
-    partial void OnActiveProfileChanged(Profile? value)
+    partial void OnActiveProfileChanged(Profile? oldValue, Profile? newValue)
     {
         if (_suppressProfileApply) return;
-        if (value is null || SelectedMachine is null) return;
-        _profileService.Apply(SelectedMachine, _hotkeys, value);
+        if (newValue is null || SelectedMachine is null) return;
+
+        var diff = _profileService.Diff(SelectedMachine, newValue);
+        if (diff.HasChanges)
+        {
+            var dialog = new ProfileDiffDialog(newValue.Name, diff)
+            {
+                Owner = System.Windows.Application.Current?.MainWindow,
+            };
+            if (dialog.ShowDialog() != true)
+            {
+                _suppressProfileApply = true;
+                try { ActiveProfile = oldValue; }
+                finally { _suppressProfileApply = false; }
+                return;
+            }
+        }
+
+        _profileService.Apply(SelectedMachine, _hotkeys, newValue);
     }
 
     [RelayCommand]
