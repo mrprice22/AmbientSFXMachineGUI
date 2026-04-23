@@ -586,7 +586,7 @@
       "title": "Per-sound volume override",
       "description": "Set a volume multiplier on an individual sound file that stacks with the agent-level volume. Editable from the expanded file list on the agent card.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "SFX-01"
       ],
