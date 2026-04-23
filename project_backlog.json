@@ -528,7 +528,7 @@
       "title": "Reveal-in-Explorer and copy-path actions",
       "description": "Row context menu on any library entry: open containing folder in Explorer, copy full path to clipboard.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LIB-04"
       ],

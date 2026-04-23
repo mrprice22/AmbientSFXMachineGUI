@@ -218,6 +218,33 @@ public partial class ShellViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void RevealInExplorer(AudioFileEntry? entry)
+    {
+        if (entry is null) return;
+        var path = entry.AbsolutePath;
+        try
+        {
+            if (File.Exists(path))
+                System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{path}\"");
+            else
+            {
+                var dir = Path.GetDirectoryName(path);
+                if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                    System.Diagnostics.Process.Start("explorer.exe", $"\"{dir}\"");
+            }
+        }
+        catch { }
+    }
+
+    [RelayCommand]
+    private void CopyLibraryEntryPath(AudioFileEntry? entry)
+    {
+        if (entry is null) return;
+        try { System.Windows.Clipboard.SetText(entry.AbsolutePath); }
+        catch { }
+    }
+
+    [RelayCommand]
     private void RemoveUnused(IList? selected)
     {
         if (selected is null || selected.Count == 0) return;

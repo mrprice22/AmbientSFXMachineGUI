@@ -48,6 +48,13 @@
                                             <MenuItem Header="Add to agents…"
                                                       Command="{Binding DataContext.AddLibraryEntryToAgentsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                       CommandParameter="{Binding}"/>
+                                            <Separator/>
+                                            <MenuItem Header="Reveal in Explorer"
+                                                      Command="{Binding DataContext.RevealInExplorerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}"/>
+                                            <MenuItem Header="Copy full path"
+                                                      Command="{Binding DataContext.CopyLibraryEntryPathCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}"/>
                                         </ContextMenu>
                                     </Setter.Value>
                                 </Setter>
@@ -113,6 +120,13 @@
                                                                     <MenuItem Header="Add to agents…"
                                                                               Command="{Binding PlacementTarget.Tag.AddLibraryEntryToAgentsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                               CommandParameter="{Binding}"/>
+                                                                    <Separator/>
+                                                                    <MenuItem Header="Reveal in Explorer"
+                                                                              Command="{Binding PlacementTarget.Tag.RevealInExplorerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                              CommandParameter="{Binding}"/>
+                                                                    <MenuItem Header="Copy full path"
+                                                                              Command="{Binding PlacementTarget.Tag.CopyLibraryEntryPathCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                              CommandParameter="{Binding}"/>
                                                                 </ContextMenu>
                                                             </Grid.ContextMenu>
                                                             <Grid.Tag>
@@ -173,6 +187,13 @@
                                                                               CommandParameter="{Binding}"/>
                                                                     <MenuItem Header="Add to agents…"
                                                                               Command="{Binding PlacementTarget.Tag.AddLibraryEntryToAgentsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                              CommandParameter="{Binding}"/>
+                                                                    <Separator/>
+                                                                    <MenuItem Header="Reveal in Explorer"
+                                                                              Command="{Binding PlacementTarget.Tag.RevealInExplorerCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                              CommandParameter="{Binding}"/>
+                                                                    <MenuItem Header="Copy full path"
+                                                                              Command="{Binding PlacementTarget.Tag.CopyLibraryEntryPathCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                                               CommandParameter="{Binding}"/>
                                                                 </ContextMenu>
                                                             </Grid.ContextMenu>
@@ -246,6 +267,13 @@
                                         <ContextMenu>
                                             <MenuItem Header="Add to agents…"
                                                       Command="{Binding DataContext.AddLibraryEntryToAgentsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}"/>
+                                            <Separator/>
+                                            <MenuItem Header="Reveal in Explorer"
+                                                      Command="{Binding DataContext.RevealInExplorerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}"/>
+                                            <MenuItem Header="Copy full path"
+                                                      Command="{Binding DataContext.CopyLibraryEntryPathCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                       CommandParameter="{Binding}"/>
                                         </ContextMenu>
                                     </Setter.Value>
