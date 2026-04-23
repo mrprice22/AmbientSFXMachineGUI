@@ -13,7 +13,12 @@
         <ItemsControl x:Name="AgentsList" ItemsSource="{Binding Agents}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Border Margin="6" Padding="10" BorderBrush="#444" BorderThickness="1" CornerRadius="4">
+                    <Border Margin="6" Padding="10" BorderBrush="#444" BorderThickness="1" CornerRadius="4"
+                            AllowDrop="True"
+                            DragEnter="OnAgentCardDragEnter"
+                            DragOver="OnAgentCardDragOver"
+                            DragLeave="OnAgentCardDragLeave"
+                            Drop="OnAgentCardDrop">
                         <StackPanel>
                             <!-- Header row: name, mode badge, turbo badge, enable toggle -->
                             <DockPanel LastChildFill="True">
@@ -96,7 +101,7 @@
     <Border x:Name="DropOverlay"
             Background="#88000000" BorderBrush="#BBFFFFFF" BorderThickness="2" CornerRadius="6"
             Visibility="Collapsed" IsHitTestVisible="False">
-        <TextBlock Text="Drop folder to add agent"
+        <TextBlock x:Name="DropOverlayText" Text="Drop folder to add agent"
                    HorizontalAlignment="Center" VerticalAlignment="Center"
                    FontSize="16" Foreground="White" FontWeight="Bold"/>
     </Border>

@@ -76,6 +76,28 @@ public sealed class AudioLibrary
     }
 
     /// <summary>
+    /// Registers a file as a library entry without attaching a usage. Used by OS drag-drop
+    /// onto the Library panel (LIB-08): the file becomes discoverable in the library even
+    /// though no agent currently references it. If the path is already registered, returns
+    /// the existing entry unchanged.
+    /// </summary>
+    public AudioFileEntry RegisterPathOnly(string absolutePath)
+    {
+        lock (_lock)
+        {
+            if (_byPath.TryGetValue(absolutePath, out var existing)) return existing;
+            var entry = new AudioFileEntry { AbsolutePath = absolutePath };
+            if (File.Exists(absolutePath))
+            {
+                try { entry.ByteSize = new FileInfo(absolutePath).Length; } catch { }
+            }
+            _byPath[absolutePath] = entry;
+            _entries.Add(entry);
+            return entry;
+        }
+    }
+
+    /// <summary>
     /// Removes an entry from the library. No-op if the entry still has usages — callers
     /// should surface the unused-only rule in the UI rather than letting this silently skip.
     /// Does not touch the file on disk.

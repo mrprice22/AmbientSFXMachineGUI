@@ -59,10 +59,28 @@ public partial class AgentPanelView : UserControl
         element.BeginAnimation(OpacityProperty, anim);
     }
 
+    private static string[] GetDropPaths(DragEventArgs e)
+        => e.Data.GetData(DataFormats.FileDrop) as string[] ?? Array.Empty<string>();
+
+    private static bool HasFolder(string[] paths) => paths.Any(Directory.Exists);
+    private static bool HasAudioFile(string[] paths) => paths.Any(ShellViewModel.IsAudioFile);
+
     private void OnDragEnter(object sender, DragEventArgs e)
     {
-        if (e.Data.GetDataPresent(DataFormats.FileDrop))
+        var paths = GetDropPaths(e);
+        bool hasFolder = HasFolder(paths);
+        bool hasAudio = HasAudioFile(paths);
+
+        if (hasFolder)
         {
+            DropOverlayText.Text = "Drop folder to add agent";
+            DropOverlay.Visibility = Visibility.Visible;
+            e.Effects = DragDropEffects.Copy;
+        }
+        else if (hasAudio)
+        {
+            // Audio-file drop is handled per-card; panel-level only shows a hint.
+            DropOverlayText.Text = "Drop audio files onto an agent card";
             DropOverlay.Visibility = Visibility.Visible;
             e.Effects = DragDropEffects.Copy;
         }
@@ -75,7 +93,8 @@ public partial class AgentPanelView : UserControl
 
     private void OnDragOver(object sender, DragEventArgs e)
     {
-        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop)
+        var paths = GetDropPaths(e);
+        e.Effects = (HasFolder(paths) || HasAudioFile(paths))
             ? DragDropEffects.Copy
             : DragDropEffects.None;
         e.Handled = true;
@@ -89,13 +108,52 @@ public partial class AgentPanelView : UserControl
     private void OnDrop(object sender, DragEventArgs e)
     {
         DropOverlay.Visibility = Visibility.Collapsed;
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths) return;
         if (DataContext is not ShellViewModel vm) return;
+        var paths = GetDropPaths(e);
+        if (paths.Length == 0) return;
 
+        // Panel-level: folders become agents. Raw audio file drops that miss a card are ignored
+        // (the spec directs users to drop onto an agent card or the Library panel).
         foreach (var path in paths)
         {
             if (Directory.Exists(path))
                 vm.ImportAgentFolder(path);
         }
+    }
+
+    private void OnAgentCardDragEnter(object sender, DragEventArgs e)
+    {
+        var paths = GetDropPaths(e);
+        if (!HasAudioFile(paths)) return;
+        if (sender is FrameworkElement fe) fe.Opacity = 0.7;
+        DropOverlay.Visibility = Visibility.Collapsed;
+        e.Effects = DragDropEffects.Copy;
+        e.Handled = true;
+    }
+
+    private void OnAgentCardDragOver(object sender, DragEventArgs e)
+    {
+        var paths = GetDropPaths(e);
+        if (!HasAudioFile(paths)) return;
+        e.Effects = DragDropEffects.Copy;
+        e.Handled = true;
+    }
+
+    private void OnAgentCardDragLeave(object sender, DragEventArgs e)
+    {
+        if (sender is FrameworkElement fe) fe.Opacity = 1.0;
+    }
+
+    private void OnAgentCardDrop(object sender, DragEventArgs e)
+    {
+        if (sender is FrameworkElement fe) fe.Opacity = 1.0;
+        if (sender is not FrameworkElement { DataContext: AgentViewModel agent }) return;
+        if (DataContext is not ShellViewModel vm) return;
+
+        var paths = GetDropPaths(e);
+        if (!HasAudioFile(paths)) return;
+
+        vm.AddFilesToAgent(agent, paths);
+        e.Handled = true;
     }
 }

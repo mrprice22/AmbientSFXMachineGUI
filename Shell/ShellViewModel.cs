@@ -213,6 +213,45 @@ public partial class ShellViewModel : ObservableObject
             _machineCoordinator.RegisterAgentFromFolder(SelectedMachine, folderPath);
     }
 
+    private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".mp3", ".wav", ".ogg", ".flac", ".m4a", ".aac", ".wma", ".aiff", ".aif", ".opus"
+    };
+
+    public static bool IsAudioFile(string path)
+        => !string.IsNullOrEmpty(path)
+           && File.Exists(path)
+           && AudioExtensions.Contains(Path.GetExtension(path));
+
+    /// <summary>Registers dropped audio files as library entries with no agent attachment (LIB-08).</summary>
+    public int RegisterLibraryFiles(IEnumerable<string> paths)
+    {
+        int added = 0;
+        foreach (var path in paths)
+        {
+            if (!IsAudioFile(path)) continue;
+            AudioLibrary.RegisterPathOnly(path);
+            added++;
+        }
+        return added;
+    }
+
+    /// <summary>Adds dropped audio files to an agent; library usage is registered automatically via AudioLibrary's Files hook.</summary>
+    public int AddFilesToAgent(AgentViewModel agent, IEnumerable<string> paths)
+    {
+        int added = 0;
+        foreach (var path in paths)
+        {
+            if (!IsAudioFile(path)) continue;
+            if (agent.Files.Any(f => string.Equals(f.FilePath, path, StringComparison.OrdinalIgnoreCase)))
+                continue;
+            agent.Files.Add(new SoundFileViewModel(path));
+            added++;
+        }
+        if (added > 0) agent.FileCount = agent.Files.Count;
+        return added;
+    }
+
     [RelayCommand]
     private void ImportMachine()
     {

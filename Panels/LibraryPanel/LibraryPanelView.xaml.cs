@@ -1,7 +1,10 @@
+using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using AmbientSFXMachineGUI.Shell;
 
 namespace AmbientSFXMachineGUI.Panels.LibraryPanel;
 
@@ -13,6 +16,46 @@ public partial class LibraryPanelView : UserControl
     public LibraryPanelView()
     {
         InitializeComponent();
+    }
+
+    private static string[] GetDropPaths(DragEventArgs e)
+        => e.Data.GetData(DataFormats.FileDrop) as string[] ?? Array.Empty<string>();
+
+    private void OnDragEnter(object sender, DragEventArgs e)
+    {
+        var paths = GetDropPaths(e);
+        if (paths.Any(ShellViewModel.IsAudioFile))
+        {
+            DropOverlay.Visibility = Visibility.Visible;
+            e.Effects = DragDropEffects.Copy;
+        }
+        else
+        {
+            e.Effects = DragDropEffects.None;
+        }
+        e.Handled = true;
+    }
+
+    private void OnDragOver(object sender, DragEventArgs e)
+    {
+        var paths = GetDropPaths(e);
+        e.Effects = paths.Any(ShellViewModel.IsAudioFile) ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private void OnDragLeave(object sender, DragEventArgs e)
+    {
+        DropOverlay.Visibility = Visibility.Collapsed;
+    }
+
+    private void OnDrop(object sender, DragEventArgs e)
+    {
+        DropOverlay.Visibility = Visibility.Collapsed;
+        if (DataContext is not ShellViewModel vm) return;
+        var paths = GetDropPaths(e);
+        if (paths.Length == 0) return;
+        vm.RegisterLibraryFiles(paths);
+        e.Handled = true;
     }
 
     private void OnHeaderClick(object sender, RoutedEventArgs e)
