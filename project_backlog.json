@@ -818,7 +818,7 @@
       "title": "Profile hot-swap",
       "description": "Switch between profiles at runtime from a toolbar dropdown or hotkey. All settings apply immediately without restart. Skips any agent marked as pinned.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "PROF-01"
       ],

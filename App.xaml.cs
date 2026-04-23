@@ -40,6 +40,14 @@ public partial class App : Application
         {
             if (MainWindow is MainWindow main) main.ToggleVisibility();
         }));
+        Hotkeys.Register("app.nextProfile", () => Dispatcher.Invoke(() =>
+        {
+            if (MainWindow is MainWindow main && main.DataContext is Shell.ShellViewModel vm
+                && vm.CycleNextProfileCommand.CanExecute(null))
+            {
+                vm.CycleNextProfileCommand.Execute(null);
+            }
+        }));
         Hotkeys.LoadDefaults();
 
         // Keep the app alive when all windows are hidden (tray still running).

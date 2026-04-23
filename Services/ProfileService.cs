@@ -60,14 +60,11 @@ public sealed class ProfileService
 
     public void Apply(MachineViewModel machine, HotkeyService hotkeys, Profile profile)
     {
-        var pinned = new HashSet<string>(profile.PinnedAgents ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
-
         machine.MasterVolume = profile.MachineMasterVolume;
 
         var agentStates = profile.Agents.ToDictionary(a => a.Name, StringComparer.OrdinalIgnoreCase);
         foreach (var agent in machine.Agents)
         {
-            agent.IsPinned = pinned.Contains(agent.Name);
             if (agent.IsPinned) continue;
             if (!agentStates.TryGetValue(agent.Name, out var state)) continue;
             agent.IsEnabled = state.Enabled;

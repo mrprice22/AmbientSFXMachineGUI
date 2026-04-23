@@ -414,6 +414,17 @@ public partial class ShellViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void CycleNextProfile()
+    {
+        if (SelectedMachine is null) return;
+        if (_profileService.Profiles.Count == 0) return;
+        var list = _profileService.Profiles;
+        var idx = ActiveProfile is null ? -1 : list.IndexOf(ActiveProfile);
+        var next = list[(idx + 1) % list.Count];
+        ActiveProfile = next;
+    }
+
+    [RelayCommand]
     private void QuickSaveProfile()
     {
         if (SelectedMachine is null) return;
