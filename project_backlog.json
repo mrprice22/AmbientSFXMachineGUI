@@ -644,7 +644,7 @@
       "title": "Right-click context menu on log entries",
       "description": "Right-click any log row to: add to soundboard, disable that file, set a volume override, or open the containing folder in Explorer.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LOG-01",
         "SFX-01"

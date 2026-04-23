@@ -18,11 +18,19 @@
                 </GridView>
             </ListView.View>
             <ListView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Add to Soundboard"/>
-                    <MenuItem Header="Disable this file"/>
-                    <MenuItem Header="Set volume override..."/>
-                    <MenuItem Header="Open containing folder"/>
+                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="Add to Soundboard"
+                              Command="{Binding AddLogEntryToSoundboardCommand}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Header="Disable this file"
+                              Command="{Binding DisableLogEntryFileCommand}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Header="Set volume override..."
+                              Command="{Binding SetLogEntryVolumeOverrideCommand}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    <MenuItem Header="Open containing folder"
+                              Command="{Binding OpenLogEntryFolderCommand}"
+                              CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                 </ContextMenu>
             </ListView.ContextMenu>
         </ListView>

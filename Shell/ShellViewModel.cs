@@ -476,6 +476,91 @@ public partial class ShellViewModel : ObservableObject
     private void Clear() => Log.Clear();
 
     [RelayCommand]
+    private void AddLogEntryToSoundboard(LogEntryViewModel? entry)
+    {
+        if (entry is null || string.IsNullOrEmpty(entry.FilePath)) return;
+        if (Items.Any(i => string.Equals(i.FilePath, entry.FilePath, StringComparison.OrdinalIgnoreCase)))
+            return;
+        Items.Add(new SoundboardItem
+        {
+            Label    = Path.GetFileNameWithoutExtension(entry.FileName),
+            FilePath = entry.FilePath,
+        });
+    }
+
+    [RelayCommand]
+    private void DisableLogEntryFile(LogEntryViewModel? entry)
+    {
+        if (entry is null || string.IsNullOrEmpty(entry.FilePath)) return;
+        int count = 0;
+        foreach (var file in EnumerateMatchingFiles(entry.FilePath))
+        {
+            if (file.IsEnabled) { file.IsEnabled = false; count++; }
+        }
+        if (count == 0)
+        {
+            System.Windows.MessageBox.Show(
+                $"No agent currently references:\n\n{entry.FilePath}",
+                "Disable File",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+        }
+    }
+
+    [RelayCommand]
+    private void SetLogEntryVolumeOverride(LogEntryViewModel? entry)
+    {
+        if (entry is null || string.IsNullOrEmpty(entry.FilePath)) return;
+        var matches = EnumerateMatchingFiles(entry.FilePath).ToList();
+        if (matches.Count == 0)
+        {
+            System.Windows.MessageBox.Show(
+                $"No agent currently references:\n\n{entry.FilePath}",
+                "Set Volume Override",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+            return;
+        }
+        var current = matches[0].VolumeOverride;
+        var dialog = new InputDialog("Set Volume Override",
+            $"Volume for {entry.FileName} (0-200%):",
+            current.ToString("0"))
+        { Owner = System.Windows.Application.Current.MainWindow };
+        if (dialog.ShowDialog() != true) return;
+        if (!double.TryParse(dialog.Value, out var value)) return;
+        value = Math.Clamp(value, 0, 200);
+        foreach (var file in matches) file.VolumeOverride = value;
+    }
+
+    [RelayCommand]
+    private void OpenLogEntryFolder(LogEntryViewModel? entry)
+    {
+        if (entry is null || string.IsNullOrEmpty(entry.FilePath)) return;
+        var path = entry.FilePath;
+        try
+        {
+            if (File.Exists(path))
+                System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{path}\"");
+            else
+            {
+                var dir = Path.GetDirectoryName(path);
+                if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                    System.Diagnostics.Process.Start("explorer.exe", $"\"{dir}\"");
+            }
+        }
+        catch { }
+    }
+
+    private IEnumerable<SoundFileViewModel> EnumerateMatchingFiles(string filePath)
+    {
+        foreach (var machine in Machines)
+            foreach (var agent in machine.Agents)
+                foreach (var file in agent.Files)
+                    if (string.Equals(file.FilePath, filePath, StringComparison.OrdinalIgnoreCase))
+                        yield return file;
+    }
+
+    [RelayCommand]
     private void AddGroup()
     {
         // TODO: insert a labeled soundboard section divider.

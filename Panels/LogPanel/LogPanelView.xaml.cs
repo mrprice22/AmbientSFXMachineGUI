@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace AmbientSFXMachineGUI.Panels.LogPanel;
 
@@ -14,6 +15,13 @@ public partial class LogPanelView : UserControl
         InitializeComponent();
         LogList.DataContextChanged += (_, _) => RehookItemsSource();
         Loaded += (_, _) => RehookItemsSource();
+        LogList.PreviewMouseRightButtonDown += OnListPreviewMouseRightButtonDown;
+    }
+
+    private void OnListPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var item = ItemsControl.ContainerFromElement(LogList, e.OriginalSource as DependencyObject) as ListViewItem;
+        if (item is not null) item.IsSelected = true;
     }
 
     private void RehookItemsSource()
