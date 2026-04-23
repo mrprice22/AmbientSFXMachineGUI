@@ -94,6 +94,8 @@ public sealed class HotkeyService : IDisposable
     private readonly Dictionary<string, string?> _globalBindings = new();
     private readonly Dictionary<string, string?> _machineBindings = new();
     private readonly Dictionary<int, string> _idToAction = new();
+    private readonly Dictionary<string, int> _dynamicIds = new();
+    private readonly Dictionary<int, Action> _dynamicHandlers = new();
     private MessageWindow? _window;
     private int _nextId = 1;
     private Guid? _activeMachine;
@@ -208,8 +210,35 @@ public sealed class HotkeyService : IDisposable
         }
     }
 
+    public bool RegisterDynamic(string key, string? combo, Action handler)
+    {
+        UnregisterDynamic(key);
+        if (_window is null) return false;
+        if (string.IsNullOrWhiteSpace(combo)) return false;
+        if (!TryParseCombo(combo!, out var mods, out var vk)) return false;
+        var id = _nextId++;
+        if (!RegisterHotKey(_window.Handle, id, mods | (uint)ModKey.NoRepeat, vk)) return false;
+        _dynamicIds[key] = id;
+        _dynamicHandlers[id] = handler;
+        return true;
+    }
+
+    public void UnregisterDynamic(string key)
+    {
+        if (_window is null) return;
+        if (!_dynamicIds.TryGetValue(key, out var id)) return;
+        UnregisterHotKey(_window.Handle, id);
+        _dynamicIds.Remove(key);
+        _dynamicHandlers.Remove(id);
+    }
+
     private void OnHotkeyPressed(int id)
     {
+        if (_dynamicHandlers.TryGetValue(id, out var dyn))
+        {
+            try { dyn(); } catch { /* swallow handler errors */ }
+            return;
+        }
         if (!_idToAction.TryGetValue(id, out var actionId)) return;
         HotkeyTriggered?.Invoke(this, actionId);
         if (_handlers.TryGetValue(actionId, out var handler))

@@ -751,7 +751,7 @@
       "title": "Hotkey binding for soundboard buttons",
       "description": "Assign a keyboard shortcut to any soundboard button via right-click so favorites can be triggered without focusing the window.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "SB-01",
         "SHELL-04"

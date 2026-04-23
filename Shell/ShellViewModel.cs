@@ -307,11 +307,90 @@ public partial class ShellViewModel : ObservableObject
             || entry.AbsolutePath.Contains(q, StringComparison.OrdinalIgnoreCase);
     }
 
-    partial void OnSelectedMachineChanged(MachineViewModel? value)
+    partial void OnSelectedMachineChanged(MachineViewModel? oldValue, MachineViewModel? newValue)
     {
         OnPropertyChanged(nameof(Agents));
         OnPropertyChanged(nameof(SoundboardItems));
-        _hotkeys.SetActiveMachine(value?.Id);
+        _hotkeys.SetActiveMachine(newValue?.Id);
+        RebindActiveSoundboardHotkeys(oldValue, newValue);
+    }
+
+    private readonly HashSet<SoundboardItem> _hookedSoundboardItems = new();
+
+    private void RebindActiveSoundboardHotkeys(MachineViewModel? oldMachine, MachineViewModel? newMachine)
+    {
+        foreach (var item in _hookedSoundboardItems)
+        {
+            item.PropertyChanged -= OnSoundboardItemPropertyChanged;
+            _hotkeys.UnregisterDynamic(SoundboardHotkeyKey(item));
+        }
+        _hookedSoundboardItems.Clear();
+
+        if (oldMachine is not null) oldMachine.SoundboardItems.CollectionChanged -= OnActiveSoundboardCollectionChanged;
+        if (newMachine is null) return;
+        newMachine.SoundboardItems.CollectionChanged += OnActiveSoundboardCollectionChanged;
+        foreach (var item in newMachine.SoundboardItems) HookSoundboardItem(item);
+    }
+
+    private void OnActiveSoundboardCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.OldItems != null)
+            foreach (SoundboardItem item in e.OldItems) UnhookSoundboardItem(item);
+        if (e.NewItems != null)
+            foreach (SoundboardItem item in e.NewItems) HookSoundboardItem(item);
+    }
+
+    private void HookSoundboardItem(SoundboardItem item)
+    {
+        if (!_hookedSoundboardItems.Add(item)) return;
+        item.PropertyChanged += OnSoundboardItemPropertyChanged;
+        RegisterSoundboardHotkey(item);
+    }
+
+    private void UnhookSoundboardItem(SoundboardItem item)
+    {
+        if (!_hookedSoundboardItems.Remove(item)) return;
+        item.PropertyChanged -= OnSoundboardItemPropertyChanged;
+        _hotkeys.UnregisterDynamic(SoundboardHotkeyKey(item));
+    }
+
+    private void OnSoundboardItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(SoundboardItem.Hotkey)) return;
+        if (sender is SoundboardItem item) RegisterSoundboardHotkey(item);
+    }
+
+    private void RegisterSoundboardHotkey(SoundboardItem item)
+    {
+        var key = SoundboardHotkeyKey(item);
+        _hotkeys.UnregisterDynamic(key);
+        if (item.IsDivider || string.IsNullOrWhiteSpace(item.Hotkey)) return;
+        _hotkeys.RegisterDynamic(key, item.Hotkey, () =>
+        {
+            System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+            {
+                if (PlaySoundboardItemCommand.CanExecute(item))
+                    PlaySoundboardItemCommand.Execute(item);
+            });
+        });
+    }
+
+    private static string SoundboardHotkeyKey(SoundboardItem item) => "soundboard." + item.GetHashCode();
+
+    [RelayCommand]
+    private void AssignSoundboardHotkey(SoundboardItem? item)
+    {
+        if (item is null || item.IsDivider) return;
+        var capture = new HotkeyCaptureWindow { Owner = System.Windows.Application.Current.MainWindow };
+        if (capture.ShowDialog() != true || string.IsNullOrWhiteSpace(capture.CapturedCombo)) return;
+        item.Hotkey = capture.CapturedCombo;
+    }
+
+    [RelayCommand]
+    private void ClearSoundboardHotkey(SoundboardItem? item)
+    {
+        if (item is null) return;
+        item.Hotkey = null;
     }
 
     partial void OnMasterVolumeChanged(double value) => _machineCoordinator.SetMasterVolume(value);

@@ -29,18 +29,45 @@
                               Drop="OnItemDrop">
                             <Button x:Name="SoundButton"
                                     Margin="4" MinWidth="100" MinHeight="60"
-                                    Content="{Binding Label}"
                                     ToolTip="{Binding FilePath}"
                                     Command="{Binding DataContext.PlaySoundboardItemCommand,
                                                       RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                     CommandParameter="{Binding}"
                                     MouseDoubleClick="OnItemDoubleClick">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Label}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Hotkey}" FontSize="10" Foreground="#888"
+                                               HorizontalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Hotkey}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Hotkey}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
                                 <Button.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="Rename..."
                                                   Command="{Binding PlacementTarget.Tag.DataContext.RenameSoundboardItemCommand,
                                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                   CommandParameter="{Binding}"/>
+                                        <MenuItem Header="Assign hotkey..."
+                                                  Command="{Binding PlacementTarget.Tag.DataContext.AssignSoundboardHotkeyCommand,
+                                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                  CommandParameter="{Binding}"/>
+                                        <MenuItem Header="Clear hotkey"
+                                                  Command="{Binding PlacementTarget.Tag.DataContext.ClearSoundboardHotkeyCommand,
+                                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                  CommandParameter="{Binding}"/>
+                                        <Separator/>
                                         <MenuItem Header="Delete"
                                                   Command="{Binding PlacementTarget.Tag.DataContext.DeleteSoundboardItemCommand,
                                                                     RelativeSource={RelativeSource AncestorType=ContextMenu}}"
