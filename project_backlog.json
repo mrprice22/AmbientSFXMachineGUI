@@ -557,7 +557,7 @@
       "title": "Session history export",
       "description": "Toolbar button serialises the full current-session log to a timestamped CSV file (timestamp, agent, filename).",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LOG-01"
       ],

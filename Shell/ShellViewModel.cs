@@ -312,7 +312,39 @@ public partial class ShellViewModel : ObservableObject
     [RelayCommand]
     private void ExportCsv()
     {
-        // TODO: write Log collection to timestamped CSV via SaveFileDialog.
+        var suggested = $"playback-log-{DateTime.Now:yyyyMMdd-HHmmss}.csv";
+        using var sfd = new SaveFileDialog
+        {
+            Title      = "Export Playback Log",
+            Filter     = "CSV (Comma delimited)|*.csv|All files|*.*",
+            FileName   = suggested,
+            DefaultExt = ".csv",
+            AddExtension = true,
+        };
+        if (sfd.ShowDialog() != DialogResult.OK) return;
+
+        var snapshot = Log.ToList();
+        using var writer = new StreamWriter(sfd.FileName, false, new System.Text.UTF8Encoding(true));
+        writer.WriteLine("Timestamp,Agent,FileName,FilePath");
+        foreach (var entry in snapshot)
+        {
+            writer.Write(entry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+            writer.Write(',');
+            writer.Write(CsvEscape(entry.AgentName));
+            writer.Write(',');
+            writer.Write(CsvEscape(entry.FileName));
+            writer.Write(',');
+            writer.Write(CsvEscape(entry.FilePath));
+            writer.WriteLine();
+        }
+    }
+
+    private static string CsvEscape(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return string.Empty;
+        bool needsQuotes = value.IndexOfAny(new[] { ',', '"', '\r', '\n' }) >= 0;
+        if (!needsQuotes) return value;
+        return "\"" + value.Replace("\"", "\"\"") + "\"";
     }
 
     public void ImportAgentFolder(string folderPath)
