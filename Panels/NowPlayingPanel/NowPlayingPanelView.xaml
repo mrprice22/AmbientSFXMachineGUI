@@ -41,22 +41,43 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Margin="4" Padding="6" BorderBrush="#444" BorderThickness="1" CornerRadius="3">
-                            <StackPanel Width="240">
-                                <TextBlock Text="{Binding AgentName}" FontWeight="Bold"/>
-                                <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" Opacity="0.8"/>
-                                <ProgressBar Minimum="0"
-                                             Maximum="{Binding Duration.TotalMilliseconds}"
-                                             Value="{Binding Position.TotalMilliseconds}"
-                                             Height="6" Margin="0,4,0,2"/>
-                                <DockPanel LastChildFill="False">
-                                    <TextBlock DockPanel.Dock="Left"
-                                               Text="{Binding Position, StringFormat={}{0:mm\\:ss}}"
-                                               Opacity="0.7" FontSize="11"/>
-                                    <TextBlock DockPanel.Dock="Right"
-                                               Text="{Binding Duration, StringFormat={}{0:mm\\:ss}}"
-                                               Opacity="0.7" FontSize="11"/>
-                                </DockPanel>
-                            </StackPanel>
+                            <DockPanel Width="280">
+                                <!-- Compact vertical "rotary-style" volume slider on the right edge -->
+                                <Grid DockPanel.Dock="Right" Width="42" Margin="6,0,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Slider Grid.Row="0"
+                                            Orientation="Vertical"
+                                            Minimum="0" Maximum="200"
+                                            SmallChange="1" LargeChange="10"
+                                            TickFrequency="100" TickPlacement="BottomRight"
+                                            Value="{Binding Volume, Mode=TwoWay}"
+                                            HorizontalAlignment="Center"
+                                            ToolTip="Live volume for this sound (0–200%)"/>
+                                    <TextBlock Grid.Row="1"
+                                               Text="{Binding Volume, StringFormat={}{0:0}%}"
+                                               HorizontalAlignment="Center"
+                                               FontSize="10" Opacity="0.8"/>
+                                </Grid>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding AgentName}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" Opacity="0.8"/>
+                                    <ProgressBar Minimum="0"
+                                                 Maximum="{Binding Duration.TotalMilliseconds}"
+                                                 Value="{Binding Position.TotalMilliseconds}"
+                                                 Height="6" Margin="0,4,0,2"/>
+                                    <DockPanel LastChildFill="False">
+                                        <TextBlock DockPanel.Dock="Left"
+                                                   Text="{Binding Position, StringFormat={}{0:mm\\:ss}}"
+                                                   Opacity="0.7" FontSize="11"/>
+                                        <TextBlock DockPanel.Dock="Right"
+                                                   Text="{Binding Duration, StringFormat={}{0:mm\\:ss}}"
+                                                   Opacity="0.7" FontSize="11"/>
+                                    </DockPanel>
+                                </StackPanel>
+                            </DockPanel>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

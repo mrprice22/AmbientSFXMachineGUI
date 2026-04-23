@@ -676,7 +676,7 @@
       "title": "Per-active-sound volume knob in now-playing",
       "description": "Inline rotary volume control next to each active sound in the now-playing panel for quick in-the-moment adjustment.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "NOW-01"
       ],

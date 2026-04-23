@@ -213,6 +213,14 @@ public sealed partial class ActivePlayback : ObservableObject
 
     [ObservableProperty] private TimeSpan _position;
     [ObservableProperty] private TimeSpan _duration;
+    [ObservableProperty] private double _volume = 100;
+
+    partial void OnVolumeChanged(double value)
+    {
+        if (Reader is null) return;
+        try { Reader.Volume = (float)(Math.Clamp(value, 0, 200) / 100.0); }
+        catch { }
+    }
 
     /// <summary>Called by the Now Playing panel timer to pull the latest position off the reader.</summary>
     public void RefreshFromReader()
