@@ -40,6 +40,19 @@
                               VirtualizingStackPanel.VirtualizationMode="Recycling"
                               ScrollViewer.IsDeferredScrollingEnabled="True"
                               GridViewColumnHeader.Click="OnHeaderClick">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="ContextMenu">
+                                    <Setter.Value>
+                                        <ContextMenu>
+                                            <MenuItem Header="Add to agents…"
+                                                      Command="{Binding DataContext.AddLibraryEntryToAgentsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}"/>
+                                        </ContextMenu>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListView.ItemContainerStyle>
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Width="220" DisplayMemberBinding="{Binding FileName}">
@@ -188,6 +201,19 @@
                               VirtualizingStackPanel.IsVirtualizing="True"
                               VirtualizingStackPanel.VirtualizationMode="Recycling"
                               ScrollViewer.IsDeferredScrollingEnabled="True">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="ContextMenu">
+                                    <Setter.Value>
+                                        <ContextMenu>
+                                            <MenuItem Header="Add to agents…"
+                                                      Command="{Binding DataContext.AddLibraryEntryToAgentsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}"/>
+                                        </ContextMenu>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListView.ItemContainerStyle>
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="File" Width="220" DisplayMemberBinding="{Binding FileName}"/>
@@ -227,6 +253,12 @@
                            ToolTip="{Binding SelectedLibraryEntry.AbsolutePath}"/>
                 <TextBlock DockPanel.Dock="Top" Text="{Binding SelectedLibraryEntry.AbsolutePath}"
                            Opacity="0.6" FontSize="10" TextTrimming="CharacterEllipsis" Margin="0,0,0,6"/>
+                <Button DockPanel.Dock="Top" Content="Add to agents…"
+                        Command="{Binding AddLibraryEntryToAgentsCommand}"
+                        CommandParameter="{Binding SelectedLibraryEntry}"
+                        Padding="8,2" Margin="0,0,0,6"
+                        HorizontalAlignment="Left"
+                        ToolTip="Add this file to additional agents"/>
                 <TextBlock DockPanel.Dock="Top" Margin="0,0,0,4" Opacity="0.75">
                     <Run Text="Referenced by "/><Run Text="{Binding SelectedEntryUsages.Count, Mode=OneWay}"/><Run Text=" agent(s)"/>
                 </TextBlock>

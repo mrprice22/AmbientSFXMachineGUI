@@ -498,7 +498,7 @@
       "title": "Add library file to additional agents/machines",
       "description": "Action on a library row that opens a multi-select picker of machines and agents and appends the file to each chosen agent's file list. The same library entry can belong to many agents/machines.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LIB-04"
       ],

@@ -137,6 +137,26 @@ public partial class ShellViewModel : ObservableObject
     private void OnEntryUsagesChanged(object? sender, EventArgs e) => _unusedView.Refresh();
 
     [RelayCommand]
+    private void AddLibraryEntryToAgents(AudioFileEntry? entry)
+    {
+        if (entry is null) return;
+        var dialog = new AddToAgentsDialog(entry, Machines)
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+        if (dialog.ShowDialog() != true) return;
+
+        foreach (var pick in dialog.SelectedAgents)
+        {
+            var agent = pick.Agent;
+            if (agent.Files.Any(f => string.Equals(f.FilePath, entry.AbsolutePath, StringComparison.OrdinalIgnoreCase)))
+                continue;
+            agent.Files.Add(new SoundFileViewModel(entry.AbsolutePath));
+            agent.FileCount = agent.Files.Count;
+        }
+    }
+
+    [RelayCommand]
     private void RemoveUnused(IList? selected)
     {
         if (selected is null || selected.Count == 0) return;
