@@ -3,13 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:AmbientSFXMachineGUI.Controls"
              AllowDrop="True"
+             Loaded="OnLoaded" Unloaded="OnUnloaded" DataContextChanged="OnDataContextChanged"
              DragEnter="OnDragEnter" DragOver="OnDragOver" DragLeave="OnDragLeave" Drop="OnDrop">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
     <Grid>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <ItemsControl ItemsSource="{Binding Agents}">
+        <ItemsControl x:Name="AgentsList" ItemsSource="{Binding Agents}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Border Margin="6" Padding="10" BorderBrush="#444" BorderThickness="1" CornerRadius="4">

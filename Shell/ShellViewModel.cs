@@ -78,6 +78,49 @@ public partial class ShellViewModel : ObservableObject
     [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private string _libraryFilter = string.Empty;
     [ObservableProperty] private bool _isEditMode;
+    [ObservableProperty] private AudioFileEntry? _selectedLibraryEntry;
+
+    public ObservableCollection<LibraryUsageItem> SelectedEntryUsages { get; } = new();
+
+    public event EventHandler<Guid>? AgentFocusRequested;
+
+    private AudioFileEntry? _trackedUsageEntry;
+
+    partial void OnSelectedLibraryEntryChanged(AudioFileEntry? value)
+    {
+        if (_trackedUsageEntry is not null) _trackedUsageEntry.UsagesChanged -= OnSelectedEntryUsagesChanged;
+        _trackedUsageEntry = value;
+        if (value is not null) value.UsagesChanged += OnSelectedEntryUsagesChanged;
+        RebuildSelectedEntryUsages();
+    }
+
+    private void OnSelectedEntryUsagesChanged(object? sender, EventArgs e) => RebuildSelectedEntryUsages();
+
+    private void RebuildSelectedEntryUsages()
+    {
+        SelectedEntryUsages.Clear();
+        var entry = SelectedLibraryEntry;
+        if (entry is null) return;
+        foreach (var usage in entry.Usages)
+        {
+            var machine = Machines.FirstOrDefault(m => m.Id == usage.MachineId);
+            var agent = machine?.Agents.FirstOrDefault(a => a.Id == usage.AgentId);
+            if (machine is null || agent is null) continue;
+            SelectedEntryUsages.Add(new LibraryUsageItem(machine, agent, NavigateToUsage));
+        }
+    }
+
+    private void NavigateToUsage(MachineViewModel machine, AgentViewModel agent)
+    {
+        SelectedMachine = machine;
+        AgentFocusRequested?.Invoke(this, agent.Id);
+    }
+
+    [RelayCommand]
+    private void SelectLibraryEntry(AudioFileEntry? entry) => SelectedLibraryEntry = entry;
+
+    [RelayCommand]
+    private void CloseUsagesDrawer() => SelectedLibraryEntry = null;
 
     partial void OnLibraryFilterChanged(string value) => LibraryView.Refresh();
 

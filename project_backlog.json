@@ -469,7 +469,7 @@
       "title": "Show usages for a library file",
       "description": "Clicking a file in any library tab opens a side drawer listing every (machine, agent) pair that references it. Each row has a 'navigate to' action that focuses the corresponding agent card in the main panel.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LIB-04"
       ],
