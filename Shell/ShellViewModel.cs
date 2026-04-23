@@ -63,6 +63,8 @@ public partial class ShellViewModel : ObservableObject
         };
     }
 
+    private bool _suppressProfileApply;
+
     public LibraryHasher LibraryHasher { get; }
     public AudioLibrary AudioLibrary { get; }
     public LibraryDuplicates LibraryDuplicates { get; }
@@ -313,6 +315,15 @@ public partial class ShellViewModel : ObservableObject
         OnPropertyChanged(nameof(SoundboardItems));
         _hotkeys.SetActiveMachine(newValue?.Id);
         RebindActiveSoundboardHotkeys(oldValue, newValue);
+
+        _suppressProfileApply = true;
+        try
+        {
+            if (newValue is not null) _profileService.LoadAll(newValue.Id);
+            else _profileService.Profiles.Clear();
+            ActiveProfile = null;
+        }
+        finally { _suppressProfileApply = false; }
     }
 
     private readonly HashSet<SoundboardItem> _hookedSoundboardItems = new();
@@ -397,13 +408,24 @@ public partial class ShellViewModel : ObservableObject
     partial void OnIsMutedAllChanged(bool value) => _machineCoordinator.SetMuteAll(value);
     partial void OnActiveProfileChanged(Profile? value)
     {
-        if (value is not null) _profileService.Apply(value);
+        if (_suppressProfileApply) return;
+        if (value is null || SelectedMachine is null) return;
+        _profileService.Apply(SelectedMachine, _hotkeys, value);
     }
 
     [RelayCommand]
     private void QuickSaveProfile()
     {
-        // TODO: prompt for name, snapshot current state via ProfileService.SnapshotCurrent()
+        if (SelectedMachine is null) return;
+        var suggested = ActiveProfile?.Name ?? "Profile";
+        var dialog = new InputDialog("Save Profile", "Name:", suggested)
+            { Owner = System.Windows.Application.Current.MainWindow };
+        if (dialog.ShowDialog() != true || string.IsNullOrWhiteSpace(dialog.Value)) return;
+
+        var profile = _profileService.SnapshotCurrent(SelectedMachine, _hotkeys, dialog.Value.Trim());
+        _suppressProfileApply = true;
+        try { ActiveProfile = profile; }
+        finally { _suppressProfileApply = false; }
     }
 
     private MiniModeWindow? _miniWindow;

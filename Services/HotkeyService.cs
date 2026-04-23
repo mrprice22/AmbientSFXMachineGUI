@@ -179,6 +179,31 @@ public sealed class HotkeyService : IDisposable
         ApplyAll();
     }
 
+    public IReadOnlyDictionary<string, string?> GetMachineBindings()
+    {
+        var result = new Dictionary<string, string?>();
+        foreach (var action in _actions.Values)
+        {
+            if (action.Scope != HotkeyScope.Machine) continue;
+            result[action.Id] = _machineBindings.TryGetValue(action.Id, out var c) ? c : null;
+        }
+        return result;
+    }
+
+    public void ApplyMachineBindings(Guid machineId, IReadOnlyDictionary<string, string?> bindings)
+    {
+        _machineBindings.Clear();
+        foreach (var kv in bindings)
+        {
+            if (!_actions.TryGetValue(kv.Key, out var action)) continue;
+            if (action.Scope != HotkeyScope.Machine) continue;
+            _machineBindings[kv.Key] = string.IsNullOrWhiteSpace(kv.Value) ? null : kv.Value;
+        }
+        SaveMachineBindings(machineId);
+        RefreshBindingsCollection();
+        ApplyAll();
+    }
+
     public void SetActiveMachine(Guid? machineId)
     {
         _activeMachine = machineId;

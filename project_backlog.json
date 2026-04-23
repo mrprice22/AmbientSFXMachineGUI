@@ -798,7 +798,7 @@
       "title": "Profile save and load",
       "description": "Save the full current state of a machine (agent enable states, per-sound enable states, all volumes, machine master volume, soundboard layout, hotkeys, pinned agents) as a named JSON profile. Profiles are scoped per-machine and saved under %AppData%\\AmbientAgents\\machines\\<machineId>\\profiles\\. Load restores all settings for that machine.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "AGENT-02",
         "AGENT-03",
