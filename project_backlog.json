@@ -659,7 +659,7 @@
       "title": "Now-playing panel with active sounds",
       "description": "Collapsible dockable panel listing every sound currently playing, with agent name, filename, and a live progress bar driven by polling AudioFileReader.Position on a 100ms timer.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "SHELL-01",
         "LOG-01"

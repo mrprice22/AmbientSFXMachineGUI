@@ -7,6 +7,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using AmbientSFXMachineGUI.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using NAudio.Wave;
 
 namespace AmbientSFXMachineGUI.Services;
 
@@ -104,6 +106,30 @@ public sealed class AgentCoordinator
     internal IReadOnlyCollection<ActivePlayback> ActivePlaybacks
         => (IReadOnlyCollection<ActivePlayback>)_active.Values;
 
+    public event EventHandler<ActivePlayback>? PlaybackStarted;
+    public event EventHandler<ActivePlayback>? PlaybackEnded;
+
+    /// <summary>Registers an in-progress playback so the Now Playing panel can observe it. Called by the playback loop.</summary>
+    public ActivePlayback RegisterPlayback(AgentViewModel agent, string filePath, AudioFileReader? reader = null)
+    {
+        var playback = new ActivePlayback
+        {
+            AgentName = agent.Name,
+            FilePath  = filePath,
+            Reader    = reader,
+            Duration  = reader?.TotalTime ?? TimeSpan.Zero,
+        };
+        _active[playback.Id] = playback;
+        PlaybackStarted?.Invoke(this, playback);
+        return playback;
+    }
+
+    public void UnregisterPlayback(ActivePlayback playback)
+    {
+        if (_active.TryRemove(playback.Id, out _))
+            PlaybackEnded?.Invoke(this, playback);
+    }
+
     internal void PublishLog(LogEntryViewModel entry) => _publishLog(entry);
 
     private void OnAgentsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -174,12 +200,29 @@ public sealed class AgentCoordinator
     }
 }
 
-public sealed class ActivePlayback
+public sealed partial class ActivePlayback : ObservableObject
 {
     public Guid Id { get; init; } = Guid.NewGuid();
     public Guid MachineId { get; init; }
     public string AgentName { get; init; } = string.Empty;
     public string FilePath { get; init; } = string.Empty;
-    public TimeSpan Position { get; set; }
-    public TimeSpan Duration { get; set; }
+    public string FileName => string.IsNullOrEmpty(FilePath) ? string.Empty : Path.GetFileName(FilePath);
+
+    /// <summary>NAudio reader the Now Playing panel polls every 100ms to refresh Position. May be null while the engine loop is stubbed.</summary>
+    public AudioFileReader? Reader { get; init; }
+
+    [ObservableProperty] private TimeSpan _position;
+    [ObservableProperty] private TimeSpan _duration;
+
+    /// <summary>Called by the Now Playing panel timer to pull the latest position off the reader.</summary>
+    public void RefreshFromReader()
+    {
+        if (Reader is null) return;
+        try
+        {
+            Position = Reader.CurrentTime;
+            if (Duration == TimeSpan.Zero) Duration = Reader.TotalTime;
+        }
+        catch { }
+    }
 }

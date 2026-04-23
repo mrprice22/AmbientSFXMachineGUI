@@ -19,6 +19,8 @@ public sealed class MachineCoordinator
     private readonly Dictionary<MachineViewModel, AgentCoordinator> _coordinators = new();
 
     public event EventHandler<LogEntryViewModel>? SoundPlayed;
+    public event EventHandler<ActivePlayback>? PlaybackStarted;
+    public event EventHandler<ActivePlayback>? PlaybackEnded;
 
     private static string MachinesDir => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -34,9 +36,19 @@ public sealed class MachineCoordinator
     {
         machine.PropertyChanged -= OnMachinePropertyChanged;
         if (_coordinators.Remove(machine, out var coordinator))
+        {
+            coordinator.PlaybackStarted -= OnPlaybackStarted;
+            coordinator.PlaybackEnded   -= OnPlaybackEnded;
             coordinator.Shutdown();
+        }
         Machines.Remove(machine);
     }
+
+    private void OnPlaybackStarted(object? sender, ActivePlayback playback)
+        => Application.Current.Dispatcher.Invoke(() => PlaybackStarted?.Invoke(this, playback));
+
+    private void OnPlaybackEnded(object? sender, ActivePlayback playback)
+        => Application.Current.Dispatcher.Invoke(() => PlaybackEnded?.Invoke(this, playback));
 
     public AgentCoordinator GetCoordinator(MachineViewModel machine)
         => _coordinators[machine];
@@ -173,6 +185,8 @@ public sealed class MachineCoordinator
         var coordinator = new AgentCoordinator(machine.Agents, PublishLog);
         coordinator.SetMachineVolume(machine.MasterVolume);
         coordinator.SetGroupEnabled(machine.IsEnabled);
+        coordinator.PlaybackStarted += OnPlaybackStarted;
+        coordinator.PlaybackEnded   += OnPlaybackEnded;
         _coordinators[machine] = coordinator;
         machine.PropertyChanged += OnMachinePropertyChanged;
         Machines.Add(machine);

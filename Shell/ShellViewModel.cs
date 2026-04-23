@@ -37,6 +37,9 @@ public partial class ShellViewModel : ObservableObject
         ActivePlaybacks = new ObservableCollection<ActivePlayback>();
         Items = new ObservableCollection<SoundboardItem>();
 
+        _machineCoordinator.PlaybackStarted += (_, p) => { if (!ActivePlaybacks.Contains(p)) ActivePlaybacks.Add(p); };
+        _machineCoordinator.PlaybackEnded   += (_, p) => ActivePlaybacks.Remove(p);
+
         LibraryView = CollectionViewSource.GetDefaultView(AudioLibrary.Entries);
         LibraryView.Filter = MatchesLibraryFilter;
         LibraryView.SortDescriptions.Add(new SortDescription(nameof(AudioFileEntry.FileName), ListSortDirection.Ascending));
