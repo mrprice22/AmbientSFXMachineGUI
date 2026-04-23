@@ -42,8 +42,12 @@ public sealed class AgentCoordinator
         vm.IsEnabled = cfg.Enabled;
         vm.Volume    = cfg.Volume;
         vm.Mode      = cfg.Mode;
-        vm.FileCount = Directory.GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly)
-                                .Count(f => !f.EndsWith(".config", StringComparison.OrdinalIgnoreCase));
+
+        var audioFiles = Directory.GetFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly)
+                                  .Where(f => !f.EndsWith(".config", StringComparison.OrdinalIgnoreCase))
+                                  .ToList();
+        foreach (var f in audioFiles) vm.Files.Add(new SoundFileViewModel(f));
+        vm.FileCount = audioFiles.Count;
 
         _agents.Add(vm);
     }

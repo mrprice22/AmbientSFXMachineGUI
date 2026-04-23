@@ -7,6 +7,7 @@ namespace AmbientSFXMachineGUI;
 public partial class App : Application
 {
     public static MachineCoordinator MachineCoordinator { get; } = new();
+    public static AudioLibrary AudioLibrary { get; } = new();
     public static ProfileService Profiles { get; } = new();
     public static HotkeyService Hotkeys { get; } = new();
     public static TrayService Tray { get; } = new();
@@ -16,6 +17,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        AudioLibrary.Attach(MachineCoordinator);
         MachineCoordinator.LoadMachinesFromDisk();
 
         Tray.Initialize();

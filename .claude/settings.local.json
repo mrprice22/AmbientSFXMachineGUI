@@ -8,7 +8,8 @@
       "Bash(git commit -m ' *)",
       "Bash(python -c \"import json; data=json.load\\(open\\('project_backlog.json'\\)\\); stories=[s for s in data['stories'] if s['id'] in ['MACHINE-02','MACHINE-04','MACHINE-08']]; [print\\(s['id'], s['status']\\) for s in stories]\")",
       "Bash(python -c ' *)",
-      "Bash(python /c/GIT/AudioMachines/AmbientSFXMachineGUI/next_task.py)"
+      "Bash(python /c/GIT/AudioMachines/AmbientSFXMachineGUI/next_task.py)",
+      "Bash(py C:/Git/AudioMachines/AmbientSFXMachineGUI/next_task.py)"
     ]
   }
 }

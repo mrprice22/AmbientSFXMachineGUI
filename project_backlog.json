@@ -377,7 +377,7 @@
       "title": "AudioFileEntry and AudioLibrary registry",
       "description": "Introduce AudioFileEntry (AbsolutePath, Sha256, Duration, ByteSize, FileName, Usages) and AudioLibrary as a process-wide singleton keyed by content hash with a secondary index by absolute path. Usages list is maintained by subscribing to mutations on every MachineViewModel.Agents[*].Files collection.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "MACHINE-01"
       ],
