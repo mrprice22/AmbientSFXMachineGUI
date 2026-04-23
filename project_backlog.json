@@ -767,7 +767,7 @@
       "title": "Add to soundboard from agent file list",
       "description": "Star button on each file row in an expanded agent card adds the file to the active machine's soundboard in one click. This is a second entry point to soundboard creation distinct from the log-row star (SB-02) and from log drag-drop (LOG-03).",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "SFX-01",
         "SB-01"

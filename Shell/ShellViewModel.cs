@@ -538,6 +538,25 @@ public partial class ShellViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void AddFileToSoundboard(SoundFileViewModel? file)
+    {
+        if (file is null || string.IsNullOrEmpty(file.FilePath)) return;
+        if (SelectedMachine is null) return;
+        var items = SelectedMachine.SoundboardItems;
+        if (items.Any(i => string.Equals(i.FilePath, file.FilePath, StringComparison.OrdinalIgnoreCase)))
+        {
+            file.IsFavorite = true;
+            return;
+        }
+        items.Add(new SoundboardItem
+        {
+            Label    = Path.GetFileNameWithoutExtension(file.FileName),
+            FilePath = file.FilePath,
+        });
+        file.IsFavorite = true;
+    }
+
+    [RelayCommand]
     private void PlaySoundboardItem(SoundboardItem? item)
     {
         if (item is null || string.IsNullOrEmpty(item.FilePath)) return;
