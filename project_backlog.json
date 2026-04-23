@@ -1,14 +1,14 @@
 {
   "features": {
-    "F01_SHELL": "F01 \u2014 Core Shell",
-    "F02_AGENTS": "F02 \u2014 Agent Management",
-    "F03_MACHINE": "F03 \u2014 Machine Management",
-    "F04_LIB": "F04 \u2014 Audio Library",
-    "F05_LOG": "F05 \u2014 Live Playback Log",
-    "F06_SFX": "F06 \u2014 Sound File Management",
-    "F07_NOW": "F07 \u2014 Now Playing",
-    "F08_SB": "F08 \u2014 Soundboard / Favorites",
-    "F09_PROF": "F09 \u2014 Profiles"
+    "F01_SHELL": "F01 — Core Shell",
+    "F02_AGENTS": "F02 — Agent Management",
+    "F03_MACHINE": "F03 — Machine Management",
+    "F04_LIB": "F04 — Audio Library",
+    "F05_LOG": "F05 — Live Playback Log",
+    "F06_SFX": "F06 — Sound File Management",
+    "F07_NOW": "F07 — Now Playing",
+    "F08_SB": "F08 — Soundboard / Favorites",
+    "F09_PROF": "F09 — Profiles"
   },
   "stories": [
     {
@@ -20,9 +20,9 @@
       "status": "done",
       "dependencies": [],
       "references": [
-        "\u00c2\u00a74 Panel Layout System",
-        "\u00c2\u00a75.1 Core Shell \u2014 SHELL-01",
-        "\u00c2\u00a78 Persistence (Panel layout \u2192 layout.xml)"
+        "Â§4 Panel Layout System",
+        "Â§5.1 Core Shell — SHELL-01",
+        "Â§8 Persistence (Panel layout → layout.xml)"
       ]
     },
     {
@@ -34,7 +34,7 @@
       "status": "done",
       "dependencies": [],
       "references": [
-        "\u00c2\u00a75.1 Core Shell \u2014 SHELL-02"
+        "Â§5.1 Core Shell — SHELL-02"
       ]
     },
     {
@@ -49,7 +49,7 @@
         "AGENT-01"
       ],
       "references": [
-        "\u00c2\u00a75.1 Core Shell \u2014 SHELL-03"
+        "Â§5.1 Core Shell — SHELL-03"
       ]
     },
     {
@@ -63,8 +63,8 @@
         "SHELL-01"
       ],
       "references": [
-        "\u00c2\u00a75.1 Core Shell \u2014 SHELL-04",
-        "\u00c2\u00a77 Hotkey Architecture"
+        "Â§5.1 Core Shell — SHELL-04",
+        "Â§7 Hotkey Architecture"
       ]
     },
     {
@@ -76,7 +76,7 @@
       "status": "done",
       "dependencies": [],
       "references": [
-        "\u00c2\u00a72 Technology Decision (NuGet dependencies, build setup)"
+        "Â§2 Technology Decision (NuGet dependencies, build setup)"
       ]
     },
     {
@@ -90,8 +90,8 @@
         "SHELL-01"
       ],
       "references": [
-        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard UI elements",
-        "\u00c2\u00a73 Architecture (AgentViewModel exposes)"
+        "Â§5.2 Agent Management — AgentCard UI elements",
+        "Â§3 Architecture (AgentViewModel exposes)"
       ]
     },
     {
@@ -105,7 +105,7 @@
         "AGENT-01"
       ],
       "references": [
-        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: Toggle switch \u2192 IsEnabled"
+        "Â§5.2 Agent Management — AgentCard: Toggle switch → IsEnabled"
       ]
     },
     {
@@ -119,8 +119,8 @@
         "AGENT-01"
       ],
       "references": [
-        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: Volume slider \u2192 Volume",
-        "\u00c2\u00a73.1 Machine concept (volume chain)"
+        "Â§5.2 Agent Management — AgentCard: Volume slider → Volume",
+        "Â§3.1 Machine concept (volume chain)"
       ]
     },
     {
@@ -134,8 +134,8 @@
         "SHELL-01"
       ],
       "references": [
-        "\u00c2\u00a74 Panel Layout System (Toolbar: App Master Vol | Mute All)",
-        "\u00c2\u00a73.1 Machine concept (volume chain)"
+        "Â§4 Panel Layout System (Toolbar: App Master Vol | Mute All)",
+        "Â§3.1 Machine concept (volume chain)"
       ]
     },
     {
@@ -149,7 +149,7 @@
         "AGENT-01"
       ],
       "references": [
-        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: Force-play button"
+        "Â§5.2 Agent Management — AgentCard: Force-play button"
       ]
     },
     {
@@ -163,7 +163,7 @@
         "AGENT-01"
       ],
       "references": [
-        "\u00c2\u00a75.2 Agent Management \u2014 Config Editor (slide-over sheet, not a modal)"
+        "Â§5.2 Agent Management — Config Editor (slide-over sheet, not a modal)"
       ]
     },
     {
@@ -177,7 +177,7 @@
         "AGENT-06"
       ],
       "references": [
-        "\u00c2\u00a75.2 Agent Management \u2014 Config Editor (Dual-handle RangeSlider for min/max intervals)"
+        "Â§5.2 Agent Management — Config Editor (Dual-handle RangeSlider for min/max intervals)"
       ]
     },
     {
@@ -191,7 +191,7 @@
         "AGENT-01"
       ],
       "references": [
-        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: L/R balance arc indicator \u2192 LastPanValue"
+        "Â§5.2 Agent Management — AgentCard: L/R balance arc indicator → LastPanValue"
       ]
     },
     {
@@ -205,7 +205,7 @@
         "AGENT-01"
       ],
       "references": [
-        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: Turbo badge (animated pulse ring) \u2192 IsInTurboMode, RemainingTurboPlays"
+        "Â§5.2 Agent Management — AgentCard: Turbo badge (animated pulse ring) → IsInTurboMode, RemainingTurboPlays"
       ]
     },
     {
@@ -219,8 +219,8 @@
         "AGENT-06"
       ],
       "references": [
-        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard UI",
-        "\u00c2\u00a75.8 Machine Management (Import machine \u2014 folder referenced in place)"
+        "Â§5.2 Agent Management — AgentCard UI",
+        "Â§5.8 Machine Management (Import machine — folder referenced in place)"
       ]
     },
     {
@@ -234,9 +234,9 @@
         "SHELL-01"
       ],
       "references": [
-        "\u00c2\u00a73 Architecture (MachineCoordinator, AgentCoordinator, MachineViewModel)",
-        "\u00c2\u00a73.1 Machine concept",
-        "\u00c2\u00a76 State Management"
+        "Â§3 Architecture (MachineCoordinator, AgentCoordinator, MachineViewModel)",
+        "Â§3.1 Machine concept",
+        "Â§6 State Management"
       ]
     },
     {
@@ -251,8 +251,8 @@
         "AGENT-01"
       ],
       "references": [
-        "\u00c2\u00a74 Panel Layout System (Default layout \u2014 Machines rail left edge)",
-        "\u00c2\u00a75.8 Machine Management (Machines rail)"
+        "Â§4 Panel Layout System (Default layout — Machines rail left edge)",
+        "Â§5.8 Machine Management (Machines rail)"
       ]
     },
     {
@@ -268,8 +268,8 @@
         "AGENT-04"
       ],
       "references": [
-        "\u00c2\u00a73.1 Machine concept (volume chain, disable behavior)",
-        "\u00c2\u00a75.8 Machine Management (machine card: enable toggle, master volume slider)"
+        "Â§3.1 Machine concept (volume chain, disable behavior)",
+        "Â§5.8 Machine Management (machine card: enable toggle, master volume slider)"
       ]
     },
     {
@@ -283,7 +283,7 @@
         "MACHINE-01"
       ],
       "references": [
-        "\u00c2\u00a75.8 Machine Management \u2014 Import machine (MachineImporter.cs)"
+        "Â§5.8 Machine Management — Import machine (MachineImporter.cs)"
       ]
     },
     {
@@ -297,7 +297,7 @@
         "MACHINE-01"
       ],
       "references": [
-        "\u00c2\u00a75.8 Machine Management \u2014 Create machine"
+        "Â§5.8 Machine Management — Create machine"
       ]
     },
     {
@@ -311,7 +311,7 @@
         "MACHINE-02"
       ],
       "references": [
-        "\u00c2\u00a75.8 Machine Management \u2014 Rename / change icon / reorder"
+        "Â§5.8 Machine Management — Rename / change icon / reorder"
       ]
     },
     {
@@ -325,7 +325,7 @@
         "MACHINE-02"
       ],
       "references": [
-        "\u00c2\u00a75.8 Machine Management \u2014 Remove machine"
+        "Â§5.8 Machine Management — Remove machine"
       ]
     },
     {
@@ -339,7 +339,7 @@
         "MACHINE-01"
       ],
       "references": [
-        "\u00c2\u00a78 Persistence (Machine index \u2192 %AppData%\\AmbientAgents\\machines\\<id>.json)"
+        "Â§8 Persistence (Machine index → %AppData%\\AmbientAgents\\machines\\<id>.json)"
       ]
     },
     {
@@ -354,7 +354,7 @@
         "SHELL-02"
       ],
       "references": [
-        "\u00c2\u00a75.8 Machine Management \u2014 Per-machine tray submenu"
+        "Â§5.8 Machine Management — Per-machine tray submenu"
       ]
     },
     {
@@ -368,7 +368,7 @@
         "MACHINE-01"
       ],
       "references": [
-        "\u00c2\u00a78 Persistence (Profiles, Soundboard, Hotkeys \u2014 per-machine paths)"
+        "Â§8 Persistence (Profiles, Soundboard, Hotkeys — per-machine paths)"
       ]
     },
     {
@@ -382,8 +382,8 @@
         "MACHINE-01"
       ],
       "references": [
-        "\u00c2\u00a73.2 Audio Library (AudioFileEntry, keying, usages, decentralized ownership)",
-        "\u00c2\u00a76 State Management (AudioLibrary singleton)"
+        "Â§3.2 Audio Library (AudioFileEntry, keying, usages, decentralized ownership)",
+        "Â§6 State Management (AudioLibrary singleton)"
       ]
     },
     {
@@ -397,9 +397,9 @@
         "LIB-01"
       ],
       "references": [
-        "\u00c2\u00a73.2 Audio Library (Hashing: lazy, streamed SHA-256)",
-        "\u00c2\u00a78 Persistence (Library cache \u2192 library.json)",
-        "\u00c2\u00a75.9 Audio Library (progress indicator in tab header)"
+        "Â§3.2 Audio Library (Hashing: lazy, streamed SHA-256)",
+        "Â§8 Persistence (Library cache → library.json)",
+        "Â§5.9 Audio Library (progress indicator in tab header)"
       ]
     },
     {
@@ -413,8 +413,8 @@
         "LIB-01"
       ],
       "references": [
-        "\u00c2\u00a73.2 Audio Library (entry: Duration, ByteSize probed via NAudio)",
-        "\u00c2\u00a75.9 Audio Library \u2014 Duplicates tab (likely duplicates: duration within \u00b11%)"
+        "Â§3.2 Audio Library (entry: Duration, ByteSize probed via NAudio)",
+        "Â§5.9 Audio Library — Duplicates tab (likely duplicates: duration within ±1%)"
       ]
     },
     {
@@ -428,24 +428,24 @@
         "LIB-01"
       ],
       "references": [
-        "\u00c2\u00a75.9 Audio Library \u2014 All Files tab",
-        "\u00c2\u00a74 Panel Layout System (tabbed bottom dock)"
+        "Â§5.9 Audio Library — All Files tab",
+        "Â§4 Panel Layout System (tabbed bottom dock)"
       ]
     },
     {
       "id": "LIB-05",
       "feature": "F04_LIB",
       "title": "Library panel: Duplicates tab",
-      "description": "Two grouped sections: (1) Exact duplicates grouped by identical SHA-256. (2) Likely duplicates grouped by case/extension-insensitive filename match AND duration within \u00b11%. Each group shows all candidate paths with usage counts.",
+      "description": "Two grouped sections: (1) Exact duplicates grouped by identical SHA-256. (2) Likely duplicates grouped by case/extension-insensitive filename match AND duration within ±1%. Each group shows all candidate paths with usage counts.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LIB-02",
         "LIB-03"
       ],
       "references": [
-        "\u00c2\u00a73.2 Audio Library (Duplicate detection: tiered \u2014 exact and likely)",
-        "\u00c2\u00a75.9 Audio Library \u2014 Duplicates tab"
+        "Â§3.2 Audio Library (Duplicate detection: tiered — exact and likely)",
+        "Â§5.9 Audio Library — Duplicates tab"
       ]
     },
     {
@@ -459,8 +459,8 @@
         "LIB-04"
       ],
       "references": [
-        "\u00c2\u00a73.2 Audio Library (Unused detection: entries with empty Usages)",
-        "\u00c2\u00a75.9 Audio Library \u2014 Unused tab"
+        "Â§3.2 Audio Library (Unused detection: entries with empty Usages)",
+        "Â§5.9 Audio Library — Unused tab"
       ]
     },
     {
@@ -474,7 +474,7 @@
         "LIB-04"
       ],
       "references": [
-        "\u00c2\u00a75.9 Audio Library \u2014 Row actions: Show usages (side drawer)"
+        "Â§5.9 Audio Library — Row actions: Show usages (side drawer)"
       ]
     },
     {
@@ -489,7 +489,7 @@
         "AGENT-10"
       ],
       "references": [
-        "\u00c2\u00a75.9 Audio Library \u2014 Ingest (drag from Explorer)"
+        "Â§5.9 Audio Library — Ingest (drag from Explorer)"
       ]
     },
     {
@@ -503,8 +503,8 @@
         "LIB-04"
       ],
       "references": [
-        "\u00c2\u00a73.2 Audio Library (Reuse: single entry in many agents/machines)",
-        "\u00c2\u00a75.9 Audio Library \u2014 Row actions: Add to additional agents/machines"
+        "Â§3.2 Audio Library (Reuse: single entry in many agents/machines)",
+        "Â§5.9 Audio Library — Row actions: Add to additional agents/machines"
       ]
     },
     {
@@ -519,7 +519,7 @@
         "LIB-07"
       ],
       "references": [
-        "\u00c2\u00a75.9 Audio Library \u2014 Row actions: Merge duplicates (Duplicates tab only)"
+        "Â§5.9 Audio Library — Row actions: Merge duplicates (Duplicates tab only)"
       ]
     },
     {
@@ -533,7 +533,7 @@
         "LIB-04"
       ],
       "references": [
-        "\u00c2\u00a75.9 Audio Library \u2014 Row actions: Reveal in Explorer, Copy full path"
+        "Â§5.9 Audio Library — Row actions: Reveal in Explorer, Copy full path"
       ]
     },
     {
@@ -547,8 +547,8 @@
         "SHELL-01"
       ],
       "references": [
-        "\u00c2\u00a75.4 Live Playback Log (LogEntryViewModel: Timestamp, AgentName, FileName, FilePath)",
-        "\u00c2\u00a76 State Management (ObservableCollection<LogEntryViewModel> capped at 500)"
+        "Â§5.4 Live Playback Log (LogEntryViewModel: Timestamp, AgentName, FileName, FilePath)",
+        "Â§6 State Management (ObservableCollection<LogEntryViewModel> capped at 500)"
       ]
     },
     {
@@ -562,7 +562,7 @@
         "LOG-01"
       ],
       "references": [
-        "\u00c2\u00a75.4 Live Playback Log \u2014 Export (Toolbar button \u2192 .csv)"
+        "Â§5.4 Live Playback Log — Export (Toolbar button → .csv)"
       ]
     },
     {
@@ -576,8 +576,8 @@
         "AGENT-01"
       ],
       "references": [
-        "\u00c2\u00a75.3 Sound File Management (expanded file list: Enable/disable checkbox)",
-        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard: Expand/collapse chevron reveals file list"
+        "Â§5.3 Sound File Management (expanded file list: Enable/disable checkbox)",
+        "Â§5.2 Agent Management — AgentCard: Expand/collapse chevron reveals file list"
       ]
     },
     {
@@ -591,8 +591,8 @@
         "SFX-01"
       ],
       "references": [
-        "\u00c2\u00a75.3 Sound File Management (Volume override slider, defaults hidden, appears on hover)",
-        "\u00c2\u00a73.1 Machine concept (volume chain: sound.VolumeOverride up to 200%)"
+        "Â§5.3 Sound File Management (Volume override slider, defaults hidden, appears on hover)",
+        "Â§3.1 Machine concept (volume chain: sound.VolumeOverride up to 200%)"
       ]
     },
     {
@@ -606,7 +606,7 @@
         "SFX-01"
       ],
       "references": [
-        "\u00c2\u00a75.3 Sound File Management (Cooldown override field)"
+        "Â§5.3 Sound File Management (Cooldown override field)"
       ]
     },
     {
@@ -620,7 +620,7 @@
         "AGENT-01"
       ],
       "references": [
-        "\u00c2\u00a75.3 Sound File Management \u2014 global search bar in toolbar"
+        "Â§5.3 Sound File Management — global search bar in toolbar"
       ]
     },
     {
@@ -635,7 +635,7 @@
         "LOG-01"
       ],
       "references": [
-        "\u00c2\u00a75.3 Sound File Management (Session play count heatmap dot \u2014 color intensity scales with count)"
+        "Â§5.3 Sound File Management (Session play count heatmap dot — color intensity scales with count)"
       ]
     },
     {
@@ -650,7 +650,7 @@
         "SFX-01"
       ],
       "references": [
-        "\u00c2\u00a75.4 Live Playback Log \u2014 Right-click context menu (disable file and set volume override require SFX-01/SFX-02 model)"
+        "Â§5.4 Live Playback Log — Right-click context menu (disable file and set volume override require SFX-01/SFX-02 model)"
       ]
     },
     {
@@ -665,9 +665,9 @@
         "LOG-01"
       ],
       "references": [
-        "\u00c2\u00a75.5 Now Playing Panel",
-        "\u00c2\u00a74 Panel Layout System (tabbed bottom dock)",
-        "\u00c2\u00a76 State Management (ConcurrentDictionary<Guid, ActivePlayback>)"
+        "Â§5.5 Now Playing Panel",
+        "Â§4 Panel Layout System (tabbed bottom dock)",
+        "Â§6 State Management (ConcurrentDictionary<Guid, ActivePlayback>)"
       ]
     },
     {
@@ -681,7 +681,7 @@
         "NOW-01"
       ],
       "references": [
-        "\u00c2\u00a75.5 Now Playing Panel (Inline volume knob \u2014 rotary Slider style)"
+        "Â§5.5 Now Playing Panel (Inline volume knob — rotary Slider style)"
       ]
     },
     {
@@ -696,7 +696,7 @@
         "AGENT-04"
       ],
       "references": [
-        "\u00c2\u00a75.5 Now Playing Panel (Solo button \u2014 mutes all other agents; auto-unmutes on playback end)"
+        "Â§5.5 Now Playing Panel (Solo button — mutes all other agents; auto-unmutes on playback end)"
       ]
     },
     {
@@ -711,8 +711,8 @@
         "MACHINE-01"
       ],
       "references": [
-        "\u00c2\u00a75.6 Soundboard / Favorites",
-        "\u00c2\u00a74 Panel Layout System (Soundboard / Favorites collapsible dockable)"
+        "Â§5.6 Soundboard / Favorites",
+        "Â§4 Panel Layout System (Soundboard / Favorites collapsible dockable)"
       ]
     },
     {
@@ -727,8 +727,8 @@
         "LOG-01"
       ],
       "references": [
-        "\u00c2\u00a75.4 Live Playback Log \u2014 Right-click context menu: Add to Soundboard",
-        "\u00c2\u00a75.6 Soundboard / Favorites"
+        "Â§5.4 Live Playback Log — Right-click context menu: Add to Soundboard",
+        "Â§5.6 Soundboard / Favorites"
       ]
     },
     {
@@ -742,7 +742,7 @@
         "SB-01"
       ],
       "references": [
-        "\u00c2\u00a75.6 Soundboard / Favorites \u2014 Layout editor mode"
+        "Â§5.6 Soundboard / Favorites — Layout editor mode"
       ]
     },
     {
@@ -757,8 +757,8 @@
         "SHELL-04"
       ],
       "references": [
-        "\u00c2\u00a75.6 Soundboard / Favorites \u2014 Hotkey assignment",
-        "\u00c2\u00a77 Hotkey Architecture (HotkeyService)"
+        "Â§5.6 Soundboard / Favorites — Hotkey assignment",
+        "Â§7 Hotkey Architecture (HotkeyService)"
       ]
     },
     {
@@ -773,8 +773,8 @@
         "SB-01"
       ],
       "references": [
-        "\u00c2\u00a75.3 Sound File Management (Star button \u2192 adds to soundboard)",
-        "\u00c2\u00a75.6 Soundboard / Favorites (entry points to creating a SoundboardItem)"
+        "Â§5.3 Sound File Management (Star button → adds to soundboard)",
+        "Â§5.6 Soundboard / Favorites (entry points to creating a SoundboardItem)"
       ]
     },
     {
@@ -789,7 +789,7 @@
         "SB-01"
       ],
       "references": [
-        "\u00c2\u00a75.4 Live Playback Log \u2014 Drag from log to soundboard (log rows are drag sources; soundboard is drop target)"
+        "Â§5.4 Live Playback Log — Drag from log to soundboard (log rows are drag sources; soundboard is drop target)"
       ]
     },
     {
@@ -808,8 +808,8 @@
         "MACHINE-10"
       ],
       "references": [
-        "\u00c2\u00a75.7 Profiles (Profile JSON schema: agents, soundOverrides, soundboard, hotkeys, pinnedAgents)",
-        "\u00c2\u00a78 Persistence (Profiles per-machine \u2192 %AppData%\\AmbientAgents\\machines\\<id>\\profiles\\*.json)"
+        "Â§5.7 Profiles (Profile JSON schema: agents, soundOverrides, soundboard, hotkeys, pinnedAgents)",
+        "Â§8 Persistence (Profiles per-machine → %AppData%\\AmbientAgents\\machines\\<id>\\profiles\\*.json)"
       ]
     },
     {
@@ -823,8 +823,8 @@
         "PROF-01"
       ],
       "references": [
-        "\u00c2\u00a75.7 Profiles \u2014 Profile picker (dropdown in main toolbar)",
-        "\u00c2\u00a76 State Management (ProfileService.Apply iterates agents, raises ProfileChanged)"
+        "Â§5.7 Profiles — Profile picker (dropdown in main toolbar)",
+        "Â§6 State Management (ProfileService.Apply iterates agents, raises ProfileChanged)"
       ]
     },
     {
@@ -838,7 +838,7 @@
         "PROF-01"
       ],
       "references": [
-        "\u00c2\u00a75.7 Profiles \u2014 Quick-save (floppy/snapshot icon next to picker)"
+        "Â§5.7 Profiles — Quick-save (floppy/snapshot icon next to picker)"
       ]
     },
     {
@@ -852,7 +852,7 @@
         "PROF-02"
       ],
       "references": [
-        "\u00c2\u00a75.7 Profiles \u2014 Profile picker (Diff view: collapsible summary, Confirm / Cancel)"
+        "Â§5.7 Profiles — Profile picker (Diff view: collapsible summary, Confirm / Cancel)"
       ]
     },
     {
@@ -866,7 +866,7 @@
         "PROF-02"
       ],
       "references": [
-        "\u00c2\u00a75.7 Profiles \u2014 Profile audition (hold-to-preview, configurable timeout default 30s, auto-reverts)"
+        "Â§5.7 Profiles — Profile audition (hold-to-preview, configurable timeout default 30s, auto-reverts)"
       ]
     },
     {
@@ -881,8 +881,8 @@
         "PROF-02"
       ],
       "references": [
-        "\u00c2\u00a75.7 Profiles (pinnedAgents field in profile JSON)",
-        "\u00c2\u00a75.2 Agent Management \u2014 AgentCard UI elements"
+        "Â§5.7 Profiles (pinnedAgents field in profile JSON)",
+        "Â§5.2 Agent Management — AgentCard UI elements"
       ]
     }
   ]

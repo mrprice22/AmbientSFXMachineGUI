@@ -11,6 +11,8 @@ public partial class App : Application
     public static LibraryCacheStore LibraryCache { get; } = new(MachinePaths.LibraryCachePath);
     public static LibraryHasher LibraryHasher { get; } =
         new(AudioLibrary, LibraryCache, Current.Dispatcher);
+    public static LibraryDuplicates LibraryDuplicates { get; } =
+        new(AudioLibrary, Current.Dispatcher);
     public static ProfileService Profiles { get; } = new();
     public static HotkeyService Hotkeys { get; } = new();
     public static TrayService Tray { get; } = new();

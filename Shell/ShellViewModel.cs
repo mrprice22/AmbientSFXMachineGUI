@@ -18,13 +18,14 @@ public partial class ShellViewModel : ObservableObject
     private readonly HotkeyService _hotkeys;
     private static readonly ObservableCollection<AgentViewModel> _emptyAgents = new();
 
-    public ShellViewModel(MachineCoordinator machineCoordinator, ProfileService profileService, HotkeyService hotkeys, LibraryHasher libraryHasher, AudioLibrary audioLibrary)
+    public ShellViewModel(MachineCoordinator machineCoordinator, ProfileService profileService, HotkeyService hotkeys, LibraryHasher libraryHasher, AudioLibrary audioLibrary, LibraryDuplicates libraryDuplicates)
     {
         _machineCoordinator = machineCoordinator;
         _profileService = profileService;
         _hotkeys = hotkeys;
         LibraryHasher = libraryHasher;
         AudioLibrary = audioLibrary;
+        LibraryDuplicates = libraryDuplicates;
 
         Machines = _machineCoordinator.Machines;
         Log = _machineCoordinator.Log;
@@ -47,6 +48,7 @@ public partial class ShellViewModel : ObservableObject
 
     public LibraryHasher LibraryHasher { get; }
     public AudioLibrary AudioLibrary { get; }
+    public LibraryDuplicates LibraryDuplicates { get; }
     public ICollectionView LibraryView { get; }
     public ObservableCollection<MachineViewModel> Machines { get; }
     public ObservableCollection<LogEntryViewModel> Log { get; }

@@ -6,43 +6,133 @@
         <ctl:ByteSizeConverter x:Key="ByteSize"/>
         <ctl:TimeSpanConverter x:Key="Duration"/>
     </UserControl.Resources>
-    <DockPanel>
-        <DockPanel DockPanel.Dock="Top" Margin="4">
-            <TextBlock Text="Filter:" VerticalAlignment="Center" Margin="0,0,4,0"/>
-            <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Margin="8,0,4,0"
-                       Opacity="0.7">
-                <Run Text="{Binding LibraryView.Count, Mode=OneWay, FallbackValue=0}"/><Run Text=" files"/>
-            </TextBlock>
-            <TextBox Text="{Binding LibraryFilter, UpdateSourceTrigger=PropertyChanged, Delay=150}"/>
-        </DockPanel>
-        <ListView x:Name="FilesList"
-                  ItemsSource="{Binding LibraryView}"
-                  VirtualizingStackPanel.IsVirtualizing="True"
-                  VirtualizingStackPanel.VirtualizationMode="Recycling"
-                  ScrollViewer.IsDeferredScrollingEnabled="True"
-                  GridViewColumnHeader.Click="OnHeaderClick">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Width="220" DisplayMemberBinding="{Binding FileName}">
-                        <GridViewColumnHeader Content="File" Tag="FileName"/>
-                    </GridViewColumn>
-                    <GridViewColumn Width="80"
-                                    DisplayMemberBinding="{Binding Duration, Converter={StaticResource Duration}}">
-                        <GridViewColumnHeader Content="Duration" Tag="Duration"/>
-                    </GridViewColumn>
-                    <GridViewColumn Width="90"
-                                    DisplayMemberBinding="{Binding ByteSize, Converter={StaticResource ByteSize}}">
-                        <GridViewColumnHeader Content="Size" Tag="ByteSize"/>
-                    </GridViewColumn>
-                    <GridViewColumn Width="60"
-                                    DisplayMemberBinding="{Binding Usages.Count}">
-                        <GridViewColumnHeader Content="Used" Tag="Usages.Count"/>
-                    </GridViewColumn>
-                    <GridViewColumn Width="600" DisplayMemberBinding="{Binding AbsolutePath}">
-                        <GridViewColumnHeader Content="Path" Tag="AbsolutePath"/>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
-    </DockPanel>
+    <TabControl>
+        <TabItem Header="All Files">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="4">
+                    <TextBlock Text="Filter:" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Margin="8,0,4,0"
+                               Opacity="0.7">
+                        <Run Text="{Binding LibraryView.Count, Mode=OneWay, FallbackValue=0}"/><Run Text=" files"/>
+                    </TextBlock>
+                    <TextBox Text="{Binding LibraryFilter, UpdateSourceTrigger=PropertyChanged, Delay=150}"/>
+                </DockPanel>
+                <ListView x:Name="FilesList"
+                          ItemsSource="{Binding LibraryView}"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          ScrollViewer.IsDeferredScrollingEnabled="True"
+                          GridViewColumnHeader.Click="OnHeaderClick">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Width="220" DisplayMemberBinding="{Binding FileName}">
+                                <GridViewColumnHeader Content="File" Tag="FileName"/>
+                            </GridViewColumn>
+                            <GridViewColumn Width="80"
+                                            DisplayMemberBinding="{Binding Duration, Converter={StaticResource Duration}}">
+                                <GridViewColumnHeader Content="Duration" Tag="Duration"/>
+                            </GridViewColumn>
+                            <GridViewColumn Width="90"
+                                            DisplayMemberBinding="{Binding ByteSize, Converter={StaticResource ByteSize}}">
+                                <GridViewColumnHeader Content="Size" Tag="ByteSize"/>
+                            </GridViewColumn>
+                            <GridViewColumn Width="60"
+                                            DisplayMemberBinding="{Binding Usages.Count}">
+                                <GridViewColumnHeader Content="Used" Tag="Usages.Count"/>
+                            </GridViewColumn>
+                            <GridViewColumn Width="600" DisplayMemberBinding="{Binding AbsolutePath}">
+                                <GridViewColumnHeader Content="Path" Tag="AbsolutePath"/>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DockPanel>
+        </TabItem>
+
+        <TabItem>
+            <TabItem.Header>
+                <TextBlock>
+                    <Run Text="Duplicates"/>
+                    <Run Text=" ("/><Run Text="{Binding LibraryDuplicates.ExactGroups.Count, Mode=OneWay, FallbackValue=0}"/><Run Text="+"/><Run Text="{Binding LibraryDuplicates.LikelyGroups.Count, Mode=OneWay, FallbackValue=0}"/><Run Text=")"/>
+                </TextBlock>
+            </TabItem.Header>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="4">
+                    <TextBlock Text="Exact duplicates (identical SHA-256)"
+                               FontWeight="Bold" Margin="0,4,0,4"/>
+                    <ItemsControl ItemsSource="{Binding LibraryDuplicates.ExactGroups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#40808080" BorderThickness="0,0,0,1" Margin="0,2,0,2" Padding="0,2,0,4">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Header}" FontWeight="SemiBold" Opacity="0.85"/>
+                                        <ItemsControl ItemsSource="{Binding Entries}" Margin="12,2,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,1,0,1">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="90"/>
+                                                            <ColumnDefinition Width="80"/>
+                                                            <ColumnDefinition Width="60"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="{Binding AbsolutePath}" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding ByteSize, Converter={StaticResource ByteSize}}" TextAlignment="Right"/>
+                                                        <TextBlock Grid.Column="2" Text="{Binding Duration, Converter={StaticResource Duration}}" TextAlignment="Right"/>
+                                                        <TextBlock Grid.Column="3" TextAlignment="Right">
+                                                            <Run Text="{Binding Usages.Count, Mode=OneWay}"/><Run Text=" uses"/>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="(none)"
+                               Opacity="0.5" Margin="0,2,0,8"
+                               Visibility="{Binding LibraryDuplicates.ExactGroups.Count, Converter={x:Static ctl:ZeroToVisibleConverter.Instance}}"/>
+
+                    <TextBlock Text="Likely duplicates (same name, duration ±1%)"
+                               FontWeight="Bold" Margin="0,12,0,4"/>
+                    <ItemsControl ItemsSource="{Binding LibraryDuplicates.LikelyGroups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#40808080" BorderThickness="0,0,0,1" Margin="0,2,0,2" Padding="0,2,0,4">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Header}" FontWeight="SemiBold" Opacity="0.85"/>
+                                        <ItemsControl ItemsSource="{Binding Entries}" Margin="12,2,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,1,0,1">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="90"/>
+                                                            <ColumnDefinition Width="80"/>
+                                                            <ColumnDefinition Width="60"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="{Binding AbsolutePath}" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding ByteSize, Converter={StaticResource ByteSize}}" TextAlignment="Right"/>
+                                                        <TextBlock Grid.Column="2" Text="{Binding Duration, Converter={StaticResource Duration}}" TextAlignment="Right"/>
+                                                        <TextBlock Grid.Column="3" TextAlignment="Right">
+                                                            <Run Text="{Binding Usages.Count, Mode=OneWay}"/><Run Text=" uses"/>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="(none)"
+                               Opacity="0.5" Margin="0,2,0,8"
+                               Visibility="{Binding LibraryDuplicates.LikelyGroups.Count, Converter={x:Static ctl:ZeroToVisibleConverter.Instance}}"/>
+                </StackPanel>
+            </ScrollViewer>
+        </TabItem>
+    </TabControl>
 </UserControl>

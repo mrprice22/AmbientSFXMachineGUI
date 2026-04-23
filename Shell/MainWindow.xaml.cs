@@ -18,7 +18,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        DataContext = new ShellViewModel(App.MachineCoordinator, App.Profiles, App.Hotkeys, App.LibraryHasher, App.AudioLibrary);
+        DataContext = new ShellViewModel(App.MachineCoordinator, App.Profiles, App.Hotkeys, App.LibraryHasher, App.AudioLibrary, App.LibraryDuplicates);
         Loaded += OnLoaded;
         StateChanged += OnStateChanged;
     }
