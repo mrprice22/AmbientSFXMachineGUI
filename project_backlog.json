@@ -783,7 +783,7 @@
       "title": "Drag log entry to soundboard",
       "description": "Log rows are drag sources; the soundboard panel is a drop target. Dropping a log entry creates a new soundboard button for that file.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LOG-01",
         "SB-01"
