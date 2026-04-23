@@ -601,7 +601,7 @@
       "title": "Per-sound cooldown override",
       "description": "Set a minimum re-fire interval on a specific file to prevent back-to-back repeats of annoying sounds.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "SFX-01"
       ],
