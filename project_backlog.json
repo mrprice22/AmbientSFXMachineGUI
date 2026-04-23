@@ -454,7 +454,7 @@
       "title": "Library panel: Unused tab",
       "description": "Lists library entries whose Usages collection is empty. Provides multi-select and a bulk remove-from-library action (does not delete files from disk).",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LIB-04"
       ],

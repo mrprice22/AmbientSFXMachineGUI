@@ -134,5 +134,44 @@
                 </StackPanel>
             </ScrollViewer>
         </TabItem>
+
+        <TabItem>
+            <TabItem.Header>
+                <TextBlock>
+                    <Run Text="Unused"/>
+                    <Run Text=" ("/><Run Text="{Binding UnusedView.Count, Mode=OneWay, FallbackValue=0}"/><Run Text=")"/>
+                </TextBlock>
+            </TabItem.Header>
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="4">
+                    <Button Content="Remove selected from library"
+                            Command="{Binding RemoveUnusedCommand}"
+                            CommandParameter="{Binding SelectedItems, ElementName=UnusedList}"
+                            Padding="8,2"/>
+                    <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" Margin="8,0,4,0"
+                               Opacity="0.7">
+                        <Run Text="{Binding UnusedView.Count, Mode=OneWay, FallbackValue=0}"/><Run Text=" unused files"/>
+                    </TextBlock>
+                    <TextBlock/>
+                </DockPanel>
+                <ListView x:Name="UnusedList"
+                          ItemsSource="{Binding UnusedView}"
+                          SelectionMode="Extended"
+                          VirtualizingStackPanel.IsVirtualizing="True"
+                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                          ScrollViewer.IsDeferredScrollingEnabled="True">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="File" Width="220" DisplayMemberBinding="{Binding FileName}"/>
+                            <GridViewColumn Header="Duration" Width="80"
+                                            DisplayMemberBinding="{Binding Duration, Converter={StaticResource Duration}}"/>
+                            <GridViewColumn Header="Size" Width="90"
+                                            DisplayMemberBinding="{Binding ByteSize, Converter={StaticResource ByteSize}}"/>
+                            <GridViewColumn Header="Path" Width="600" DisplayMemberBinding="{Binding AbsolutePath}"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DockPanel>
+        </TabItem>
     </TabControl>
 </UserControl>

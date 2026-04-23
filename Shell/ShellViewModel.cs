@@ -1,7 +1,11 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -37,6 +41,12 @@ public partial class ShellViewModel : ObservableObject
         LibraryView.Filter = MatchesLibraryFilter;
         LibraryView.SortDescriptions.Add(new SortDescription(nameof(AudioFileEntry.FileName), ListSortDirection.Ascending));
 
+        _unusedView = new CollectionViewSource { Source = AudioLibrary.Entries }.View;
+        _unusedView.Filter = o => o is AudioFileEntry e && e.Usages.Count == 0;
+        _unusedView.SortDescriptions.Add(new SortDescription(nameof(AudioFileEntry.FileName), ListSortDirection.Ascending));
+        ((INotifyCollectionChanged)AudioLibrary.Entries).CollectionChanged += OnLibraryEntriesChanged;
+        foreach (var entry in AudioLibrary.Entries) HookEntry(entry);
+
         if (Machines.Count > 0)
             SelectedMachine = Machines[0];
         Machines.CollectionChanged += (_, _) =>
@@ -50,6 +60,8 @@ public partial class ShellViewModel : ObservableObject
     public AudioLibrary AudioLibrary { get; }
     public LibraryDuplicates LibraryDuplicates { get; }
     public ICollectionView LibraryView { get; }
+    private readonly ICollectionView _unusedView;
+    public ICollectionView UnusedView => _unusedView;
     public ObservableCollection<MachineViewModel> Machines { get; }
     public ObservableCollection<LogEntryViewModel> Log { get; }
     public ObservableCollection<Profile> Profiles { get; }
@@ -68,6 +80,26 @@ public partial class ShellViewModel : ObservableObject
     [ObservableProperty] private bool _isEditMode;
 
     partial void OnLibraryFilterChanged(string value) => LibraryView.Refresh();
+
+    private void OnLibraryEntriesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.OldItems != null)
+            foreach (AudioFileEntry entry in e.OldItems) UnhookEntry(entry);
+        if (e.NewItems != null)
+            foreach (AudioFileEntry entry in e.NewItems) HookEntry(entry);
+    }
+
+    private void HookEntry(AudioFileEntry entry) => entry.UsagesChanged += OnEntryUsagesChanged;
+    private void UnhookEntry(AudioFileEntry entry) => entry.UsagesChanged -= OnEntryUsagesChanged;
+    private void OnEntryUsagesChanged(object? sender, EventArgs e) => _unusedView.Refresh();
+
+    [RelayCommand]
+    private void RemoveUnused(IList? selected)
+    {
+        if (selected is null || selected.Count == 0) return;
+        var targets = selected.OfType<AudioFileEntry>().ToList();
+        foreach (var entry in targets) AudioLibrary.RemoveEntry(entry);
+    }
 
     private bool MatchesLibraryFilter(object obj)
     {

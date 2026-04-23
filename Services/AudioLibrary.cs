@@ -75,6 +75,22 @@ public sealed class AudioLibrary
         }
     }
 
+    /// <summary>
+    /// Removes an entry from the library. No-op if the entry still has usages — callers
+    /// should surface the unused-only rule in the UI rather than letting this silently skip.
+    /// Does not touch the file on disk.
+    /// </summary>
+    public bool RemoveEntry(AudioFileEntry entry)
+    {
+        lock (_lock)
+        {
+            if (entry.Usages.Count > 0) return false;
+            _byPath.Remove(entry.AbsolutePath);
+            if (!string.IsNullOrEmpty(entry.Sha256)) _byHash.Remove(entry.Sha256);
+            return _entries.Remove(entry);
+        }
+    }
+
     /// <summary>Attach the coordinator so we observe every current and future machine.</summary>
     public void Attach(MachineCoordinator coordinator)
     {

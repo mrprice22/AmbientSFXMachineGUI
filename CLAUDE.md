@@ -97,6 +97,7 @@ When a story is fully implemented and working:
 3. Commit both the implementation and the updated `project_backlog.json` together.
 4. Output a completion line in this exact format (no word wrap — one line only):
    `<StoryId>: <git-commit-friendly summary of what changed>`
+5. Do not attempt to actually run GIT commit, just prep a message for it per step 4 (the user will review and commit manually)
 
 **Never mark a story done if:**
 - The code compiles but hasn't been tested against the test data
