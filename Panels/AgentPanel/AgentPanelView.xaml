@@ -53,6 +53,24 @@
                                 <ToggleButton DockPanel.Dock="Right" Content="On"
                                               IsChecked="{Binding IsEnabled}"
                                               MinWidth="44" Margin="6,0,0,0"/>
+                                <ToggleButton DockPanel.Dock="Right" IsChecked="{Binding IsPinned}"
+                                              Width="22" Height="22" Padding="0" Margin="6,0,0,0"
+                                              Background="Transparent" BorderThickness="0"
+                                              ToolTip="Pin: lock enabled state and volume so profile swaps don't affect this agent">
+                                    <TextBlock Text="📌" FontSize="12"
+                                               VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Opacity" Value="0.3"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsPinned}" Value="True">
+                                                        <Setter Property="Opacity" Value="1.0"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </ToggleButton>
                                 <Border DockPanel.Dock="Right" CornerRadius="3"
                                         Padding="6,2" Margin="4,0,0,0"
                                         Visibility="{Binding IsInTurboMode, Converter={StaticResource BoolToVis}}">

@@ -875,7 +875,7 @@
       "title": "Pin agent to exclude from profile swaps",
       "description": "Pin toggle on an agent card to lock its enabled state and volume so profile hot-swaps do not affect it. Stored in the pinnedAgents list within the active profile JSON.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "AGENT-01",
         "PROF-02"
