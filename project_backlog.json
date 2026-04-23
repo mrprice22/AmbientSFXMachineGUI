@@ -629,7 +629,7 @@
       "title": "Session usage heatmap per sound",
       "description": "Visual indicator (dot intensity or play count badge) on each file row showing how many times it has fired this session.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "SFX-01",
         "LOG-01"

@@ -7,6 +7,7 @@
              DragEnter="OnDragEnter" DragOver="OnDragOver" DragLeave="OnDragLeave" Drop="OnDrop">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <controls:PlayCountHeatConverter x:Key="HeatConverter"/>
     </UserControl.Resources>
     <Grid>
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -136,13 +137,35 @@
                                                 </Grid.Style>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
                                                 <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled}"
                                                           VerticalAlignment="Center" Margin="0,0,6,0"
                                                           ToolTip="Include this file in playback selection"/>
-                                                <TextBlock Grid.Column="1" Text="{Binding FileName}"
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                                            VerticalAlignment="Center" Margin="0,0,6,0"
+                                                            ToolTip="{Binding PlayCountThisSession, StringFormat=Played {0} time(s) this session}">
+                                                    <Ellipse Width="8" Height="8" VerticalAlignment="Center"
+                                                             Fill="{Binding PlayCountThisSession, Converter={StaticResource HeatConverter}}"/>
+                                                    <TextBlock Text="{Binding PlayCountThisSession}"
+                                                               FontSize="9" Foreground="#CCC" FontWeight="Bold"
+                                                               VerticalAlignment="Center" Margin="3,0,0,0"
+                                                               MinWidth="12">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding PlayCountThisSession}" Value="0">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="2" Text="{Binding FileName}"
                                                            VerticalAlignment="Center"
                                                            TextTrimming="CharacterEllipsis"
                                                            ToolTip="{Binding FilePath}">
@@ -157,7 +180,7 @@
                                                         </Style>
                                                     </TextBlock.Style>
                                                 </TextBlock>
-                                                <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal"
                                                             VerticalAlignment="Center" Margin="6,0,0,0">
                                                     <StackPanel.Style>
                                                         <Style TargetType="StackPanel">
