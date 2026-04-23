@@ -456,6 +456,23 @@ public partial class ShellViewModel : ObservableObject
         finally { _suppressProfileApply = false; }
     }
 
+    [RelayCommand]
+    private void AuditionProfile()
+    {
+        if (SelectedMachine is null) return;
+        if (_profileService.Profiles.Count == 0) return;
+        var window = new ProfileAuditionWindow(
+            _profileService,
+            _hotkeys,
+            SelectedMachine,
+            _profileService.Profiles,
+            ActiveProfile ?? _profileService.Profiles[0])
+        {
+            Owner = System.Windows.Application.Current.MainWindow,
+        };
+        window.ShowDialog();
+    }
+
     private MiniModeWindow? _miniWindow;
 
     [RelayCommand]

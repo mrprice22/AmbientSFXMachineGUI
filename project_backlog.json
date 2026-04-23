@@ -861,7 +861,7 @@
       "title": "Profile audition / preview",
       "description": "Hold-to-preview button that temporarily applies a profile's audio settings for a configurable duration (default 30s), then auto-reverts to the previous state.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "PROF-02"
       ],

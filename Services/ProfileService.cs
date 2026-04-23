@@ -60,6 +60,13 @@ public sealed class ProfileService
 
     public void Apply(MachineViewModel machine, HotkeyService hotkeys, Profile profile)
     {
+        ApplyCore(machine, hotkeys, profile);
+        ActiveProfile = profile;
+        ProfileChanged?.Invoke(this, profile);
+    }
+
+    private static void ApplyCore(MachineViewModel machine, HotkeyService hotkeys, Profile profile)
+    {
         machine.MasterVolume = profile.MachineMasterVolume;
 
         var agentStates = profile.Agents.ToDictionary(a => a.Name, StringComparer.OrdinalIgnoreCase);
@@ -102,9 +109,6 @@ public sealed class ProfileService
         }
 
         hotkeys.ApplyMachineBindings(machine.Id, profile.Hotkeys ?? new Dictionary<string, string?>());
-
-        ActiveProfile = profile;
-        ProfileChanged?.Invoke(this, profile);
     }
 
     public static Profile BuildFromMachine(MachineViewModel machine, HotkeyService hotkeys, string name)
@@ -198,10 +202,44 @@ public sealed class ProfileService
         return diff;
     }
 
-    public IDisposable Audition(Profile profile, TimeSpan duration)
+    public AuditionHandle Audition(MachineViewModel machine, HotkeyService hotkeys, Profile profile, TimeSpan duration)
     {
-        // TODO (PROF-05): snapshot current state, apply profile, schedule revert after duration.
-        throw new NotImplementedException();
+        var snapshot = BuildFromMachine(machine, hotkeys, "__audition__");
+        ApplyCore(machine, hotkeys, profile);
+        return new AuditionHandle(machine, hotkeys, snapshot, duration);
+    }
+
+    public sealed class AuditionHandle : IDisposable
+    {
+        private readonly MachineViewModel _machine;
+        private readonly HotkeyService _hotkeys;
+        private readonly Profile _snapshot;
+        private readonly System.Windows.Threading.DispatcherTimer? _timer;
+        private bool _reverted;
+
+        public event EventHandler? Reverted;
+
+        internal AuditionHandle(MachineViewModel machine, HotkeyService hotkeys, Profile snapshot, TimeSpan duration)
+        {
+            _machine = machine;
+            _hotkeys = hotkeys;
+            _snapshot = snapshot;
+            if (duration > TimeSpan.Zero)
+            {
+                _timer = new System.Windows.Threading.DispatcherTimer { Interval = duration };
+                _timer.Tick += (_, _) => Dispose();
+                _timer.Start();
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_reverted) return;
+            _reverted = true;
+            _timer?.Stop();
+            ApplyCore(_machine, _hotkeys, _snapshot);
+            Reverted?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private static string SanitizeFileName(string name)

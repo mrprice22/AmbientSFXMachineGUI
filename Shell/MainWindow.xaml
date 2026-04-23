@@ -28,6 +28,8 @@
                           DisplayMemberPath="Name"/>
                 <Button Content="Save" Command="{Binding QuickSaveProfileCommand}"
                         ToolTip="Quick-save current state as a named profile"/>
+                <Button Content="Audition" Command="{Binding AuditionProfileCommand}"
+                        ToolTip="Hold-to-preview a profile; auto-reverts on release or timeout"/>
                 <Separator/>
                 <TextBox Width="200" Tag="Search sounds..."
                          Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"/>
