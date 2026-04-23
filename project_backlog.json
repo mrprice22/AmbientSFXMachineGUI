@@ -721,7 +721,7 @@
       "title": "Add to favorites from playback log",
       "description": "One-click star button on a log entry adds the sound to the soundboard without file browsing.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "SB-01",
         "LOG-01"

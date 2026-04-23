@@ -12,6 +12,22 @@
                   ScrollViewer.IsDeferredScrollingEnabled="False">
             <ListView.View>
                 <GridView>
+                    <GridViewColumn Header="" Width="28">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="★"
+                                        Padding="0" Margin="0"
+                                        BorderThickness="0"
+                                        Background="Transparent"
+                                        Foreground="#C8A227"
+                                        FontSize="14"
+                                        ToolTip="Add to Soundboard"
+                                        Command="{Binding DataContext.AddLogEntryToSoundboardCommand,
+                                                          RelativeSource={RelativeSource AncestorType=ListView}}"
+                                        CommandParameter="{Binding}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                     <GridViewColumn Header="Time"  Width="90"  DisplayMemberBinding="{Binding Timestamp, StringFormat=HH:mm:ss}"/>
                     <GridViewColumn Header="Agent" Width="120" DisplayMemberBinding="{Binding AgentName}"/>
                     <GridViewColumn Header="File"  Width="320" DisplayMemberBinding="{Binding FileName}"/>
