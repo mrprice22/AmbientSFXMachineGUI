@@ -105,11 +105,25 @@
                                                                               Command="{Binding DataContext.SelectLibraryEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                               CommandParameter="{Binding}"/>
                                                             </Grid.InputBindings>
+                                                            <Grid.ContextMenu>
+                                                                <ContextMenu>
+                                                                    <MenuItem Header="Make canonical — merge others here"
+                                                                              Command="{Binding PlacementTarget.Tag.MergeDuplicatesCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                              CommandParameter="{Binding}"/>
+                                                                    <MenuItem Header="Add to agents…"
+                                                                              Command="{Binding PlacementTarget.Tag.AddLibraryEntryToAgentsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                              CommandParameter="{Binding}"/>
+                                                                </ContextMenu>
+                                                            </Grid.ContextMenu>
+                                                            <Grid.Tag>
+                                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                                                            </Grid.Tag>
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="*"/>
                                                                 <ColumnDefinition Width="90"/>
                                                                 <ColumnDefinition Width="80"/>
                                                                 <ColumnDefinition Width="60"/>
+                                                                <ColumnDefinition Width="Auto"/>
                                                             </Grid.ColumnDefinitions>
                                                             <TextBlock Grid.Column="0" Text="{Binding AbsolutePath}" TextTrimming="CharacterEllipsis"/>
                                                             <TextBlock Grid.Column="1" Text="{Binding ByteSize, Converter={StaticResource ByteSize}}" TextAlignment="Right"/>
@@ -117,6 +131,11 @@
                                                             <TextBlock Grid.Column="3" TextAlignment="Right">
                                                                 <Run Text="{Binding Usages.Count, Mode=OneWay}"/><Run Text=" uses"/>
                                                             </TextBlock>
+                                                            <Button Grid.Column="4" Content="Make canonical"
+                                                                    Margin="6,0,0,0" Padding="6,1"
+                                                                    Command="{Binding DataContext.MergeDuplicatesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                    CommandParameter="{Binding}"
+                                                                    ToolTip="Make this the canonical entry — rewrite every agent reference to the other group members so they point here."/>
                                                         </Grid>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
@@ -147,11 +166,25 @@
                                                                               Command="{Binding DataContext.SelectLibraryEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                               CommandParameter="{Binding}"/>
                                                             </Grid.InputBindings>
+                                                            <Grid.ContextMenu>
+                                                                <ContextMenu>
+                                                                    <MenuItem Header="Make canonical — merge others here"
+                                                                              Command="{Binding PlacementTarget.Tag.MergeDuplicatesCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                              CommandParameter="{Binding}"/>
+                                                                    <MenuItem Header="Add to agents…"
+                                                                              Command="{Binding PlacementTarget.Tag.AddLibraryEntryToAgentsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                              CommandParameter="{Binding}"/>
+                                                                </ContextMenu>
+                                                            </Grid.ContextMenu>
+                                                            <Grid.Tag>
+                                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                                                            </Grid.Tag>
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="*"/>
                                                                 <ColumnDefinition Width="90"/>
                                                                 <ColumnDefinition Width="80"/>
                                                                 <ColumnDefinition Width="60"/>
+                                                                <ColumnDefinition Width="Auto"/>
                                                             </Grid.ColumnDefinitions>
                                                             <TextBlock Grid.Column="0" Text="{Binding AbsolutePath}" TextTrimming="CharacterEllipsis"/>
                                                             <TextBlock Grid.Column="1" Text="{Binding ByteSize, Converter={StaticResource ByteSize}}" TextAlignment="Right"/>
@@ -159,6 +192,11 @@
                                                             <TextBlock Grid.Column="3" TextAlignment="Right">
                                                                 <Run Text="{Binding Usages.Count, Mode=OneWay}"/><Run Text=" uses"/>
                                                             </TextBlock>
+                                                            <Button Grid.Column="4" Content="Make canonical"
+                                                                    Margin="6,0,0,0" Padding="6,1"
+                                                                    Command="{Binding DataContext.MergeDuplicatesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                    CommandParameter="{Binding}"
+                                                                    ToolTip="Make this the canonical entry — rewrite every agent reference to the other group members so they point here."/>
                                                         </Grid>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>

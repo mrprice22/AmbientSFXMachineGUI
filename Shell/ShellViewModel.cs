@@ -157,6 +157,67 @@ public partial class ShellViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void MergeDuplicates(AudioFileEntry? canonical)
+    {
+        if (canonical is null) return;
+        var group = LibraryDuplicates.ExactGroups.FirstOrDefault(g => g.Entries.Contains(canonical))
+                 ?? LibraryDuplicates.LikelyGroups.FirstOrDefault(g => g.Entries.Contains(canonical));
+        if (group is null) return;
+
+        var others = group.Entries.Where(e => e != canonical).ToList();
+        if (others.Count == 0) return;
+        var affected = others.Sum(e => e.Usages.Count);
+
+        var result = System.Windows.MessageBox.Show(
+            $"Merge {others.Count} duplicate entr{(others.Count == 1 ? "y" : "ies")} " +
+            $"({affected} agent reference{(affected == 1 ? "" : "s")}) into:\n\n" +
+            $"{canonical.AbsolutePath}\n\n" +
+            "Every agent that references one of the others will be updated to reference the canonical file. " +
+            "Files on disk are not touched.",
+            "Merge Duplicates",
+            System.Windows.MessageBoxButton.OKCancel,
+            System.Windows.MessageBoxImage.Question);
+        if (result != System.Windows.MessageBoxResult.OK) return;
+
+        foreach (var other in others)
+        {
+            foreach (var usage in other.Usages.ToList())
+            {
+                var machine = Machines.FirstOrDefault(m => m.Id == usage.MachineId);
+                var agent = machine?.Agents.FirstOrDefault(a => a.Id == usage.AgentId);
+                if (agent is null) continue;
+
+                bool canonicalAlreadyPresent = agent.Files.Any(f =>
+                    string.Equals(f.FilePath, canonical.AbsolutePath, StringComparison.OrdinalIgnoreCase));
+
+                for (int i = agent.Files.Count - 1; i >= 0; i--)
+                {
+                    if (!string.Equals(agent.Files[i].FilePath, other.AbsolutePath, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (canonicalAlreadyPresent)
+                    {
+                        agent.Files.RemoveAt(i);
+                    }
+                    else
+                    {
+                        var old = agent.Files[i];
+                        agent.Files[i] = new SoundFileViewModel(canonical.AbsolutePath)
+                        {
+                            IsEnabled = old.IsEnabled,
+                            VolumeOverride = old.VolumeOverride,
+                            CooldownOverrideSeconds = old.CooldownOverrideSeconds,
+                            IsFavorite = old.IsFavorite,
+                        };
+                        canonicalAlreadyPresent = true;
+                    }
+                }
+                agent.FileCount = agent.Files.Count;
+            }
+        }
+    }
+
+    [RelayCommand]
     private void RemoveUnused(IList? selected)
     {
         if (selected is null || selected.Count == 0) return;

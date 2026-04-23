@@ -513,7 +513,7 @@
       "title": "Merge duplicates action",
       "description": "In a duplicates group, select a canonical library entry and rewrite every agent reference that points at any other member of the group to point at the canonical one. Non-canonical entries become unused and appear in the Unused tab for optional cleanup.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "LIB-05",
         "LIB-07"
