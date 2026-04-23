@@ -571,7 +571,7 @@
       "title": "Per-sound enable/disable toggle",
       "description": "Expand an agent card to reveal its file list. Each file has an enable/disable toggle preventing it from being selected during playback.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "AGENT-01"
       ],

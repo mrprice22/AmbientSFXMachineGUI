@@ -20,8 +20,26 @@
                             DragLeave="OnAgentCardDragLeave"
                             Drop="OnAgentCardDrop">
                         <StackPanel>
-                            <!-- Header row: name, mode badge, turbo badge, enable toggle -->
+                            <!-- Header row: chevron, name, mode badge, turbo badge, enable toggle -->
                             <DockPanel LastChildFill="True">
+                                <ToggleButton DockPanel.Dock="Left" IsChecked="{Binding IsExpanded}"
+                                              Width="20" Height="20" Margin="0,0,6,0" Padding="0"
+                                              Background="Transparent" BorderThickness="0"
+                                              ToolTip="Show files">
+                                    <TextBlock FontSize="10" VerticalAlignment="Center"
+                                               HorizontalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="▶"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                        <Setter Property="Text" Value="▼"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </ToggleButton>
                                 <ToggleButton DockPanel.Dock="Right" Content="On"
                                               IsChecked="{Binding IsEnabled}"
                                               MinWidth="44" Margin="6,0,0,0"/>
@@ -90,6 +108,37 @@
                                 <Button DockPanel.Dock="Right" Content="Config"
                                         Command="{Binding OpenConfigEditorCommand}"/>
                             </DockPanel>
+
+                            <!-- Expanded file list -->
+                            <Border Margin="0,6,0,0" Padding="6" Background="#1A1A1A" CornerRadius="3"
+                                    Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
+                                <ItemsControl ItemsSource="{Binding Files}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <DockPanel Margin="0,1" LastChildFill="True">
+                                                <CheckBox DockPanel.Dock="Left" IsChecked="{Binding IsEnabled}"
+                                                          VerticalAlignment="Center" Margin="0,0,6,0"
+                                                          ToolTip="Include this file in playback selection"/>
+                                                <TextBlock Text="{Binding FileName}"
+                                                           VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTip="{Binding FilePath}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Opacity" Value="1.0"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                                                                    <Setter Property="Opacity" Value="0.45"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </DockPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
                         </StackPanel>
                     </Border>
                 </DataTemplate>
