@@ -1113,7 +1113,7 @@
       "title": "Agents produce no audio when enabled or on Force Play",
       "description": "After importing a machine, no sound is ever heard. The agent 'On' toggle is blue (IsEnabled true) and clicking 'Force Play' on an agent row also produces no audio. Debug Log / Live Log may or may not record playback decisions — verify both paths. Expected: toggling an agent On should schedule playback per its mode/interval and emit audio via the playback engine; Force Play should immediately pick a file and play it through the output device. Investigate: (a) whether AgentViewModel/AgentCoordinator scheduler actually fires, (b) whether MachineCoordinator routes playback to the audio engine, (c) whether the NAudio (or equivalent) output device is initialized, (d) master/per-agent volume multiplication isn't collapsing to 0, (e) file paths resolved from the imported machine actually exist on disk. Confirm a regression window by testing a previously-known-good build if needed.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [],
       "references": [
         "Â§5.2 Agent Management",
