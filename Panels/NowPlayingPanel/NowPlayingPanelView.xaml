@@ -77,8 +77,8 @@
                                     </DockPanel>
                                     <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" Opacity="0.8"/>
                                     <ProgressBar Minimum="0"
-                                                 Maximum="{Binding Duration.TotalMilliseconds}"
-                                                 Value="{Binding Position.TotalMilliseconds}"
+                                                 Maximum="{Binding Duration.TotalMilliseconds, Mode=OneWay}"
+                                                 Value="{Binding Position.TotalMilliseconds, Mode=OneWay}"
                                                  Height="6" Margin="0,4,0,2"/>
                                     <DockPanel LastChildFill="False">
                                         <TextBlock DockPanel.Dock="Left"

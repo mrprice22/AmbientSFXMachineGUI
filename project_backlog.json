@@ -1122,6 +1122,20 @@
       ]
     },
     {
+      "id": "S-BUG-005",
+      "feature": "F07_NOW",
+      "title": "Now Playing panel crashes app on first activation (TwoWay binding to TimeSpan.TotalMilliseconds)",
+      "description": "After S-BUG-004, audio plays as expected, but clicking the pinned 'Now Playing' tab in the bottom dock crashes the app. Captured stack from %AppData%\\AmbientAgents\\logs: 'A TwoWay or OneWayToSource binding cannot work on the read-only property TotalMilliseconds of type System.TimeSpan' raised from XamlParseException during the panel's first measure pass. Cause: Panels/NowPlayingPanel/NowPlayingPanelView.xaml binds ProgressBar.Value to {Binding Position.TotalMilliseconds} without Mode=OneWay; ProgressBar inherits RangeBase.Value which has FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, so WPF tries to write back to TimeSpan.TotalMilliseconds (read-only) and throws on first render. Fix: explicitly set Mode=OneWay on the ProgressBar Value and Maximum bindings (and on any other read-only-target bindings in the panel).",
+      "priority": "high",
+      "status": "done",
+      "dependencies": [
+        "NOW-01"
+      ],
+      "references": [
+        "Â§5.5 Now Playing Panel"
+      ]
+    },
+    {
       "id": "SB-05",
       "feature": "F08_SB",
       "title": "Soundboard 'Stop All' button stops only soundboard-triggered sounds",
