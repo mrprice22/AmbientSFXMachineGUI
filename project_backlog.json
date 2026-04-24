@@ -1106,6 +1106,36 @@
         "Â§5.2 Agent Management",
         "Â§5.8 Machine Management"
       ]
+    },
+    {
+      "id": "S-BUG-004",
+      "feature": "F02_AGENTS",
+      "title": "Agents produce no audio when enabled or on Force Play",
+      "description": "After importing a machine, no sound is ever heard. The agent 'On' toggle is blue (IsEnabled true) and clicking 'Force Play' on an agent row also produces no audio. Debug Log / Live Log may or may not record playback decisions — verify both paths. Expected: toggling an agent On should schedule playback per its mode/interval and emit audio via the playback engine; Force Play should immediately pick a file and play it through the output device. Investigate: (a) whether AgentViewModel/AgentCoordinator scheduler actually fires, (b) whether MachineCoordinator routes playback to the audio engine, (c) whether the NAudio (or equivalent) output device is initialized, (d) master/per-agent volume multiplication isn't collapsing to 0, (e) file paths resolved from the imported machine actually exist on disk. Confirm a regression window by testing a previously-known-good build if needed.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": [],
+      "references": [
+        "Â§5.2 Agent Management",
+        "Â§6 Playback Engine",
+        "Â§5.5 Now Playing Panel"
+      ]
+    },
+    {
+      "id": "SB-05",
+      "feature": "F08_SB",
+      "title": "Soundboard 'Stop All' button stops only soundboard-triggered sounds",
+      "description": "Add a 'Stop All' button to the Soundboard panel toolbar that immediately stops every sound that was triggered manually via the soundboard (button click or assigned hotkey) without affecting sounds currently playing from normal agent/machine scheduling or Force Play. Implementation notes: tag each playback started by the soundboard with a source marker (e.g. PlaybackSource.Soundboard) when it enters the active-playback list; the Stop All command iterates ActivePlaybacks and stops only entries whose source == Soundboard; agent-scheduled and Force Play entries remain untouched. DebugLog.LogUser records the action with count stopped. Button should be disabled when no soundboard-sourced sounds are currently playing.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": [
+        "SB-01"
+      ],
+      "references": [
+        "Â§5.6 Soundboard / Favorites",
+        "Â§5.5 Now Playing Panel",
+        "Â§6 Playback Engine"
+      ]
     }
   ]
 }
