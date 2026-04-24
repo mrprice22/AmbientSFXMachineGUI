@@ -276,9 +276,9 @@
       "id": "MACHINE-04",
       "feature": "F03_MACHINE",
       "title": "Import existing console-app machine folder",
-      "description": "File > Import Machine picker that accepts a directory containing appSettings.config and snd/. Reads appName and icon from appSettings.config, then scans snd/<agent>/*.config to materialize AgentViewModels. References the folder in place (no copying). Validate against C:\\Users\\homel\\OneDrive\\Projects\\SpookyAudioMachine, ThursdayGameNightAudioSFX, and ThursdayPacmanAudioSFX.",
+      "description": "File > Import Machine picker that accepts a directory containing appSettings.config and snd/. Reads appName and icon from appSettings.config, then scans snd/<agent>/*.config to materialize AgentViewModels. References the folder in place (no copying). Validate against C:\\Users\\homel\\OneDrive\\Projects\\SpookyAudioMachine, ThursdayGameNightAudioSFX, and ThursdayPacmanAudioSFX. Validation/error-handling scope (added during testing): reject folders that are not a valid machine root with a clear, non-modal GUI error explaining what is missing — specifically detect and message the common mistake of selecting the snd/ subfolder instead of the machine root (i.e. the picked folder IS named 'snd' OR lacks appSettings.config but contains agent-style subfolders with .config files) and suggest 'select the parent folder instead'. Other rejection cases: missing appSettings.config, missing snd/ subfolder, snd/ has no agent subfolders, appSettings.config unreadable/malformed. On rejection: do NOT add a partial/broken MachineViewModel to the coordinator (this is what produced the iconless 'snd' ghost machine), do not persist anything, and surface the error both via a non-blocking toast/dialog and DebugLog.LogError. Re-importing the same valid machine root should be idempotent (match on RootPath) rather than creating a duplicate.",
       "priority": "high",
-      "status": "done",
+      "status": "in_progress",
       "dependencies": [
         "MACHINE-01"
       ],
@@ -960,6 +960,151 @@
       "references": [
         "Â§5.8 Machine Management",
         "Â§3.1 Machine concept (disable behavior)"
+      ]
+    },
+    {
+      "id": "MACHINE-13",
+      "feature": "F03_MACHINE",
+      "title": "Tray submenu: Close (unload) machine action",
+      "description": "Extend the per-machine system tray submenu (added by MACHINE-09) with a 'Close machine' entry that unloads the machine from the running app — stops its agents, removes it from MachineCoordinator, and drops its tray submenu. This is the unload-from-session counterpart to MACHINE-07 (Remove machine, which also unlinks from the persisted index); Close should keep the machine in the recent/previously-loaded list (see MACHINE-15) so it can be re-imported later with one click. Confirm via a lightweight tray-balloon or inline submenu prompt rather than a modal. Also surfaces the same issue encountered during testing: a broken 'snd' pseudo-machine (see MACHINE-04 validation) currently shows in the tray with no icon and cannot be removed — this story must ensure Close works even for degraded/iconless entries.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": [
+        "MACHINE-09",
+        "MACHINE-07"
+      ],
+      "references": [
+        "Â§5.8 Machine Management — Per-machine tray submenu",
+        "Â§5.1 Core Shell — SHELL-02"
+      ]
+    },
+    {
+      "id": "MACHINE-14",
+      "feature": "F03_MACHINE",
+      "title": "Audio Machines dockable window — shell and loaded machines section",
+      "description": "Add a new dockable panel titled 'Audio Machines' that becomes the central hub for machine lifecycle management (parallel to the Library panel for files). This story delivers the panel shell plus the 'Loaded' section: a list/grid of currently loaded MachineViewModels rendered with a green-tinted background to indicate active state. Each row shows icon, machine name, a 'Close' button that unloads the machine (same semantics as MACHINE-13), and a stats line 'N agents · M enabled' computed from MachineViewModel.Agents (total count and count where IsEnabled==true, updating live via INotifyPropertyChanged on each agent). The panel header has a toolbar area reserved for the buttons delivered by MACHINE-16 (Create) and MACHINE-18 (Unload all). Dock defaults to the left or right side alongside the Machines rail; layout persists via the existing AvalonDock layout.xml.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": [
+        "MACHINE-02",
+        "MACHINE-04",
+        "SHELL-01"
+      ],
+      "references": [
+        "Â§5.8 Machine Management",
+        "Â§4 Panel Layout System"
+      ]
+    },
+    {
+      "id": "MACHINE-15",
+      "feature": "F03_MACHINE",
+      "title": "Audio Machines window — previously loaded / recent machines section",
+      "description": "Add a 'Recent' (a.k.a. previously loaded) section to the Audio Machines panel (MACHINE-14) rendered with a gray-tinted background. Source: a new persisted recent-machines list at %AppData%\\AmbientAgents\\recent-machines.json capturing each machine that has ever been loaded (RootPath, last known name, iconPath, lastLoadedAt, lastKnownAgentCount). Updated on every successful import (MACHINE-04) and on Close (MACHINE-13). Each row shows icon, name, 'Last loaded: <date>', stats line 'Had N agents last session', a primary 'Load' button that re-imports via MachineImporter using the stored RootPath, and a 'Forget' button that removes the entry from recent-machines.json (does not touch files on disk). If the stored RootPath no longer exists on disk, mark the row with a warning glyph and disable the Load button but keep Forget enabled.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": [
+        "MACHINE-14",
+        "MACHINE-08"
+      ],
+      "references": [
+        "Â§5.8 Machine Management",
+        "Â§8 Persistence"
+      ]
+    },
+    {
+      "id": "MACHINE-16",
+      "feature": "F03_MACHINE",
+      "title": "Audio Machines window — Create new machine action",
+      "description": "Add a 'Create new machine' button to the Audio Machines panel toolbar (MACHINE-14). Clicking opens a dialog that prompts for: (1) machine name (required, validated non-empty and filesystem-safe), (2) parent directory to host the new machine folder (FolderBrowserDialog, required), (3) icon file — an OpenFileDialog filtered to .ico/.png/.exe/.dll whose InitialDirectory defaults to %SystemRoot%\\System32 (Windows system icons folder) for convenient browsing of system icons. On confirm, the app creates <parent>\\<name>\\ with an empty snd\\ subfolder and a minimal appSettings.config, then imports the newly created machine via the same MachineImporter path used by MACHINE-04 so it immediately appears in the Loaded section. Icon handling (IMPORTANT — do not just store the source path): the chosen icon file must be *copied into the new machine's folder* so the machine stays self-contained and survives the source being moved/deleted. Copy rules by extension: (a) .ico or .png — File.Copy into <machineRoot>\\icon.<ext>; (b) .exe or .dll — cannot be used as an icon directly because PE binaries carry icons as embedded Win32 resources, not as image bytes, so the app must extract the icon and write it as a real .ico inside the machine folder: use System.Drawing.Icon.ExtractAssociatedIcon(sourcePath) for the default associated icon, or ExtractIconEx via P/Invoke (shell32.dll) if selecting a specific resource index is desired, then icon.Save(targetStream) to <machineRoot>\\icon.ico. If extraction returns null or fails, show a clear error and leave the machine iconless rather than storing a broken reference. In all cases appSettings.config's icon field stores a path *relative to machineRoot* (e.g. 'icon.ico'). Overlaps in intent with MACHINE-05 (Create new empty machine); this story is the Audio-Machines-panel entry point and should reuse the MACHINE-05 creation logic, and MACHINE-05 should be extended with the same copy-and-extract icon rules if it does not already do so.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": [
+        "MACHINE-14",
+        "MACHINE-05"
+      ],
+      "references": [
+        "Â§5.8 Machine Management — Create machine"
+      ]
+    },
+    {
+      "id": "MACHINE-17",
+      "feature": "F03_MACHINE",
+      "title": "Audio Machines window — edit loaded machine (name, icon)",
+      "description": "Add an 'Edit' action to each Loaded row in the Audio Machines panel (MACHINE-14) that opens a dialog to change the machine's display name and icon path. Persist changes to the machine's appSettings.config on disk AND to the %AppData% machine index (MACHINE-08). Because the library/soundboard/profile layers key some records by machine name/id, the rename path must cascade: update every library usage's machine-display-name, soundboard/profile folder under %AppData%\\AmbientAgents\\machines\\<id>\\ (rename directory if id-derived-from-name, else leave id stable and just update display name), and any hotkey binding labels that embed the machine name. Call out in the story's acceptance criteria that icon changes are purely cosmetic but a rename touches library/mapping and must not orphan sound file usages. Overlaps with MACHINE-06 (Rename/change icon/reorder machines); this is the Audio-Machines-panel entry point and should reuse MACHINE-06 logic.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": [
+        "MACHINE-14",
+        "MACHINE-06",
+        "LIB-01"
+      ],
+      "references": [
+        "Â§5.8 Machine Management — Rename / change icon / reorder"
+      ]
+    },
+    {
+      "id": "MACHINE-18",
+      "feature": "F03_MACHINE",
+      "title": "Audio Machines window — Unload all machines button",
+      "description": "Add an 'Unload all' button to the Audio Machines panel toolbar (MACHINE-14) that closes every currently loaded machine in one action (per-machine unload uses the same path as MACHINE-13). Prompt once for confirmation since this is a bulk, non-destructive but disruptive action. After unload, all machines appear in the Recent section (MACHINE-15) and must be re-imported via File > Import Machine or the Recent section's Load button to become active again. No on-disk files are touched.",
+      "priority": "low",
+      "status": "backlog",
+      "dependencies": [
+        "MACHINE-14",
+        "MACHINE-13"
+      ],
+      "references": [
+        "Â§5.8 Machine Management"
+      ]
+    },
+    {
+      "id": "AGENT-12",
+      "feature": "F02_AGENTS",
+      "title": "Rename agent within a machine",
+      "description": "Add a 'Rename' action to the agent card (context menu and/or inline edit on the name label) that changes the agent's display name and its on-disk folder name under <machineRoot>\\snd\\<agent>\\. Renaming the folder requires rewriting every library usage that references files under the old path (AudioLibrary.Usages entries + any file-override paths stored in profiles and soundboard items under %AppData%\\AmbientAgents\\machines\\<id>\\). Acceptance criteria: (1) rename is rejected with a clear error if the target folder name already exists or is filesystem-invalid; (2) any currently playing sound from that agent is stopped gracefully before the folder rename; (3) library/soundboard/profile mappings are rewritten atomically so no reference is orphaned; (4) DebugLog.LogUser records the rename with old → new names.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": [
+        "AGENT-01",
+        "LIB-01",
+        "MACHINE-10"
+      ],
+      "references": [
+        "Â§5.2 Agent Management",
+        "Â§3.2 Audio Library (Usages)",
+        "Â§8 Persistence"
+      ]
+    },
+    {
+      "id": "AGENT-13",
+      "feature": "F02_AGENTS",
+      "title": "Reorder agents within a machine",
+      "description": "Allow the user to reorder agent cards within a machine via drag-and-drop on the card header (or up/down buttons as fallback). Order is persisted per-machine to the machine index JSON under %AppData%\\AmbientAgents\\machines\\<id>.json (new 'agentOrder' field: array of agent folder names). On import, if agentOrder is absent or contains stale entries, fall back to alphabetical order and reconcile. Ordering is purely presentational and must not affect scheduling, cooldowns, or library references.",
+      "priority": "low",
+      "status": "backlog",
+      "dependencies": [
+        "AGENT-01",
+        "MACHINE-08"
+      ],
+      "references": [
+        "Â§5.2 Agent Management",
+        "Â§8 Persistence"
+      ]
+    },
+    {
+      "id": "AGENT-14",
+      "feature": "F02_AGENTS",
+      "title": "Create new agent within a machine",
+      "description": "Add a 'New agent' action on the machine header (in the Machines rail and/or Audio Machines window) that creates a new agent inside that machine. Dialog prompts for agent name (required, filesystem-safe, unique within the machine's snd\\). On confirm, create <machineRoot>\\snd\\<name>\\ and a minimal <name>.config populated with sensible defaults (same defaults MachineImporter expects: mode, min/max interval, volume, balance). The new agent appears live in the agent panel as an empty-file AgentViewModel ready to accept drag-drop audio (AGENT-10) or manual file additions. DebugLog.LogUser records the creation. Overlaps in spirit with AGENT-10 (drag-drop folder import) but this entry point is name-first rather than files-first.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": [
+        "AGENT-01",
+        "MACHINE-04"
+      ],
+      "references": [
+        "Â§5.2 Agent Management",
+        "Â§5.8 Machine Management"
       ]
     }
   ]
