@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using System.Windows;
 using AmbientSFXMachineGUI.Services;
 using AmbientSFXMachineGUI.Shell;
@@ -6,7 +8,9 @@ namespace AmbientSFXMachineGUI;
 
 public partial class App : Application
 {
-    public static MachineCoordinator MachineCoordinator { get; } = new();
+    public static AppSettings Settings { get; } = AppSettings.Load();
+    public static DebugLogService DebugLog { get; } = new(Settings);
+    public static MachineCoordinator MachineCoordinator { get; } = new(DebugLog);
     public static AudioLibrary AudioLibrary { get; } = new();
     public static LibraryCacheStore LibraryCache { get; } = new(MachinePaths.LibraryCachePath);
     public static LibraryHasher LibraryHasher { get; } =
@@ -22,6 +26,26 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // LOG-05: capture crashes so the debug log survives unhandled exceptions.
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        {
+            if (args.ExceptionObject is Exception ex)
+                DebugLog.LogException("AppDomain.UnhandledException", ex);
+            DebugLog.Flush();
+        };
+        DispatcherUnhandledException += (_, args) =>
+        {
+            DebugLog.LogException("Dispatcher.UnhandledException", args.Exception);
+            DebugLog.Flush();
+        };
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            DebugLog.LogException("TaskScheduler.UnobservedTaskException", args.Exception);
+            DebugLog.Flush();
+        };
+
+        DebugLog.LogUser("App", "Application starting");
         AudioLibrary.Attach(MachineCoordinator);
         MachineCoordinator.LoadMachinesFromDisk();
 
@@ -35,19 +59,31 @@ public partial class App : Application
         Tray.MachineShowCardsRequested += OnTrayMachineShowCardsRequested;
         Tray.AttachMachines(MachineCoordinator.Machines);
 
-        Hotkeys.Register("app.muteAll", () => Dispatcher.Invoke(() => OnTrayMuteAllToggled(this, System.EventArgs.Empty)));
-        Hotkeys.Register("app.toggleWindow", () => Dispatcher.Invoke(() =>
+        Hotkeys.Register("app.muteAll", () =>
         {
-            if (MainWindow is MainWindow main) main.ToggleVisibility();
-        }));
-        Hotkeys.Register("app.nextProfile", () => Dispatcher.Invoke(() =>
+            DebugLog.LogUser("Hotkey", "app.muteAll pressed");
+            Dispatcher.Invoke(() => OnTrayMuteAllToggled(this, System.EventArgs.Empty));
+        });
+        Hotkeys.Register("app.toggleWindow", () =>
         {
-            if (MainWindow is MainWindow main && main.DataContext is Shell.ShellViewModel vm
-                && vm.CycleNextProfileCommand.CanExecute(null))
+            DebugLog.LogUser("Hotkey", "app.toggleWindow pressed");
+            Dispatcher.Invoke(() =>
             {
-                vm.CycleNextProfileCommand.Execute(null);
-            }
-        }));
+                if (MainWindow is MainWindow main) main.ToggleVisibility();
+            });
+        });
+        Hotkeys.Register("app.nextProfile", () =>
+        {
+            DebugLog.LogUser("Hotkey", "app.nextProfile pressed");
+            Dispatcher.Invoke(() =>
+            {
+                if (MainWindow is MainWindow main && main.DataContext is Shell.ShellViewModel vm
+                    && vm.CycleNextProfileCommand.CanExecute(null))
+                {
+                    vm.CycleNextProfileCommand.Execute(null);
+                }
+            });
+        });
         Hotkeys.LoadDefaults();
 
         // Keep the app alive when all windows are hidden (tray still running).
@@ -113,12 +149,14 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        DebugLog.LogUser("App", "Application exiting");
         MachineCoordinator.SaveMachinesToDisk();
         LibraryHasher.Dispose();
         LibraryCache.Dispose();
         Tray.Dispose();
         Hotkeys.Dispose();
         MachineCoordinator.Shutdown();
+        DebugLog.Flush();
         base.OnExit(e);
     }
 }

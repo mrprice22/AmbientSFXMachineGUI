@@ -313,6 +313,7 @@ public partial class ShellViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(Agents));
         OnPropertyChanged(nameof(SoundboardItems));
+        App.DebugLog.LogUser("Shell", $"Selected machine → '{newValue?.Name ?? "none"}'");
         _hotkeys.SetActiveMachine(newValue?.Id);
         RebindActiveSoundboardHotkeys(oldValue, newValue);
 
@@ -404,12 +405,21 @@ public partial class ShellViewModel : ObservableObject
         item.Hotkey = null;
     }
 
-    partial void OnMasterVolumeChanged(double value) => _machineCoordinator.SetMasterVolume(value);
-    partial void OnIsMutedAllChanged(bool value) => _machineCoordinator.SetMuteAll(value);
+    partial void OnMasterVolumeChanged(double value)
+    {
+        _machineCoordinator.SetMasterVolume(value);
+        App.DebugLog.LogUser("Shell", $"Master volume → {value:0}");
+    }
+    partial void OnIsMutedAllChanged(bool value)
+    {
+        _machineCoordinator.SetMuteAll(value);
+        App.DebugLog.LogUser("Shell", value ? "Mute-all ON" : "Mute-all OFF");
+    }
     partial void OnActiveProfileChanged(Profile? oldValue, Profile? newValue)
     {
         if (_suppressProfileApply) return;
         if (newValue is null || SelectedMachine is null) return;
+        App.DebugLog.LogUser("Profile", $"Switching profile '{oldValue?.Name ?? "none"}' → '{newValue.Name}' (machine: {SelectedMachine.Name})");
 
         var diff = _profileService.Diff(SelectedMachine, newValue);
         if (diff.HasChanges)

@@ -1,0 +1,50 @@
+<UserControl x:Class="AmbientSFXMachineGUI.Panels.DebugLogPanel.DebugLogPanelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="EntryStyle" TargetType="ListViewItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding CategoryBadge}" Value="USER">
+                    <Setter Property="Foreground" Value="#2F80ED"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding CategoryBadge}" Value="AGENT">
+                    <Setter Property="Foreground" Value="#27AE60"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding CategoryBadge}" Value="ERROR">
+                    <Setter Property="Foreground" Value="#EB5757"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <DockPanel>
+        <ToolBar DockPanel.Dock="Top">
+            <Button Content="Change log folder..." Click="OnChangeFolderClick"
+                    ToolTip="Pick a folder for session .log files"/>
+            <Button Content="Open log folder" Click="OnOpenFolderClick"
+                    ToolTip="Open the current log folder in Explorer"/>
+            <Button Content="Copy to clipboard" Click="OnCopyClick"
+                    ToolTip="Copy visible in-memory entries to the clipboard"/>
+            <Separator/>
+            <Button Content="Clear" Click="OnClearClick"
+                    ToolTip="Clear the in-memory list (does not delete disk logs)"/>
+            <Separator/>
+            <TextBlock x:Name="FolderLabel" VerticalAlignment="Center" Margin="6,0"
+                       Foreground="Gray" FontStyle="Italic"/>
+        </ToolBar>
+        <ListView x:Name="EntryList"
+                  ItemContainerStyle="{StaticResource EntryStyle}"
+                  VirtualizingStackPanel.IsVirtualizing="True"
+                  VirtualizingStackPanel.VirtualizationMode="Recycling"
+                  ScrollViewer.IsDeferredScrollingEnabled="False">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Time"     Width="100" DisplayMemberBinding="{Binding Timestamp, StringFormat=HH:mm:ss.fff}"/>
+                    <GridViewColumn Header="Category" Width="60"  DisplayMemberBinding="{Binding CategoryBadge}"/>
+                    <GridViewColumn Header="Source"   Width="140" DisplayMemberBinding="{Binding Source}"/>
+                    <GridViewColumn Header="Message"  Width="600" DisplayMemberBinding="{Binding Message}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </DockPanel>
+</UserControl>

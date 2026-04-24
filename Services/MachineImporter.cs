@@ -29,6 +29,8 @@ public static class MachineImporter
         var machine = coordinator.CreateMachine(name, machineFolder);
         machine.IconPath = iconPath;
         coordinator.ScanAgentsFromDisk(machine);
+        coordinator.LogDebug(Models.DebugLogCategory.User, "MachineImporter",
+            $"Imported machine '{machine.Name}' from {machineFolder} ({machine.Agents.Count} agents)");
         return machine;
     }
 

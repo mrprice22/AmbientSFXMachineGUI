@@ -4,6 +4,7 @@
         xmlns:avalon="https://github.com/Dirkster99/AvalonDock"
         xmlns:agent="clr-namespace:AmbientSFXMachineGUI.Panels.AgentPanel"
         xmlns:log="clr-namespace:AmbientSFXMachineGUI.Panels.LogPanel"
+        xmlns:dbg="clr-namespace:AmbientSFXMachineGUI.Panels.DebugLogPanel"
         xmlns:now="clr-namespace:AmbientSFXMachineGUI.Panels.NowPlayingPanel"
         xmlns:sb="clr-namespace:AmbientSFXMachineGUI.Panels.SoundboardPanel"
         xmlns:lib="clr-namespace:AmbientSFXMachineGUI.Panels.LibraryPanel"
@@ -80,6 +81,9 @@
                         </avalon:LayoutAnchorable>
                         <avalon:LayoutAnchorable ContentId="library" Title="Audio Library" CanClose="False">
                             <lib:LibraryPanelView/>
+                        </avalon:LayoutAnchorable>
+                        <avalon:LayoutAnchorable ContentId="debuglog" Title="Debug Log" CanClose="False">
+                            <dbg:DebugLogPanelView/>
                         </avalon:LayoutAnchorable>
                     </avalon:LayoutAnchorablePane>
                     <avalon:LayoutAnchorablePane DockHeight="160">

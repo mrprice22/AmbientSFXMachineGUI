@@ -17,6 +17,10 @@ public sealed class MachineCoordinator
     private const int LogCap = 500;
 
     private readonly Dictionary<MachineViewModel, AgentCoordinator> _coordinators = new();
+    private readonly DebugLogService? _debug;
+
+    public MachineCoordinator() { }
+    public MachineCoordinator(DebugLogService debug) { _debug = debug; }
 
     public event EventHandler<LogEntryViewModel>? SoundPlayed;
     public event EventHandler<ActivePlayback>? PlaybackStarted;
@@ -163,6 +167,18 @@ public sealed class MachineCoordinator
             while (Log.Count > LogCap) Log.RemoveAt(0);
             SoundPlayed?.Invoke(this, entry);
         });
+        _debug?.LogAgent(entry.AgentName, $"Played '{entry.FileName}'");
+    }
+
+    internal void LogDebug(DebugLogCategory category, string source, string message)
+    {
+        if (_debug is null) return;
+        switch (category)
+        {
+            case DebugLogCategory.User:  _debug.LogUser(source, message); break;
+            case DebugLogCategory.Agent: _debug.LogAgent(source, message); break;
+            case DebugLogCategory.Error: _debug.LogError(source, message); break;
+        }
     }
 
     private void OnMachinePropertyChanged(object? sender, PropertyChangedEventArgs e)

@@ -170,9 +170,17 @@ public sealed class AgentCoordinator
         {
             case nameof(AgentViewModel.IsEnabled):
                 ApplyEnabled(agent);
+                AmbientSFXMachineGUI.App.DebugLog?.LogUser("Agent",
+                    $"{agent.Name}: {(agent.IsEnabled ? "enabled" : "disabled")}");
                 break;
             case nameof(AgentViewModel.Volume):
                 ApplyEffectiveVolume(agent);
+                AmbientSFXMachineGUI.App.DebugLog?.LogUser("Agent",
+                    $"{agent.Name}: volume → {agent.Volume:0}");
+                break;
+            case nameof(AgentViewModel.IsPinned):
+                AmbientSFXMachineGUI.App.DebugLog?.LogUser("Agent",
+                    $"{agent.Name}: {(agent.IsPinned ? "pinned" : "unpinned")}");
                 break;
         }
     }

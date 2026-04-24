@@ -151,6 +151,16 @@ The phase gate is a guard, not a prison. If `next_task.py` reports a phase is st
 
 ## Development Rules
 
+**Always instrument the debug log.** `App.DebugLog` (see `Services/DebugLogService.cs`, introduced by LOG-05) is the session-wide diagnostic channel — the Debug Log panel shows it live and it rolls to disk under `%AppData%\AmbientAgents\logs\`. Every new feature, command, or background action MUST emit a log entry in the appropriate category so the panel remains a faithful record of what the app did. Do not merge work that silently changes state.
+
+Rules of thumb:
+
+- **User action** (`DebugLog.LogUser`): any command or toggle the user initiates — importing a machine, toggling an agent, switching profiles, changing master volume, firing a hotkey, opening a dialog that mutates state, etc. Log before or immediately after the mutation so the order of operations is preserved.
+- **Agent activity** (`DebugLog.LogAgent`): automatic decisions made by the playback engine — which sound fired, skip/cooldown decisions, per-agent volume/pan values, scheduler state transitions. Route these through `MachineCoordinator.PublishLog` or `MachineCoordinator.LogDebug` so the Live Log and Debug Log stay consistent.
+- **Error** (`DebugLog.LogError` / `LogException`): every `catch` block that previously swallowed an exception silently should at minimum record it. New code should not introduce empty `catch { }` blocks without at least a `DebugLog.LogError` call describing the operation that failed.
+
+When you add a new `[RelayCommand]`, a new `partial void OnXxxChanged`, a new hotkey, a new background service, or a new external I/O path, include a `DebugLog.Log*` call in the same change — reviewers will look for it. If a story doesn't touch behaviour but adds logging coverage that was missing, that is valid work — include it in the current story or file a follow-up.
+
 **Read before you write.** Always read the relevant existing implementation files before starting a story. Understand what's already built.
 
 **One story at a time.** Mark a story `in_progress`, implement it completely, mark it `done`, then move on. Do not batch or partially implement stories.
