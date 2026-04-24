@@ -139,6 +139,7 @@
 
                             <!-- Expanded file list -->
                             <Border Margin="0,6,0,0" Padding="6" Background="#1A1A1A" CornerRadius="3"
+                                    TextElement.Foreground="#DDDDDD"
                                     Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
                                 <ItemsControl ItemsSource="{Binding Files}">
                                     <ItemsControl.ItemTemplate>

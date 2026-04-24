@@ -891,7 +891,7 @@
       "title": "Black background makes text unreadable in Now Playing and agent file lists",
       "description": "Text rendered in the Now Playing panel (active sounds list) and in the agent detail/file list rows has a black background, making it invisible against dark text or dark themes. Repro: import a machine, observe the now-playing entries and the expanded agent file list. Expected: list item backgrounds should inherit the panel/theme background so text is legible. Screenshot captured at Screenshots/S-BUG-002 Black background 2026-04-24 070204.png.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [],
       "references": [
         "Â§4 Panel Layout System",

@@ -6,7 +6,8 @@
     </UserControl.Resources>
     <DockPanel>
         <!-- Header: collapse/expand toggle + summary line -->
-        <Border DockPanel.Dock="Top" Background="#1F1F1F" Padding="6,3">
+        <Border DockPanel.Dock="Top" Background="#1F1F1F" Padding="6,3"
+                TextElement.Foreground="#DDDDDD">
             <DockPanel>
                 <ToggleButton x:Name="CollapseToggle"
                               DockPanel.Dock="Left"
@@ -40,7 +41,8 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Margin="4" Padding="6" BorderBrush="#444" BorderThickness="1" CornerRadius="3">
+                        <Border Margin="4" Padding="6" BorderBrush="#444" BorderThickness="1" CornerRadius="3"
+                                TextElement.Foreground="#DDDDDD">
                             <DockPanel Width="280">
                                 <!-- Compact vertical "rotary-style" volume slider on the right edge -->
                                 <Grid DockPanel.Dock="Right" Width="42" Margin="6,0,0,0">
