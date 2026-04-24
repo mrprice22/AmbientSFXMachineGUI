@@ -884,6 +884,83 @@
         "Â§5.7 Profiles (pinnedAgents field in profile JSON)",
         "Â§5.2 Agent Management — AgentCard UI elements"
       ]
+    },
+    {
+      "id": "S-BUG-002",
+      "feature": "F01_SHELL",
+      "title": "Black background makes text unreadable in Now Playing and agent file lists",
+      "description": "Text rendered in the Now Playing panel (active sounds list) and in the agent detail/file list rows has a black background, making it invisible against dark text or dark themes. Repro: import a machine, observe the now-playing entries and the expanded agent file list. Expected: list item backgrounds should inherit the panel/theme background so text is legible. Screenshot captured at Screenshots/S-BUG-002 Black background 2026-04-24 070204.png.",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": [],
+      "references": [
+        "Â§4 Panel Layout System",
+        "Â§5.5 Now Playing Panel",
+        "Â§5.3 Sound File Management"
+      ]
+    },
+    {
+      "id": "MACHINE-11",
+      "feature": "F03_MACHINE",
+      "title": "Group agents by machine in collapsible sections in the agents panel",
+      "description": "The agent cards panel currently shows a flat list of all agents with no indication of which machine they belong to. When multiple machines are imported, agents from different machines are indistinguishable. Wrap each machine's agents in a collapsible GroupBox or Expander section whose header shows the machine name (and optionally its icon). Expanding/collapsing a section should persist across sessions. This is the prerequisite for MACHINE-12 (per-machine play/pause).",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": [
+        "MACHINE-02",
+        "MACHINE-04"
+      ],
+      "references": [
+        "Â§5.8 Machine Management (Machines rail)",
+        "Â§5.2 Agent Management — AgentCard UI elements"
+      ]
+    },
+    {
+      "id": "S-BUG-003",
+      "feature": "F03_MACHINE",
+      "title": "Importing a second machine clears agent list instead of appending, and crashes on retry",
+      "description": "When a second machine folder is imported via File > Import Machine, the agent panel is cleared rather than having the new machine's agents appended alongside the first machine's agents. Re-importing the same second machine after the clear causes a crash (exception not yet captured — reproduce and record stack trace). Expected: each imported machine's agents should be added to MachineCoordinator independently; the UI should show all machines' agents grouped by machine (see MACHINE-11). The clear-on-second-import and the crash are likely the same root cause (duplicate machine ID or collection mutation on the wrong thread).",
+      "priority": "high",
+      "status": "backlog",
+      "dependencies": [
+        "MACHINE-04"
+      ],
+      "references": [
+        "Â§5.8 Machine Management — Import machine (MachineImporter.cs)",
+        "Â§3 Architecture (MachineCoordinator, ObservableCollection<MachineViewModel>)"
+      ]
+    },
+    {
+      "id": "LOG-05",
+      "feature": "F05_LOG",
+      "title": "Session debug log panel",
+      "description": "Add a dedicated debug/session log panel (separate from the live playback log) that captures three categories of events in a scrolling, timestamped list: (1) User actions — import machine, toggle agent, switch profile, adjust volume, press hotkey, etc. (2) Agent activity — which sound each agent selected, when it fired, its volume/pan values, any skip/cooldown decisions. (3) Application errors — caught exceptions, failed file reads, playback engine errors, and crash reports with stack traces. Each entry shows: timestamp, category badge (USER / AGENT / ERROR), source (machine+agent name where applicable), and message. Entries are colour-coded by category. The panel is dockable, defaults to the bottom dock beside the playback log, and caps at 2000 entries in-memory. Disk persistence: log entries are written to a rolling .log file under %AppData%\\AmbientAgents\\logs\\ (default location, one file per session named by start timestamp). Write strategy: buffer in memory and flush to disk every 1000 new entries; also flush on clean shutdown via Application.Exit. For crash persistence, register an UnhandledException handler on AppDomain.CurrentDomain and a DispatcherUnhandledException handler on the WPF Application that synchronously flush the buffer before the process dies — this is best-effort (OOM or hard kill cannot be caught). Log panel toolbar contains: (a) 'Change log folder' button — opens a FolderBrowserDialog and persists the chosen path to app settings; (b) 'Open log folder' button — opens the current log folder in Windows Explorer via Process.Start. A 'Copy to clipboard' button copies the visible in-memory entries. The save location persists in %AppData%\\AmbientAgents\\settings.json under a debugLogPath key.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": [
+        "LOG-01",
+        "MACHINE-01"
+      ],
+      "references": [
+        "Â§5.4 Live Playback Log",
+        "Â§4 Panel Layout System (tabbed bottom dock)"
+      ]
+    },
+    {
+      "id": "MACHINE-12",
+      "feature": "F03_MACHINE",
+      "title": "Play/pause button per machine",
+      "description": "Add a dedicated play/pause toggle button to each machine's group header in the agents panel (introduced by MACHINE-11). Pause stops all active playback for that machine's agents and suspends their scheduling timers; Play resumes from the paused state. This is distinct from the enable/disable toggle (MACHINE-03): pause is a temporary suspension for the session whereas disable is a persistent state change. The button should show a Play icon when paused and a Pause icon when running.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": [
+        "MACHINE-11",
+        "MACHINE-03"
+      ],
+      "references": [
+        "Â§5.8 Machine Management",
+        "Â§3.1 Machine concept (disable behavior)"
+      ]
     }
   ]
 }
