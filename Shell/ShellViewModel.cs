@@ -20,8 +20,8 @@ public partial class ShellViewModel : ObservableObject
     private readonly MachineCoordinator _machineCoordinator;
     private readonly ProfileService _profileService;
     private readonly HotkeyService _hotkeys;
-    private static readonly ObservableCollection<AgentViewModel> _emptyAgents = new();
-    private static readonly ObservableCollection<SoundboardItem> _emptySoundboard = new();
+    private MachineViewModel? _agentsSourceMachine;
+    private MachineViewModel? _soundboardSourceMachine;
 
     public ShellViewModel(MachineCoordinator machineCoordinator, ProfileService profileService, HotkeyService hotkeys, LibraryHasher libraryHasher, AudioLibrary audioLibrary, LibraryDuplicates libraryDuplicates)
     {
@@ -54,12 +54,11 @@ public partial class ShellViewModel : ObservableObject
         ((INotifyCollectionChanged)AudioLibrary.Entries).CollectionChanged += OnLibraryEntriesChanged;
         foreach (var entry in AudioLibrary.Entries) HookEntry(entry);
 
-        if (Machines.Count > 0)
-            SelectedMachine = Machines[0];
+        SelectedMachine = PickInitialMachine();
         Machines.CollectionChanged += (_, _) =>
         {
             if (SelectedMachine is null && Machines.Count > 0)
-                SelectedMachine = Machines[0];
+                SelectedMachine = PickInitialMachine();
         };
     }
 
@@ -76,11 +75,12 @@ public partial class ShellViewModel : ObservableObject
     public ObservableCollection<Profile> Profiles { get; }
     public ObservableCollection<ActivePlayback> ActivePlaybacks { get; }
 
-    public ObservableCollection<AgentViewModel> Agents
-        => SelectedMachine?.Agents ?? _emptyAgents;
-
-    public ObservableCollection<SoundboardItem> SoundboardItems
-        => SelectedMachine?.SoundboardItems ?? _emptySoundboard;
+    // Stable mirror collections kept in sync with SelectedMachine.Agents / SoundboardItems
+    // via RebindAgentsMirror / RebindSoundboardMirror. The view binds to these once;
+    // switching machines updates contents instead of swapping the collection reference,
+    // which avoids losing the binding if SelectedMachine is ever briefly null during startup.
+    public ObservableCollection<AgentViewModel> Agents { get; } = new();
+    public ObservableCollection<SoundboardItem> SoundboardItems { get; } = new();
 
     [ObservableProperty] private MachineViewModel? _selectedMachine;
     [ObservableProperty] private double _masterVolume = 100;
@@ -311,9 +311,11 @@ public partial class ShellViewModel : ObservableObject
 
     partial void OnSelectedMachineChanged(MachineViewModel? oldValue, MachineViewModel? newValue)
     {
-        OnPropertyChanged(nameof(Agents));
-        OnPropertyChanged(nameof(SoundboardItems));
+        RebindAgentsMirror(newValue);
+        RebindSoundboardMirror(newValue);
         App.DebugLog.LogUser("Shell", $"Selected machine → '{newValue?.Name ?? "none"}'");
+        App.Settings.lastSelectedMachineId = newValue?.Id.ToString();
+        App.Settings.Save();
         _hotkeys.SetActiveMachine(newValue?.Id);
         RebindActiveSoundboardHotkeys(oldValue, newValue);
 
@@ -325,6 +327,89 @@ public partial class ShellViewModel : ObservableObject
             ActiveProfile = null;
         }
         finally { _suppressProfileApply = false; }
+    }
+
+    /// <summary>
+    /// Chooses the machine to select at startup. Prefers the one persisted in AppSettings;
+    /// otherwise picks the first machine that actually has agents (avoids landing on an empty
+    /// auto-created "Default" machine when other populated machines exist); falls back to Machines[0].
+    /// </summary>
+    private MachineViewModel? PickInitialMachine()
+    {
+        if (Machines.Count == 0) return null;
+        var persistedId = App.Settings.lastSelectedMachineId;
+        if (!string.IsNullOrWhiteSpace(persistedId) && Guid.TryParse(persistedId, out var id))
+        {
+            var match = Machines.FirstOrDefault(m => m.Id == id);
+            if (match is not null) return match;
+        }
+        return Machines.FirstOrDefault(m => m.Agents.Count > 0) ?? Machines[0];
+    }
+
+    private void RebindAgentsMirror(MachineViewModel? newMachine)
+    {
+        if (_agentsSourceMachine is not null)
+            ((INotifyCollectionChanged)_agentsSourceMachine.Agents).CollectionChanged -= OnSourceAgentsChanged;
+        _agentsSourceMachine = newMachine;
+        Agents.Clear();
+        if (newMachine is not null)
+        {
+            foreach (var a in newMachine.Agents) Agents.Add(a);
+            ((INotifyCollectionChanged)newMachine.Agents).CollectionChanged += OnSourceAgentsChanged;
+        }
+    }
+
+    private void OnSourceAgentsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        switch (e.Action)
+        {
+            case NotifyCollectionChangedAction.Add:
+                if (e.NewItems is not null)
+                    foreach (AgentViewModel a in e.NewItems) Agents.Add(a);
+                break;
+            case NotifyCollectionChangedAction.Remove:
+                if (e.OldItems is not null)
+                    foreach (AgentViewModel a in e.OldItems) Agents.Remove(a);
+                break;
+            default:
+                Agents.Clear();
+                if (_agentsSourceMachine is not null)
+                    foreach (var a in _agentsSourceMachine.Agents) Agents.Add(a);
+                break;
+        }
+    }
+
+    private void RebindSoundboardMirror(MachineViewModel? newMachine)
+    {
+        if (_soundboardSourceMachine is not null)
+            ((INotifyCollectionChanged)_soundboardSourceMachine.SoundboardItems).CollectionChanged -= OnSourceSoundboardChanged;
+        _soundboardSourceMachine = newMachine;
+        SoundboardItems.Clear();
+        if (newMachine is not null)
+        {
+            foreach (var s in newMachine.SoundboardItems) SoundboardItems.Add(s);
+            ((INotifyCollectionChanged)newMachine.SoundboardItems).CollectionChanged += OnSourceSoundboardChanged;
+        }
+    }
+
+    private void OnSourceSoundboardChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        switch (e.Action)
+        {
+            case NotifyCollectionChangedAction.Add:
+                if (e.NewItems is not null)
+                    foreach (SoundboardItem s in e.NewItems) SoundboardItems.Add(s);
+                break;
+            case NotifyCollectionChangedAction.Remove:
+                if (e.OldItems is not null)
+                    foreach (SoundboardItem s in e.OldItems) SoundboardItems.Remove(s);
+                break;
+            default:
+                SoundboardItems.Clear();
+                if (_soundboardSourceMachine is not null)
+                    foreach (var s in _soundboardSourceMachine.SoundboardItems) SoundboardItems.Add(s);
+                break;
+        }
     }
 
     private readonly HashSet<SoundboardItem> _hookedSoundboardItems = new();

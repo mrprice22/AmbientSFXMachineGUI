@@ -1150,6 +1150,19 @@
         "Â§5.5 Now Playing Panel",
         "Â§6 Playback Engine"
       ]
+    },
+    {
+      "id": "S-BUG-006",
+      "feature": "F02_AGENTS",
+      "title": "Agents panel is empty at startup until an agent is re-imported",
+      "description": "On app launch the 'Agents' dock panel renders an empty list even though agents from the previously-loaded machines are alive: their schedulers fire and play audio, and the system tray menu enumerates them. Root cause (confirmed from session log): the user's MachinesDir contains multiple machine records, one of which is an empty 'Default' machine at Order=0 with no RootPath (and therefore zero agents). ShellViewModel's ctor hard-selected Machines[0], so the Default empty machine became SelectedMachine; meanwhile the populated PACMAN/Spooky machines (Order>=1) still had their AgentCoordinators running in the background, which is why audio kept playing. Agents panel bound correctly — it was just bound to the empty Default machine's Agents collection. Dropping an agent folder onto the panel appeared to 'fix' things because ImportAgentFolder adds to SelectedMachine (Default), and with the collection-mirror refactor any new add is reflected — but the underlying bug was that the wrong machine was selected from the start. Fix: (a) ShellViewModel.PickInitialMachine() — prefer the last-selected machine id persisted in AppSettings.lastSelectedMachineId; otherwise pick the first machine with Agents.Count>0 (skipping empty auto-created Default); fall back to Machines[0]. (b) Persist SelectedMachine.Id to AppSettings whenever it changes so subsequent sessions restore the user's pick. (c) As a defense-in-depth cleanup (separate from the root cause), convert ShellViewModel.Agents / SoundboardItems from switching proxies into stable ObservableCollections mirrored from SelectedMachine via CollectionChanged forwarding, so the view binds once and never risks latching onto a stale empty reference even if SelectedMachine is briefly null during init.",
+      "priority": "high",
+      "status": "in_progress",
+      "dependencies": [],
+      "references": [
+        "Â§5.2 Agent Management",
+        "Â§4 Panel Layout System"
+      ]
     }
   ]
 }

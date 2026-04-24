@@ -7,6 +7,7 @@ namespace AmbientSFXMachineGUI.Services;
 public sealed class AppSettings
 {
     public string? debugLogPath { get; set; }
+    public string? lastSelectedMachineId { get; set; }
 
     private static string SettingsPath => Path.Combine(MachinePaths.Root, "settings.json");
 
