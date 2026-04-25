@@ -29,6 +29,12 @@
                             Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
                         <Border.ContextMenu>
                             <ContextMenu>
+                                <MenuItem Header="New agent…"
+                                          Command="{Binding PlacementTarget.Tag.CreateAgentCommand,
+                                                   RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext,
+                                                   RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <Separator/>
                                 <MenuItem Header="Rename…"
                                           Command="{Binding PlacementTarget.Tag.RenameMachineCommand,
                                                    RelativeSource={RelativeSource AncestorType=ContextMenu}}"

@@ -1097,7 +1097,7 @@
       "title": "Create new agent within a machine",
       "description": "Add a 'New agent' action on the machine header (in the Machines rail and/or Audio Machines window) that creates a new agent inside that machine. Dialog prompts for agent name (required, filesystem-safe, unique within the machine's snd\\). On confirm, create <machineRoot>\\snd\\<name>\\ and a minimal <name>.config populated with sensible defaults (same defaults MachineImporter expects: mode, min/max interval, volume, balance). The new agent appears live in the agent panel as an empty-file AgentViewModel ready to accept drag-drop audio (AGENT-10) or manual file additions. DebugLog.LogUser records the creation. Overlaps in spirit with AGENT-10 (drag-drop folder import) but this entry point is name-first rather than files-first.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "AGENT-01",
         "MACHINE-04"

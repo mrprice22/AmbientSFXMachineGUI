@@ -689,6 +689,94 @@ public partial class ShellViewModel : ObservableObject
             $"Moved '{agent.Name}' down to position {idx + 1} in machine '{machine.Name}'");
     }
 
+    /// <summary>
+    /// AGENT-14: create a new agent inside <paramref name="machine"/> (or SelectedMachine if null).
+    /// Prompts for a folder name, creates &lt;machineRoot&gt;\snd\&lt;name&gt;\, and lets
+    /// AgentCoordinator.RegisterAgentFromFolder write the default &lt;name&gt;.config so the new
+    /// AgentViewModel uses the same defaults MachineImporter would have written.
+    /// </summary>
+    [RelayCommand]
+    private void CreateAgent(MachineViewModel? machine)
+    {
+        machine ??= SelectedMachine;
+        if (machine is null)
+        {
+            System.Windows.MessageBox.Show("Select a machine first.",
+                "New Agent", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+        if (string.IsNullOrEmpty(machine.RootPath) || !Directory.Exists(machine.RootPath))
+        {
+            System.Windows.MessageBox.Show(
+                $"Machine '{machine.Name}' has no on-disk folder; cannot create an agent.",
+                "New Agent", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var sndDir = Path.Combine(machine.RootPath, "snd");
+        try { Directory.CreateDirectory(sndDir); }
+        catch (Exception ex)
+        {
+            App.DebugLog.LogError("Agent",
+                $"Could not create snd folder for machine '{machine.Name}': {ex.Message}");
+            System.Windows.MessageBox.Show(
+                $"Could not create '{sndDir}': {ex.Message}",
+                "New Agent",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+            return;
+        }
+
+        var dialog = new InputDialog("New Agent", "Agent name:", "NewAgent")
+            { Owner = System.Windows.Application.Current.MainWindow };
+        if (dialog.ShowDialog() != true) return;
+
+        var name = dialog.Value?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(name)) return;
+
+        if (!IsValidFolderName(name, out var reason))
+        {
+            System.Windows.MessageBox.Show($"Cannot create agent '{name}': {reason}.",
+                "New Agent", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var folderPath = Path.Combine(sndDir, name);
+        if (Directory.Exists(folderPath)
+            || machine.Agents.Any(a => string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase)))
+        {
+            System.Windows.MessageBox.Show(
+                $"An agent named '{name}' already exists in '{sndDir}'.",
+                "New Agent", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(folderPath);
+            // Switch the panel to the target machine so the new card appears live.
+            SelectedMachine = machine;
+            // RegisterAgentFromFolder writes default <name>.config when none exists, then attaches the VM.
+            _machineCoordinator.RegisterAgentFromFolder(machine, folderPath);
+            _machineCoordinator.SaveMachinesToDisk();
+            App.DebugLog.LogUser("Agent",
+                $"Created new agent '{name}' in machine '{machine.Name}' at {folderPath}");
+        }
+        catch (Exception ex)
+        {
+            App.DebugLog.LogError("Agent",
+                $"Could not create agent '{name}' in machine '{machine.Name}': {ex.Message}");
+            // Best-effort cleanup if the folder was created but registration failed.
+            try { if (Directory.Exists(folderPath) && !Directory.EnumerateFileSystemEntries(folderPath).Any()) Directory.Delete(folderPath); }
+            catch { }
+            System.Windows.MessageBox.Show(
+                $"Could not create agent '{name}': {ex.Message}",
+                "New Agent",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
+    }
+
     [RelayCommand]
     private void RenameAgent(AgentViewModel? agent)
     {
