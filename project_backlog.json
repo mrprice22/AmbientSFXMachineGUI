@@ -1251,7 +1251,7 @@
       "title": "On/Off toggle buttons: show 'Off' with light red background when inactive",
       "description": "All toggle/on-off buttons throughout the application (agent enable toggles, machine enable toggle, per-sound enable checkboxes, turbo mode button, etc.) currently display 'On' with a grey/neutral background when the feature is inactive. This is ambiguous — grey looks like a disabled control rather than an intentional off state. Change: when a toggle is OFF, display the text 'Off' with a light red background (e.g. #FFCCCC or similar warm red tint) so the off state is unmistakably communicated. When ON, retain the existing styling (e.g. blue/accent background with 'On' label). Apply consistently across: AgentCard enable toggle, machine enable toggle, per-sound enable rows in the expanded file list, and any other boolean-state button in the UI. Define the style change once as a shared ControlTemplate or Style trigger so it propagates everywhere automatically. No DebugLog changes needed for a purely visual update.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "AGENT-02",
         "MACHINE-03"

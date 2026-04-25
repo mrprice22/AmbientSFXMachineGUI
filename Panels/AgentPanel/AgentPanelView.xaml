@@ -51,9 +51,10 @@
                                         </TextBlock.Style>
                                     </TextBlock>
                                 </ToggleButton>
-                                <ToggleButton DockPanel.Dock="Right" Content="On"
+                                <ToggleButton DockPanel.Dock="Right"
                                               IsChecked="{Binding IsEnabled}"
-                                              MinWidth="44" Margin="6,0,0,0"/>
+                                              MinWidth="44" Margin="6,0,0,0"
+                                              Style="{StaticResource OnOffToggleStyle}"/>
                                 <ToggleButton DockPanel.Dock="Right" IsChecked="{Binding IsPinned}"
                                               Width="22" Height="22" Padding="0" Margin="6,0,0,0"
                                               Background="Transparent" BorderThickness="0"

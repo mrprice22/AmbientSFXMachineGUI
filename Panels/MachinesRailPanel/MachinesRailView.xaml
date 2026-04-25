@@ -57,8 +57,9 @@
                             <!-- Icon + Name + Enable toggle -->
                             <DockPanel LastChildFill="True">
                                 <ToggleButton DockPanel.Dock="Right"
-                                              Content="On" IsChecked="{Binding IsEnabled}"
-                                              MinWidth="34" FontSize="10" Padding="3,1"/>
+                                              IsChecked="{Binding IsEnabled}"
+                                              MinWidth="34" FontSize="10" Padding="3,1"
+                                              Style="{StaticResource OnOffToggleStyle}"/>
                                 <Image DockPanel.Dock="Left"
                                        Source="{Binding ResolvedIconPath, Converter={StaticResource PathToImage}}"
                                        Width="20" Height="20" Margin="0,0,5,0"
