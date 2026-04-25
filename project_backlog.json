@@ -1081,7 +1081,7 @@
       "title": "Reorder agents within a machine",
       "description": "Allow the user to reorder agent cards within a machine via drag-and-drop on the card header (or up/down buttons as fallback). Order is persisted per-machine to the machine index JSON under %AppData%\\AmbientAgents\\machines\\<id>.json (new 'agentOrder' field: array of agent folder names). On import, if agentOrder is absent or contains stale entries, fall back to alphabetical order and reconcile. Ordering is purely presentational and must not affect scheduling, cooldowns, or library references.",
       "priority": "low",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "AGENT-01",
         "MACHINE-08"

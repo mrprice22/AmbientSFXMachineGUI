@@ -60,13 +60,29 @@ public sealed class MachineCoordinator
     public void RegisterAgentFromFolder(MachineViewModel machine, string folderPath)
         => GetCoordinator(machine).RegisterAgentFromFolder(folderPath);
 
-    public void ScanAgentsFromDisk(MachineViewModel machine)
+    public void ScanAgentsFromDisk(MachineViewModel machine, IReadOnlyList<string>? agentOrder = null)
     {
         if (string.IsNullOrEmpty(machine.RootPath)) return;
         var sndDir = Path.Combine(machine.RootPath, "snd");
         if (!Directory.Exists(sndDir)) return;
-        foreach (var dir in Directory.GetDirectories(sndDir))
-            RegisterAgentFromFolder(machine, dir);
+
+        var dirs = Directory.GetDirectories(sndDir);
+        // AGENT-13: apply persisted order; missing/stale entries fall through to alphabetical at the end.
+        var byName = dirs.ToDictionary(d => Path.GetFileName(d), d => d, StringComparer.OrdinalIgnoreCase);
+        var consumed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (agentOrder is not null)
+        {
+            foreach (var name in agentOrder)
+            {
+                if (string.IsNullOrEmpty(name)) continue;
+                if (!byName.TryGetValue(name, out var dir)) continue;
+                if (!consumed.Add(name)) continue;
+                RegisterAgentFromFolder(machine, dir);
+            }
+        }
+        foreach (var kv in byName.Where(kv => !consumed.Contains(kv.Key))
+                                 .OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase))
+            RegisterAgentFromFolder(machine, kv.Value);
     }
 
     public void SetMasterVolume(double volume)
@@ -118,7 +134,7 @@ public sealed class MachineCoordinator
                 RootPath     = r.RootPath,
             };
             AttachMachine(machine);
-            ScanAgentsFromDisk(machine);
+            ScanAgentsFromDisk(machine, r.AgentOrder);
         }
     }
 
@@ -140,6 +156,9 @@ public sealed class MachineCoordinator
                 MasterVolume = m.MasterVolume,
                 RootPath     = m.RootPath,
                 Order        = i,
+                AgentOrder   = m.Agents.Select(a => Path.GetFileName(a.FolderPath))
+                                       .Where(n => !string.IsNullOrEmpty(n))
+                                       .ToList(),
             };
             File.WriteAllText(Path.Combine(dir, $"{m.Id}.json"),
                               JsonSerializer.Serialize(record, options));
@@ -218,5 +237,6 @@ public sealed class MachineCoordinator
         public double MasterVolume { get; set; } = 100;
         public string RootPath     { get; set; } = string.Empty;
         public int    Order        { get; set; }
+        public List<string> AgentOrder { get; set; } = new();
     }
 }

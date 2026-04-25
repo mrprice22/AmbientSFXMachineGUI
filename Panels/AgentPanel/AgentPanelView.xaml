@@ -109,12 +109,26 @@
                                 </Border>
                                 <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"
                                            VerticalAlignment="Center"
+                                           Cursor="SizeAll"
                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                           ToolTip="Right-click to rename">
+                                           ToolTip="Right-click to rename or reorder · Drag to move"
+                                           PreviewMouseLeftButtonDown="OnAgentHeaderMouseDown"
+                                           PreviewMouseMove="OnAgentHeaderMouseMove">
                                     <TextBlock.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="Rename..."
                                                       Command="{Binding PlacementTarget.Tag.RenameAgentCommand,
+                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding PlacementTarget.DataContext,
+                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <Separator/>
+                                            <MenuItem Header="Move Up"
+                                                      Command="{Binding PlacementTarget.Tag.MoveAgentUpCommand,
+                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      CommandParameter="{Binding PlacementTarget.DataContext,
+                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                            <MenuItem Header="Move Down"
+                                                      Command="{Binding PlacementTarget.Tag.MoveAgentDownCommand,
                                                                         RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       CommandParameter="{Binding PlacementTarget.DataContext,
                                                                                   RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>

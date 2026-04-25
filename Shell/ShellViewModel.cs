@@ -642,6 +642,53 @@ public partial class ShellViewModel : ObservableObject
             _machineCoordinator.RegisterAgentFromFolder(SelectedMachine, folderPath);
     }
 
+    /// <summary>
+    /// AGENT-13: move <paramref name="source"/> to the position of <paramref name="target"/> within
+    /// the same machine. Reorder is purely presentational — the AgentCoordinator runtime is keyed by
+    /// AgentViewModel reference, so scheduling/cooldowns/library refs are unaffected.
+    /// </summary>
+    public void MoveAgent(AgentViewModel source, AgentViewModel target)
+    {
+        if (ReferenceEquals(source, target)) return;
+        var machine = Machines.FirstOrDefault(m => m.Agents.Contains(source) && m.Agents.Contains(target));
+        if (machine is null) return;
+        var from = machine.Agents.IndexOf(source);
+        var to   = machine.Agents.IndexOf(target);
+        if (from < 0 || to < 0 || from == to) return;
+        machine.Agents.Move(from, to);
+        _machineCoordinator.SaveMachinesToDisk();
+        App.DebugLog.LogUser("Agent",
+            $"Reordered '{source.Name}' to position {to} in machine '{machine.Name}'");
+    }
+
+    [RelayCommand]
+    private void MoveAgentUp(AgentViewModel? agent)
+    {
+        if (agent is null) return;
+        var machine = Machines.FirstOrDefault(m => m.Agents.Contains(agent));
+        if (machine is null) return;
+        var idx = machine.Agents.IndexOf(agent);
+        if (idx <= 0) return;
+        machine.Agents.Move(idx, idx - 1);
+        _machineCoordinator.SaveMachinesToDisk();
+        App.DebugLog.LogUser("Agent",
+            $"Moved '{agent.Name}' up to position {idx - 1} in machine '{machine.Name}'");
+    }
+
+    [RelayCommand]
+    private void MoveAgentDown(AgentViewModel? agent)
+    {
+        if (agent is null) return;
+        var machine = Machines.FirstOrDefault(m => m.Agents.Contains(agent));
+        if (machine is null) return;
+        var idx = machine.Agents.IndexOf(agent);
+        if (idx < 0 || idx >= machine.Agents.Count - 1) return;
+        machine.Agents.Move(idx, idx + 1);
+        _machineCoordinator.SaveMachinesToDisk();
+        App.DebugLog.LogUser("Agent",
+            $"Moved '{agent.Name}' down to position {idx + 1} in machine '{machine.Name}'");
+    }
+
     [RelayCommand]
     private void RenameAgent(AgentViewModel? agent)
     {

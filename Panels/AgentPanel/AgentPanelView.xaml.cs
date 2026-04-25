@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Animation;
 using AmbientSFXMachineGUI.Models;
 using AmbientSFXMachineGUI.Shell;
@@ -57,6 +58,37 @@ public partial class AgentPanelView : UserControl
             AutoReverse = false,
         };
         element.BeginAnimation(OpacityProperty, anim);
+    }
+
+    private const string AgentReorderFormat = "AmbientSFX.AgentReorder";
+    private Point? _agentDragStart;
+    private AgentViewModel? _agentDragSource;
+
+    private void OnAgentHeaderMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: AgentViewModel agent })
+        {
+            _agentDragStart = e.GetPosition(this);
+            _agentDragSource = agent;
+        }
+    }
+
+    private void OnAgentHeaderMouseMove(object sender, MouseEventArgs e)
+    {
+        if (_agentDragStart is null || _agentDragSource is null) return;
+        if (e.LeftButton != MouseButtonState.Pressed)
+        {
+            _agentDragStart = null; _agentDragSource = null;
+            return;
+        }
+        var pos = e.GetPosition(this);
+        if (Math.Abs(pos.X - _agentDragStart.Value.X) < SystemParameters.MinimumHorizontalDragDistance &&
+            Math.Abs(pos.Y - _agentDragStart.Value.Y) < SystemParameters.MinimumVerticalDragDistance) return;
+
+        if (sender is not DependencyObject src) { _agentDragStart = null; _agentDragSource = null; return; }
+        var data = new DataObject(AgentReorderFormat, _agentDragSource);
+        try { DragDrop.DoDragDrop(src, data, DragDropEffects.Move); }
+        finally { _agentDragStart = null; _agentDragSource = null; }
     }
 
     private static string[] GetDropPaths(DragEventArgs e)
@@ -123,9 +155,17 @@ public partial class AgentPanelView : UserControl
 
     private void OnAgentCardDragEnter(object sender, DragEventArgs e)
     {
+        if (e.Data.GetDataPresent(AgentReorderFormat))
+        {
+            if (sender is FrameworkElement fe) fe.Opacity = 0.7;
+            DropOverlay.Visibility = Visibility.Collapsed;
+            e.Effects = DragDropEffects.Move;
+            e.Handled = true;
+            return;
+        }
         var paths = GetDropPaths(e);
         if (!HasAudioFile(paths)) return;
-        if (sender is FrameworkElement fe) fe.Opacity = 0.7;
+        if (sender is FrameworkElement card) card.Opacity = 0.7;
         DropOverlay.Visibility = Visibility.Collapsed;
         e.Effects = DragDropEffects.Copy;
         e.Handled = true;
@@ -133,6 +173,12 @@ public partial class AgentPanelView : UserControl
 
     private void OnAgentCardDragOver(object sender, DragEventArgs e)
     {
+        if (e.Data.GetDataPresent(AgentReorderFormat))
+        {
+            e.Effects = DragDropEffects.Move;
+            e.Handled = true;
+            return;
+        }
         var paths = GetDropPaths(e);
         if (!HasAudioFile(paths)) return;
         e.Effects = DragDropEffects.Copy;
@@ -147,13 +193,21 @@ public partial class AgentPanelView : UserControl
     private void OnAgentCardDrop(object sender, DragEventArgs e)
     {
         if (sender is FrameworkElement fe) fe.Opacity = 1.0;
-        if (sender is not FrameworkElement { DataContext: AgentViewModel agent }) return;
+        if (sender is not FrameworkElement { DataContext: AgentViewModel target }) return;
         if (DataContext is not ShellViewModel vm) return;
+
+        if (e.Data.GetData(AgentReorderFormat) is AgentViewModel source
+            && !ReferenceEquals(source, target))
+        {
+            vm.MoveAgent(source, target);
+            e.Handled = true;
+            return;
+        }
 
         var paths = GetDropPaths(e);
         if (!HasAudioFile(paths)) return;
 
-        vm.AddFilesToAgent(agent, paths);
+        vm.AddFilesToAgent(target, paths);
         e.Handled = true;
     }
 }
