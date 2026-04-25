@@ -9,336 +9,450 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <controls:PlayCountHeatConverter x:Key="HeatConverter"/>
-    </UserControl.Resources>
-    <Grid>
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <ItemsControl x:Name="AgentsList" ItemsSource="{Binding Agents}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border Margin="6" Padding="10" BorderBrush="#444" BorderThickness="1" CornerRadius="4"
-                            AllowDrop="True"
-                            DragEnter="OnAgentCardDragEnter"
-                            DragOver="OnAgentCardDragOver"
-                            DragLeave="OnAgentCardDragLeave"
-                            Drop="OnAgentCardDrop">
-                        <Border.Style>
-                            <Style TargetType="Border">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsHiddenBySearch}" Value="True">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <StackPanel>
-                            <!-- Header row: chevron, name, mode badge, turbo badge, enable toggle -->
-                            <DockPanel LastChildFill="True">
-                                <ToggleButton DockPanel.Dock="Left" IsChecked="{Binding IsExpanded}"
-                                              Width="20" Height="20" Margin="0,0,6,0" Padding="0"
-                                              Background="Transparent" BorderThickness="0"
-                                              ToolTip="Show files">
-                                    <TextBlock FontSize="10" VerticalAlignment="Center"
-                                               HorizontalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Text" Value="▶"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsExpanded}" Value="True">
-                                                        <Setter Property="Text" Value="▼"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </ToggleButton>
-                                <ToggleButton DockPanel.Dock="Right"
-                                              IsChecked="{Binding IsEnabled}"
-                                              MinWidth="44" Margin="6,0,0,0"
-                                              Style="{StaticResource OnOffToggleStyle}"/>
-                                <ToggleButton DockPanel.Dock="Right" IsChecked="{Binding IsPinned}"
-                                              Width="22" Height="22" Padding="0" Margin="6,0,0,0"
-                                              Background="Transparent" BorderThickness="0"
-                                              ToolTip="Pin: lock enabled state and volume so profile swaps don't affect this agent">
-                                    <TextBlock Text="📌" FontSize="12"
-                                               VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Opacity" Value="0.3"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsPinned}" Value="True">
-                                                        <Setter Property="Opacity" Value="1.0"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </ToggleButton>
-                                <Border DockPanel.Dock="Right" CornerRadius="3"
-                                        Padding="6,2" Margin="4,0,0,0"
-                                        Visibility="{Binding IsInTurboMode, Converter={StaticResource BoolToVis}}">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Background" Value="#8C3A1F"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsInTurboMode}" Value="True">
-                                                    <DataTrigger.EnterActions>
-                                                        <BeginStoryboard x:Name="TurboPulse">
-                                                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                                 From="1.0" To="0.4"
-                                                                                 Duration="0:0:0.65"/>
-                                                            </Storyboard>
-                                                        </BeginStoryboard>
-                                                    </DataTrigger.EnterActions>
-                                                    <DataTrigger.ExitActions>
-                                                        <StopStoryboard BeginStoryboardName="TurboPulse"/>
-                                                    </DataTrigger.ExitActions>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="⚡" Foreground="White" FontSize="10"/>
-                                        <TextBlock Text="TURBO" Foreground="White" FontWeight="Bold" FontSize="10" Margin="2,0,0,0"/>
-                                        <TextBlock Text="{Binding RemainingTurboPlays, StringFormat= x{0}}"
-                                                   Foreground="White" FontSize="10" Margin="3,0,0,0"/>
-                                    </StackPanel>
-                                </Border>
-                                <Border DockPanel.Dock="Right" Background="#333" CornerRadius="3"
-                                        Padding="6,2" Margin="4,0,0,0">
-                                    <TextBlock Text="{Binding Mode}" Foreground="#CCC" FontSize="10"/>
-                                </Border>
-                                <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"
-                                           VerticalAlignment="Center"
-                                           Cursor="SizeAll"
-                                           Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                           ToolTip="Right-click to rename or reorder · Drag to move"
-                                           PreviewMouseLeftButtonDown="OnAgentHeaderMouseDown"
-                                           PreviewMouseMove="OnAgentHeaderMouseMove">
-                                    <TextBlock.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="Rename..."
-                                                      Command="{Binding PlacementTarget.Tag.RenameAgentCommand,
-                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="{Binding PlacementTarget.DataContext,
-                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                            <Separator/>
-                                            <MenuItem Header="Move Up"
-                                                      Command="{Binding PlacementTarget.Tag.MoveAgentUpCommand,
-                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="{Binding PlacementTarget.DataContext,
-                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                            <MenuItem Header="Move Down"
-                                                      Command="{Binding PlacementTarget.Tag.MoveAgentDownCommand,
-                                                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      CommandParameter="{Binding PlacementTarget.DataContext,
-                                                                                  RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
-                                        </ContextMenu>
-                                    </TextBlock.ContextMenu>
-                                </TextBlock>
-                            </DockPanel>
+        <controls:StringToImageSourceConverter x:Key="GroupHeaderIcon"/>
 
-                            <!-- Meta row: file count -->
-                            <TextBlock Opacity="0.65" FontSize="11" Margin="0,4,0,0">
-                                <Run Text="{Binding FileCount, Mode=OneWay}"/>
-                                <Run Text=" files"/>
+        <!-- MACHINE-11: shared agent-card template used by both the flat list and the grouped fallback view. -->
+        <DataTemplate x:Key="AgentCardTemplate">
+            <Border Margin="6" Padding="10" BorderBrush="#444" BorderThickness="1" CornerRadius="4"
+                    AllowDrop="True"
+                    DragEnter="OnAgentCardDragEnter"
+                    DragOver="OnAgentCardDragOver"
+                    DragLeave="OnAgentCardDragLeave"
+                    Drop="OnAgentCardDrop">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsHiddenBySearch}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel>
+                    <!-- Header row: chevron, name, mode badge, turbo badge, enable toggle -->
+                    <DockPanel LastChildFill="True">
+                        <ToggleButton DockPanel.Dock="Left" IsChecked="{Binding IsExpanded}"
+                                      Width="20" Height="20" Margin="0,0,6,0" Padding="0"
+                                      Background="Transparent" BorderThickness="0"
+                                      ToolTip="Show files">
+                            <TextBlock FontSize="10" VerticalAlignment="Center"
+                                       HorizontalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="▶"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                <Setter Property="Text" Value="▼"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
                             </TextBlock>
+                        </ToggleButton>
+                        <ToggleButton DockPanel.Dock="Right"
+                                      IsChecked="{Binding IsEnabled}"
+                                      MinWidth="44" Margin="6,0,0,0"
+                                      Style="{StaticResource OnOffToggleStyle}"/>
+                        <ToggleButton DockPanel.Dock="Right" IsChecked="{Binding IsPinned}"
+                                      Width="22" Height="22" Padding="0" Margin="6,0,0,0"
+                                      Background="Transparent" BorderThickness="0"
+                                      ToolTip="Pin: lock enabled state and volume so profile swaps don't affect this agent">
+                            <TextBlock Text="📌" FontSize="12"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Opacity" Value="0.3"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsPinned}" Value="True">
+                                                <Setter Property="Opacity" Value="1.0"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </ToggleButton>
+                        <Border DockPanel.Dock="Right" CornerRadius="3"
+                                Padding="6,2" Margin="4,0,0,0"
+                                Visibility="{Binding IsInTurboMode, Converter={StaticResource BoolToVis}}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#8C3A1F"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsInTurboMode}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard x:Name="TurboPulse">
+                                                    <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                         From="1.0" To="0.4"
+                                                                         Duration="0:0:0.65"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <StopStoryboard BeginStoryboardName="TurboPulse"/>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚡" Foreground="White" FontSize="10"/>
+                                <TextBlock Text="TURBO" Foreground="White" FontWeight="Bold" FontSize="10" Margin="2,0,0,0"/>
+                                <TextBlock Text="{Binding RemainingTurboPlays, StringFormat= x{0}}"
+                                           Foreground="White" FontSize="10" Margin="3,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border DockPanel.Dock="Right" Background="#333" CornerRadius="3"
+                                Padding="6,2" Margin="4,0,0,0">
+                            <TextBlock Text="{Binding Mode}" Foreground="#CCC" FontSize="10"/>
+                        </Border>
+                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14"
+                                   VerticalAlignment="Center"
+                                   Cursor="SizeAll"
+                                   Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   ToolTip="Right-click to rename or reorder · Drag to move"
+                                   PreviewMouseLeftButtonDown="OnAgentHeaderMouseDown"
+                                   PreviewMouseMove="OnAgentHeaderMouseMove">
+                            <TextBlock.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Rename..."
+                                              Command="{Binding PlacementTarget.Tag.RenameAgentCommand,
+                                                                RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext,
+                                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                    <Separator/>
+                                    <MenuItem Header="Move Up"
+                                              Command="{Binding PlacementTarget.Tag.MoveAgentUpCommand,
+                                                                RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext,
+                                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                    <MenuItem Header="Move Down"
+                                              Command="{Binding PlacementTarget.Tag.MoveAgentDownCommand,
+                                                                RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext,
+                                                                          RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                </ContextMenu>
+                            </TextBlock.ContextMenu>
+                        </TextBlock>
+                    </DockPanel>
 
-                            <!-- Volume -->
-                            <Slider Minimum="0" Maximum="100" Value="{Binding Volume}" Margin="0,4,0,0"/>
+                    <!-- Meta row: file count -->
+                    <TextBlock Opacity="0.65" FontSize="11" Margin="0,4,0,0">
+                        <Run Text="{Binding FileCount, Mode=OneWay}"/>
+                        <Run Text=" files"/>
+                    </TextBlock>
 
-                            <!-- Countdown + last played -->
-                            <TextBlock Text="{Binding NextPlayIn, StringFormat=Next in \{0:mm\\:ss\}}"
-                                       Margin="0,4,0,0"/>
-                            <TextBlock Text="{Binding LastPlayedFile, TargetNullValue=—}"
-                                       Opacity="0.6" TextTrimming="CharacterEllipsis" ToolTip="{Binding LastPlayedFile}"/>
+                    <!-- Volume -->
+                    <Slider Minimum="0" Maximum="100" Value="{Binding Volume}" Margin="0,4,0,0"/>
 
-                            <!-- Actions -->
-                            <DockPanel Margin="0,6,0,0">
-                                <Button DockPanel.Dock="Left" Content="Force Play"
-                                        Command="{Binding ForcePlayCommand}"/>
-                                <Button DockPanel.Dock="Right" Content="Config"
-                                        Command="{Binding OpenConfigEditorCommand}"/>
-                            </DockPanel>
+                    <!-- Countdown + last played -->
+                    <TextBlock Text="{Binding NextPlayIn, StringFormat=Next in \{0:mm\\:ss\}}"
+                               Margin="0,4,0,0"/>
+                    <TextBlock Text="{Binding LastPlayedFile, TargetNullValue=—}"
+                               Opacity="0.6" TextTrimming="CharacterEllipsis" ToolTip="{Binding LastPlayedFile}"/>
 
-                            <!-- Expanded file list -->
-                            <Border Margin="0,6,0,0" Padding="6" Background="#1A1A1A" CornerRadius="3"
-                                    TextElement.Foreground="#DDDDDD"
-                                    Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
-                                <ItemsControl ItemsSource="{Binding Files}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Margin="0,1" Background="Transparent">
-                                                <Grid.Style>
-                                                    <Style TargetType="Grid">
+                    <!-- Actions -->
+                    <DockPanel Margin="0,6,0,0">
+                        <Button DockPanel.Dock="Left" Content="Force Play"
+                                Command="{Binding ForcePlayCommand}"/>
+                        <Button DockPanel.Dock="Right" Content="Config"
+                                Command="{Binding OpenConfigEditorCommand}"/>
+                    </DockPanel>
+
+                    <!-- Expanded file list -->
+                    <Border Margin="0,6,0,0" Padding="6" Background="#1A1A1A" CornerRadius="3"
+                            TextElement.Foreground="#DDDDDD"
+                            Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
+                        <ItemsControl ItemsSource="{Binding Files}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,1" Background="Transparent">
+                                        <Grid.Style>
+                                            <Style TargetType="Grid">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsHiddenBySearch}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled}"
+                                                  VerticalAlignment="Center" Margin="0,0,6,0"
+                                                  ToolTip="Include this file in playback selection"/>
+                                        <Button Grid.Column="1"
+                                                Content="★"
+                                                Width="18" Height="18" Padding="0" Margin="0,0,6,0"
+                                                BorderThickness="0"
+                                                Background="Transparent"
+                                                FontSize="12"
+                                                VerticalAlignment="Center"
+                                                ToolTip="Add to Soundboard"
+                                                Command="{Binding DataContext.AddFileToSoundboardCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Foreground" Value="#555"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                                            <Setter Property="Foreground" Value="#C8A227"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                                    VerticalAlignment="Center" Margin="0,0,6,0"
+                                                    ToolTip="{Binding PlayCountThisSession, StringFormat=Played {0} time(s) this session}">
+                                            <Ellipse Width="8" Height="8" VerticalAlignment="Center"
+                                                     Fill="{Binding PlayCountThisSession, Converter={StaticResource HeatConverter}}"/>
+                                            <TextBlock Text="{Binding PlayCountThisSession}"
+                                                       FontSize="9" Foreground="#CCC" FontWeight="Bold"
+                                                       VerticalAlignment="Center" Margin="3,0,0,0"
+                                                       MinWidth="12">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Visible"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsHiddenBySearch}" Value="True">
+                                                            <DataTrigger Binding="{Binding PlayCountThisSession}" Value="0">
                                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
-                                                </Grid.Style>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-                                                <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled}"
-                                                          VerticalAlignment="Center" Margin="0,0,6,0"
-                                                          ToolTip="Include this file in playback selection"/>
-                                                <Button Grid.Column="1"
-                                                        Content="★"
-                                                        Width="18" Height="18" Padding="0" Margin="0,0,6,0"
-                                                        BorderThickness="0"
-                                                        Background="Transparent"
-                                                        FontSize="12"
-                                                        VerticalAlignment="Center"
-                                                        ToolTip="Add to Soundboard"
-                                                        Command="{Binding DataContext.AddFileToSoundboardCommand,
-                                                                          RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        CommandParameter="{Binding}">
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="3" Text="{Binding FileName}"
+                                                   VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding FilePath}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Opacity" Value="1.0"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                                                            <Setter Property="Opacity" Value="0.45"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <StackPanel Grid.Column="4" Orientation="Horizontal"
+                                                    VerticalAlignment="Center" Margin="6,0,0,0">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Grid}}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsVolumeOverridden}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsCooldownOverridden}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <StackPanel Orientation="Horizontal"
+                                                        ToolTip="Per-sound volume override (stacks with agent volume, 0–200%)">
+                                                <Slider Minimum="0" Maximum="200"
+                                                        Value="{Binding VolumeOverride}"
+                                                        Width="90" VerticalAlignment="Center"
+                                                        SmallChange="1" LargeChange="10"
+                                                        TickFrequency="100" TickPlacement="BottomRight"/>
+                                                <TextBlock Text="{Binding VolumeOverride, StringFormat={}{0:0}%}"
+                                                           VerticalAlignment="Center" Margin="4,0,0,0"
+                                                           Width="38" TextAlignment="Right"
+                                                           FontSize="11" Opacity="0.8"/>
+                                                <Button Content="↺" Width="20" Height="18"
+                                                        Padding="0" Margin="2,0,0,0"
+                                                        Background="Transparent" BorderThickness="0"
+                                                        Command="{Binding ResetVolumeOverrideCommand}"
+                                                        ToolTip="Reset volume to 100%">
                                                     <Button.Style>
                                                         <Style TargetType="Button">
-                                                            <Setter Property="Foreground" Value="#555"/>
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                                                                    <Setter Property="Foreground" Value="#C8A227"/>
+                                                                <DataTrigger Binding="{Binding IsVolumeOverridden}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
                                                     </Button.Style>
                                                 </Button>
-                                                <StackPanel Grid.Column="2" Orientation="Horizontal"
-                                                            VerticalAlignment="Center" Margin="0,0,6,0"
-                                                            ToolTip="{Binding PlayCountThisSession, StringFormat=Played {0} time(s) this session}">
-                                                    <Ellipse Width="8" Height="8" VerticalAlignment="Center"
-                                                             Fill="{Binding PlayCountThisSession, Converter={StaticResource HeatConverter}}"/>
-                                                    <TextBlock Text="{Binding PlayCountThisSession}"
-                                                               FontSize="9" Foreground="#CCC" FontWeight="Bold"
-                                                               VerticalAlignment="Center" Margin="3,0,0,0"
-                                                               MinWidth="12">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding PlayCountThisSession}" Value="0">
-                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-                                                </StackPanel>
-                                                <TextBlock Grid.Column="3" Text="{Binding FileName}"
-                                                           VerticalAlignment="Center"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           ToolTip="{Binding FilePath}">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Opacity" Value="1.0"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsEnabled}" Value="False">
-                                                                    <Setter Property="Opacity" Value="0.45"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                                <StackPanel Grid.Column="4" Orientation="Horizontal"
-                                                            VerticalAlignment="Center" Margin="6,0,0,0">
-                                                    <StackPanel.Style>
-                                                        <Style TargetType="StackPanel">
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="10,0,0,0"
+                                                        ToolTip="Per-sound minimum cooldown in seconds (blank = none)">
+                                                <TextBlock Text="⏱" VerticalAlignment="Center"
+                                                           FontSize="11" Opacity="0.7" Margin="0,0,3,0"/>
+                                                <TextBox Text="{Binding CooldownOverrideText, UpdateSourceTrigger=LostFocus}"
+                                                         Width="40" VerticalAlignment="Center"
+                                                         FontSize="11" Padding="2,1"
+                                                         TextAlignment="Right"/>
+                                                <TextBlock Text="s" VerticalAlignment="Center"
+                                                           FontSize="11" Opacity="0.7" Margin="2,0,0,0"/>
+                                                <Button Content="✕" Width="18" Height="18"
+                                                        Padding="0" Margin="2,0,0,0"
+                                                        Background="Transparent" BorderThickness="0"
+                                                        Command="{Binding ResetCooldownOverrideCommand}"
+                                                        ToolTip="Clear cooldown override">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Grid}}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding IsVolumeOverridden}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
                                                                 <DataTrigger Binding="{Binding IsCooldownOverridden}" Value="True">
                                                                     <Setter Property="Visibility" Value="Visible"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
-                                                    </StackPanel.Style>
-                                                    <StackPanel Orientation="Horizontal"
-                                                                ToolTip="Per-sound volume override (stacks with agent volume, 0–200%)">
-                                                        <Slider Minimum="0" Maximum="200"
-                                                                Value="{Binding VolumeOverride}"
-                                                                Width="90" VerticalAlignment="Center"
-                                                                SmallChange="1" LargeChange="10"
-                                                                TickFrequency="100" TickPlacement="BottomRight"/>
-                                                        <TextBlock Text="{Binding VolumeOverride, StringFormat={}{0:0}%}"
-                                                                   VerticalAlignment="Center" Margin="4,0,0,0"
-                                                                   Width="38" TextAlignment="Right"
-                                                                   FontSize="11" Opacity="0.8"/>
-                                                        <Button Content="↺" Width="20" Height="18"
-                                                                Padding="0" Margin="2,0,0,0"
-                                                                Background="Transparent" BorderThickness="0"
-                                                                Command="{Binding ResetVolumeOverrideCommand}"
-                                                                ToolTip="Reset volume to 100%">
-                                                            <Button.Style>
-                                                                <Style TargetType="Button">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding IsVolumeOverridden}" Value="True">
-                                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </Button.Style>
-                                                        </Button>
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal" Margin="10,0,0,0"
-                                                                ToolTip="Per-sound minimum cooldown in seconds (blank = none)">
-                                                        <TextBlock Text="⏱" VerticalAlignment="Center"
-                                                                   FontSize="11" Opacity="0.7" Margin="0,0,3,0"/>
-                                                        <TextBox Text="{Binding CooldownOverrideText, UpdateSourceTrigger=LostFocus}"
-                                                                 Width="40" VerticalAlignment="Center"
-                                                                 FontSize="11" Padding="2,1"
-                                                                 TextAlignment="Right"/>
-                                                        <TextBlock Text="s" VerticalAlignment="Center"
-                                                                   FontSize="11" Opacity="0.7" Margin="2,0,0,0"/>
-                                                        <Button Content="✕" Width="18" Height="18"
-                                                                Padding="0" Margin="2,0,0,0"
-                                                                Background="Transparent" BorderThickness="0"
-                                                                Command="{Binding ResetCooldownOverrideCommand}"
-                                                                ToolTip="Clear cooldown override">
-                                                            <Button.Style>
-                                                                <Style TargetType="Button">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding IsCooldownOverridden}" Value="True">
-                                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </Button.Style>
-                                                        </Button>
-                                                    </StackPanel>
-                                                </StackPanel>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </Border>
-                        </StackPanel>
+                                                    </Button.Style>
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </ScrollViewer>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-    <!-- Drop overlay shown while a folder is dragged over the panel -->
-    <Border x:Name="DropOverlay"
-            Background="#88000000" BorderBrush="#BBFFFFFF" BorderThickness="2" CornerRadius="6"
-            Visibility="Collapsed" IsHitTestVisible="False">
-        <TextBlock x:Name="DropOverlayText" Text="Drop folder to add agent"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                   FontSize="16" Foreground="White" FontWeight="Bold"/>
-    </Border>
+        <!-- MACHINE-11: Header row — machine selector dropdown shown only in flat mode -->
+        <Border Grid.Row="0" Padding="6,4" BorderBrush="#333" BorderThickness="0,0,0,1">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsAgentsGrouped}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <DockPanel LastChildFill="True">
+                <TextBlock DockPanel.Dock="Left" Text="Machine:" VerticalAlignment="Center"
+                           Margin="0,0,6,0" Opacity="0.7"/>
+                <ComboBox ItemsSource="{Binding Machines}"
+                          SelectedItem="{Binding SelectedMachine, Mode=TwoWay}"
+                          DisplayMemberPath="Name"
+                          ToolTip="Switch which machine's agents are listed here"/>
+            </DockPanel>
+        </Border>
+
+        <!-- Flat list (visible when IsAgentsGrouped=false) -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer.Style>
+                <Style TargetType="ScrollViewer">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsAgentsGrouped}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ScrollViewer.Style>
+            <ItemsControl x:Name="AgentsList" ItemsSource="{Binding Agents}"
+                          ItemTemplate="{StaticResource AgentCardTemplate}"/>
+        </ScrollViewer>
+
+        <!-- Grouped list (visible when IsAgentsGrouped=true): one collapsible header per machine -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer.Style>
+                <Style TargetType="ScrollViewer">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsAgentsGrouped}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ScrollViewer.Style>
+            <ItemsControl x:Name="AgentGroupsList" ItemsSource="{Binding AgentGroups}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="0,4,0,0">
+                            <!-- Group header: chevron toggle, icon, machine name -->
+                            <Border Background="#262626" Padding="6,4" CornerRadius="3"
+                                    Cursor="Hand"
+                                    MouseLeftButtonUp="OnGroupHeaderClick"
+                                    Tag="{Binding}">
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock DockPanel.Dock="Left" FontSize="10"
+                                               VerticalAlignment="Center" Margin="0,0,6,0">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="▼"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsCollapsed}" Value="True">
+                                                        <Setter Property="Text" Value="▶"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <Image DockPanel.Dock="Left"
+                                           Source="{Binding Machine.ResolvedIconPath, Converter={StaticResource GroupHeaderIcon}}"
+                                           Width="18" Height="18" Margin="0,0,6,0"
+                                           VerticalAlignment="Center">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Machine.IconPath}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                    <TextBlock Text="{Binding Machine.Name}" FontWeight="SemiBold"
+                                               FontSize="13" VerticalAlignment="Center"
+                                               TextTrimming="CharacterEllipsis"/>
+                                </DockPanel>
+                            </Border>
+                            <!-- Agents under this machine (collapsed when group is collapsed) -->
+                            <ItemsControl ItemsSource="{Binding Agents}"
+                                          ItemTemplate="{StaticResource AgentCardTemplate}"
+                                          Margin="12,2,0,0">
+                                <ItemsControl.Style>
+                                    <Style TargetType="ItemsControl">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCollapsed}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ItemsControl.Style>
+                            </ItemsControl>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Drop overlay shown while a folder is dragged over the panel -->
+        <Border x:Name="DropOverlay" Grid.Row="0" Grid.RowSpan="2"
+                Background="#88000000" BorderBrush="#BBFFFFFF" BorderThickness="2" CornerRadius="6"
+                Visibility="Collapsed" IsHitTestVisible="False">
+            <TextBlock x:Name="DropOverlayText" Text="Drop folder to add agent"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       FontSize="16" Foreground="White" FontWeight="Bold"/>
+        </Border>
     </Grid>
 </UserControl>

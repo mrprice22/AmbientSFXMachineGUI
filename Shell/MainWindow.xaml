@@ -77,16 +77,25 @@
             <avalon:LayoutRoot>
                 <avalon:LayoutPanel Orientation="Vertical">
                     <avalon:LayoutPanel Orientation="Horizontal">
-                        <avalon:LayoutAnchorablePane DockWidth="200">
-                            <avalon:LayoutAnchorable x:Name="PaneMachines" ContentId="machines" Title="Machines">
-                                <machines:MachinesRailView/>
-                            </avalon:LayoutAnchorable>
-                        </avalon:LayoutAnchorablePane>
-                        <avalon:LayoutAnchorablePane DockWidth="*">
-                            <avalon:LayoutAnchorable x:Name="PaneAgents" ContentId="agents" Title="Agents">
-                                <agent:AgentPanelView/>
-                            </avalon:LayoutAnchorable>
-                        </avalon:LayoutAnchorablePane>
+                        <!-- MACHINE-11: Machines + Agents are nested in their own horizontal
+                             group so the splitter between them stays inside the pair, and
+                             CanFloat="False" prevents either from being torn off into a
+                             floating window. The machines pane still supports Hide (X) and
+                             auto-hide (pin); those actions only affect the machines pane. -->
+                        <avalon:LayoutPanel Orientation="Horizontal" DockWidth="*">
+                            <avalon:LayoutAnchorablePane DockWidth="200">
+                                <avalon:LayoutAnchorable x:Name="PaneMachines" ContentId="machines"
+                                                         Title="Machines" CanFloat="False">
+                                    <machines:MachinesRailView/>
+                                </avalon:LayoutAnchorable>
+                            </avalon:LayoutAnchorablePane>
+                            <avalon:LayoutAnchorablePane DockWidth="*">
+                                <avalon:LayoutAnchorable x:Name="PaneAgents" ContentId="agents"
+                                                         Title="Agents" CanFloat="False">
+                                    <agent:AgentPanelView/>
+                                </avalon:LayoutAnchorable>
+                            </avalon:LayoutAnchorablePane>
+                        </avalon:LayoutPanel>
                         <avalon:LayoutAnchorablePane DockWidth="*">
                             <avalon:LayoutAnchorable x:Name="PaneLog" ContentId="log" Title="Live Log">
                                 <log:LogPanelView/>

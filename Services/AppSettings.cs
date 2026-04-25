@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
@@ -8,6 +9,9 @@ public sealed class AppSettings
 {
     public string? debugLogPath { get; set; }
     public string? lastSelectedMachineId { get; set; }
+
+    // MACHINE-11: per-machine collapse state for grouped agents view (key = machineId GUID string).
+    public Dictionary<string, bool> agentGroupCollapsed { get; set; } = new();
 
     private static string SettingsPath => Path.Combine(MachinePaths.Root, "settings.json");
 

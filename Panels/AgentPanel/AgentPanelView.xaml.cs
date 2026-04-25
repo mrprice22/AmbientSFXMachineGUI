@@ -190,6 +190,13 @@ public partial class AgentPanelView : UserControl
         if (sender is FrameworkElement fe) fe.Opacity = 1.0;
     }
 
+    // MACHINE-11: toggle the collapse state of a group header in the grouped agents view.
+    private void OnGroupHeaderClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: AgentGroupViewModel group })
+            group.IsCollapsed = !group.IsCollapsed;
+    }
+
     private void OnAgentCardDrop(object sender, DragEventArgs e)
     {
         if (sender is FrameworkElement fe) fe.Opacity = 1.0;

@@ -936,7 +936,7 @@
       "title": "Link machines and agents panes; group agents by machine when machines pane is closed",
       "description": "The Machines rail and Agents panel are currently independent dockable panels that can be placed anywhere in the layout, creating disjointed UX when they are split apart. This story makes them a linked pair: (1) Linked docking — when both panes are visible, they share a splitter container so they always appear side-by-side and cannot be dragged into unrelated layout zones; (2) Machines pane still supports all normal AvalonDock actions — pin to auto-hide, close (hide) via X, or minimize. These actions affect only the machines pane, not the agents pane; (3) Grouped fallback — when the machines pane is hidden/closed/auto-hidden, the agents panel switches from a flat list to a grouped view: agents are sectioned under collapsible group headers (one per machine) showing the machine name and icon. Each group can be individually expanded or collapsed; collapse state persists across sessions in %AppData%\\AmbientAgents\\settings.json under an 'agentGroupCollapsed' map keyed by machineId. When the machines pane is restored, the grouped view reverts to the flat list scoped to SelectedMachine. A machine selector dropdown appears in the agents panel header in flat mode so the user can still switch machines without the rail.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "MACHINE-02",
         "MACHINE-04",

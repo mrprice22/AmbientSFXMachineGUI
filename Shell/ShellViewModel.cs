@@ -60,6 +60,7 @@ public partial class ShellViewModel : ObservableObject
         {
             if (SelectedMachine is null && Machines.Count > 0)
                 SelectedMachine = PickInitialMachine();
+            if (IsAgentsGrouped) RebuildAgentGroups();
         };
     }
 
@@ -83,6 +84,9 @@ public partial class ShellViewModel : ObservableObject
     public ObservableCollection<AgentViewModel> Agents { get; } = new();
     public ObservableCollection<SoundboardItem> SoundboardItems { get; } = new();
 
+    // MACHINE-11: groups for the fallback "all machines" agents view shown when the machines pane is hidden.
+    public ObservableCollection<AgentGroupViewModel> AgentGroups { get; } = new();
+
     [ObservableProperty] private MachineViewModel? _selectedMachine;
     [ObservableProperty] private double _masterVolume = 100;
     [ObservableProperty] private bool _isMutedAll;
@@ -91,6 +95,11 @@ public partial class ShellViewModel : ObservableObject
     [ObservableProperty] private string _libraryFilter = string.Empty;
     [ObservableProperty] private bool _isEditMode;
     [ObservableProperty] private AudioFileEntry? _selectedLibraryEntry;
+
+    // MACHINE-11: when true, the agents panel shows all machines' agents grouped under collapsible
+    // headers; when false, it shows a flat list scoped to SelectedMachine. Driven by the machines
+    // pane visibility from MainWindow.
+    [ObservableProperty] private bool _isAgentsGrouped;
 
     public ObservableCollection<LibraryUsageItem> SelectedEntryUsages { get; } = new();
 
@@ -345,6 +354,42 @@ public partial class ShellViewModel : ObservableObject
             if (match is not null) return match;
         }
         return Machines.FirstOrDefault(m => m.Agents.Count > 0) ?? Machines[0];
+    }
+
+    // MACHINE-11
+    partial void OnIsAgentsGroupedChanged(bool value)
+    {
+        if (value) RebuildAgentGroups();
+        else ClearAgentGroups();
+        App.DebugLog.LogUser("Shell", $"Agents view → {(value ? "grouped (machines pane hidden)" : "flat")}");
+    }
+
+    private void RebuildAgentGroups()
+    {
+        ClearAgentGroups();
+        var collapsed = App.Settings.agentGroupCollapsed ??= new Dictionary<string, bool>();
+        foreach (var machine in Machines)
+        {
+            var key = machine.Id.ToString();
+            collapsed.TryGetValue(key, out var isCollapsed);
+            var group = new AgentGroupViewModel(machine, isCollapsed);
+            group.CollapseStateChanged += OnAgentGroupCollapseChanged;
+            AgentGroups.Add(group);
+        }
+    }
+
+    private void ClearAgentGroups()
+    {
+        foreach (var g in AgentGroups) g.CollapseStateChanged -= OnAgentGroupCollapseChanged;
+        AgentGroups.Clear();
+    }
+
+    private void OnAgentGroupCollapseChanged(object? sender, EventArgs e)
+    {
+        if (sender is not AgentGroupViewModel group) return;
+        var map = App.Settings.agentGroupCollapsed ??= new Dictionary<string, bool>();
+        map[group.Machine.Id.ToString()] = group.IsCollapsed;
+        App.Settings.Save();
     }
 
     private void RebindAgentsMirror(MachineViewModel? newMachine)

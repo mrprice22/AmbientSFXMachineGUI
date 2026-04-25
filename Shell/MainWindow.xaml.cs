@@ -40,17 +40,54 @@ public partial class MainWindow : Window
         // so Reset / Show-All-fallback can restore the fresh-install state.
         SnapshotDefaultLayout();
 
-        if (!File.Exists(LayoutFilePath)) return;
-        try
+        if (File.Exists(LayoutFilePath))
         {
-            var serializer = new XmlLayoutSerializer(DockManager);
-            using var stream = File.OpenRead(LayoutFilePath);
-            serializer.Deserialize(stream);
+            try
+            {
+                var serializer = new XmlLayoutSerializer(DockManager);
+                using var stream = File.OpenRead(LayoutFilePath);
+                serializer.Deserialize(stream);
+            }
+            catch
+            {
+                // Corrupt or incompatible layout — ignore and fall back to default.
+            }
         }
-        catch
+
+        // MACHINE-11: track machines-pane visibility so the agents panel can switch
+        // to its grouped fallback view when the rail is hidden/closed/auto-hidden.
+        // Resolve fresh after Deserialize because the loaded layout may have
+        // replaced the original anchorable instances.
+        var machinesPane = FindAnchorable("machines");
+        if (machinesPane is not null)
         {
-            // Corrupt or incompatible layout — ignore and fall back to default.
+            machinesPane.IsVisibleChanged += OnMachinesPaneStateChanged;
+            machinesPane.IsActiveChanged += OnMachinesPaneStateChanged;
+            ((INotifyPropertyChanged)machinesPane).PropertyChanged += OnMachinesPanePropertyChanged;
         }
+        UpdateAgentsGroupingMode();
+    }
+
+    private void OnMachinesPaneStateChanged(object? sender, EventArgs e) => UpdateAgentsGroupingMode();
+
+    private void OnMachinesPanePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(LayoutAnchorable.IsAutoHidden) ||
+            e.PropertyName == nameof(LayoutAnchorable.IsHidden) ||
+            e.PropertyName == nameof(LayoutAnchorable.IsVisible))
+        {
+            UpdateAgentsGroupingMode();
+        }
+    }
+
+    private void UpdateAgentsGroupingMode()
+    {
+        if (DataContext is not ShellViewModel vm) return;
+        var pane = FindAnchorable("machines");
+        // Grouped fallback applies whenever the rail is not actively visible to the user:
+        // hidden via X, removed entirely, or auto-hidden (pinned to side).
+        bool grouped = pane is null || !pane.IsVisible || pane.IsAutoHidden || pane.IsHidden;
+        vm.IsAgentsGrouped = grouped;
     }
 
     private void SnapshotDefaultLayout()
