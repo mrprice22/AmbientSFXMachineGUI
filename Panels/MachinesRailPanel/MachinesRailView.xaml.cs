@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using AmbientSFXMachineGUI.Models;
@@ -12,18 +13,24 @@ public partial class MachinesRailView : UserControl
 {
     private Point _dragStart;
     private MachineViewModel? _dragged;
+    private bool _suppressReorderDrag;
 
     public MachinesRailView() => InitializeComponent();
 
     private void OnListPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        _dragStart = e.GetPosition(null);
-        _dragged   = null;
+        _dragStart            = e.GetPosition(null);
+        _dragged              = null;
+        // Don't start a row reorder drag if the press began inside an interactive
+        // control like the master-volume Slider or the enable ToggleButton —
+        // DoDragDrop would steal mouse capture from the Slider's Thumb mid-drag.
+        _suppressReorderDrag  = IsInsideInteractiveControl(e.OriginalSource as DependencyObject);
     }
 
     private void OnListMouseMove(object sender, MouseEventArgs e)
     {
         if (e.LeftButton != MouseButtonState.Pressed) return;
+        if (_suppressReorderDrag) return;
         var delta = e.GetPosition(null) - _dragStart;
         if (Math.Abs(delta.X) < SystemParameters.MinimumHorizontalDragDistance &&
             Math.Abs(delta.Y) < SystemParameters.MinimumVerticalDragDistance) return;
@@ -34,6 +41,18 @@ public partial class MachinesRailView : UserControl
 
         _dragged = machine;
         DragDrop.DoDragDrop(lb, machine, DragDropEffects.Move);
+    }
+
+    private static bool IsInsideInteractiveControl(DependencyObject? source)
+    {
+        while (source is not null)
+        {
+            if (source is RangeBase or Thumb or ToggleButton) return true;
+            source = source is Visual
+                ? VisualTreeHelper.GetParent(source)
+                : LogicalTreeHelper.GetParent(source);
+        }
+        return false;
     }
 
     private void OnListDrop(object sender, DragEventArgs e)

@@ -1222,7 +1222,7 @@
       "title": "Machine master volume slider drag stops mid-range requiring re-grab",
       "description": "The master volume slider on a machine card in the Machines rail stops responding to drag mid-stroke — the user must lift and re-grab the thumb to continue adjusting. Expected: the slider thumb should follow the pointer continuously from one extreme to the other in a single drag gesture. Likely cause: a ScrollViewer or other mouse-capture-stealing ancestor intercepts PreviewMouseMove/MouseMove before the Slider's Thumb sees it, or a LayoutTransform/RenderTransform misaligns hit-test coordinates so the thumb loses capture when the pointer drifts slightly outside its rendered bounds. Investigation: check whether a nested ScrollViewer in the machine card is swallowing events and calling e.Handled=true; also verify the Thumb DragDelta handler does not clamp value in a way that desyncs thumb position from the drag origin.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "MACHINE-03"
       ],
