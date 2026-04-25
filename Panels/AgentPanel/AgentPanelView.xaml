@@ -423,6 +423,7 @@
                                     </Image>
                                     <TextBlock Text="{Binding Machine.Name}" FontWeight="SemiBold"
                                                FontSize="13" VerticalAlignment="Center"
+                                               Foreground="#E8E8E8"
                                                TextTrimming="CharacterEllipsis"/>
                                 </DockPanel>
                             </Border>
