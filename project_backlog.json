@@ -278,7 +278,7 @@
       "title": "Import existing console-app machine folder",
       "description": "File > Import Machine picker that accepts a directory containing appSettings.config and snd/. Reads appName and icon from appSettings.config, then scans snd/<agent>/*.config to materialize AgentViewModels. References the folder in place (no copying). Validate against C:\\Users\\homel\\OneDrive\\Projects\\SpookyAudioMachine, ThursdayGameNightAudioSFX, and ThursdayPacmanAudioSFX. Validation/error-handling scope (added during testing): reject folders that are not a valid machine root with a clear, non-modal GUI error explaining what is missing — specifically detect and message the common mistake of selecting the snd/ subfolder instead of the machine root (i.e. the picked folder IS named 'snd' OR lacks appSettings.config but contains agent-style subfolders with .config files) and suggest 'select the parent folder instead'. Other rejection cases: missing appSettings.config, missing snd/ subfolder, snd/ has no agent subfolders, appSettings.config unreadable/malformed. On rejection: do NOT add a partial/broken MachineViewModel to the coordinator (this is what produced the iconless 'snd' ghost machine), do not persist anything, and surface the error both via a non-blocking toast/dialog and DebugLog.LogError. Re-importing the same valid machine root should be idempotent (match on RootPath) rather than creating a duplicate.",
       "priority": "high",
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [
         "MACHINE-01"
       ],

@@ -988,9 +988,22 @@ public partial class ShellViewModel : ObservableObject
         };
         if (dialog.ShowDialog() != DialogResult.OK) return;
 
-        var machine = MachineImporter.Import(dialog.SelectedPath, _machineCoordinator);
-        SelectedMachine = machine;
-        _machineCoordinator.SaveMachinesToDisk();
+        App.DebugLog.LogUser("Shell", $"Import Machine requested for '{dialog.SelectedPath}'");
+
+        var result = MachineImporter.TryImport(dialog.SelectedPath, _machineCoordinator);
+        if (!result.Success || result.Machine is null)
+        {
+            System.Windows.MessageBox.Show(
+                System.Windows.Application.Current?.MainWindow,
+                result.ErrorMessage ?? "Machine import failed.",
+                result.ErrorTitle   ?? "Import Machine",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        SelectedMachine = result.Machine;
+        if (!result.Reused) _machineCoordinator.SaveMachinesToDisk();
     }
 
     [RelayCommand]
