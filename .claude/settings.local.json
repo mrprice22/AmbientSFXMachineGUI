@@ -12,7 +12,8 @@
       "Bash(py C:/Git/AudioMachines/AmbientSFXMachineGUI/next_task.py)",
       "Bash(py *)",
       "Bash(xargs grep *)",
-      "Bash(python *)"
+      "Bash(python *)",
+      "Bash(python3 *)"
     ]
   }
 }

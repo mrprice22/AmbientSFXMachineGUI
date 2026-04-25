@@ -1262,6 +1262,45 @@
       ]
     },
     {
+      "id": "S-BUG-009",
+      "feature": "F05_LOG",
+      "title": "Live Log star icon shown as filled for all SFX regardless of favorite status",
+      "description": "Every entry in the Live Log displays a filled/active star icon even when the played sound file is not saved as a favorite in the Soundboard. The star should only appear filled when the sound's file path matches an existing Soundboard entry; otherwise it should be empty or hidden. Correct behaviour: filled star = file is in the Soundboard favorites; empty/no star = file is not favorited.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["LOG-05"],
+      "references": [
+        "§5.5 Live Playback Log",
+        "§5.8 Soundboard / Favorites"
+      ]
+    },
+    {
+      "id": "AGENT-16",
+      "feature": "F02_AGENTS",
+      "title": "Per-machine on/off toggle in the Agents pane grouped-view header row",
+      "description": "When the Agents pane is in grouped mode (MACHINE-11), each machine-group header row should include an on/off ToggleButton that mirrors the machine's IsEnabled state — identical in appearance to the toggle already present on the machine card in the Machines pane (SHELL-06 style: blue 'On' / light-red 'Off'). Toggling either button must update the shared MachineViewModel.IsEnabled property so both panes stay in sync without a separate sync step. The toggle should sit to the right of the machine name/icon inside the group header Border, docked to the right edge of the DockPanel.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["MACHINE-11", "SHELL-06"],
+      "references": [
+        "§5.2 Agent Management",
+        "§5.3 Machine Management"
+      ]
+    },
+    {
+      "id": "SHELL-07",
+      "feature": "F01_SHELL",
+      "title": "Global Pause/Play button next to the master volume slider",
+      "description": "Add a Pause/Play toggle button in the top shell bar, immediately adjacent to the master volume slider. When Pause is pressed: all active WaveOutEvent instances across every machine/agent should be paused mid-playback (WaveOutEvent.Pause()) so the current audio position is preserved; all agent scheduler timers should be suspended so no new sounds are triggered while paused. When Play (resume) is pressed: all previously-paused WaveOutEvent instances should resume from their saved position (WaveOutEvent.Play() after Pause keeps the buffer position); all agent scheduler timers should restart from where they were suspended. Paused state must survive a SelectedMachine change and should be communicated to AgentCoordinator via a new SetGlobalPaused(bool) method (or equivalent) so each coordinator knows to hold new fires. The button should use a recognisable pause (‖) and play (▶) icon and reflect the current state visually. DebugLog.LogUser should record the pause/resume action.",
+      "priority": "medium",
+      "status": "backlog",
+      "dependencies": ["SHELL-06"],
+      "references": [
+        "§5.1 Core Shell",
+        "§5.2 Agent Management — Playback Engine"
+      ]
+    },
+    {
       "id": "S-BUG-006",
       "feature": "F02_AGENTS",
       "title": "Agents panel is empty at startup until an agent is re-imported",
