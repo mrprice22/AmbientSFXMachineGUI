@@ -1312,6 +1312,19 @@
         "Â§5.2 Agent Management",
         "Â§4 Panel Layout System"
       ]
+    },
+    {
+      "id": "S-BUG-010",
+      "feature": "F01_SHELL",
+      "title": "Global unpause spawns duplicate sounds on top of resumed playback",
+      "description": "After SHELL-07, hitting global Play (resume) while a sound was actively playing at the moment of pause causes a second sound to start firing immediately, layered on top of the resumed playback. Root cause in AgentCoordinator: the per-agent System.Threading.Timer is one-shot, but rt.Timer is only nulled inside ScheduleNext/StopRuntime — not when the timer fires. Between OnTimerFire firing and the spawned playback eventually completing (and OnPlaybackComplete -> ScheduleNext nulling/replacing rt.Timer), rt.Timer holds a stale-but-non-null reference to the already-fired timer while rt.Active also has the running playback. If the user pauses in that window, SetGlobalPaused(true) sees rt.Timer != null, computes PausedRemainingMs ~= 0 (because TimerScheduledAt is far in the past) and pauses the active output. On resume SetGlobalPaused(false) restarts the active output AND, because PausedRemainingMs >= 0, schedules a brand-new timer with a delay of ~0ms that immediately fires another OnTimerFire/PlayFile — producing the duplicate. Fix: null rt.Timer at the start of OnTimerFire so SetGlobalPaused correctly identifies that no timer is pending while a playback is running, and add a small safety net so a timer that fires while _globallyPaused is true records PausedRemainingMs=0 to be picked up on resume rather than going silent.",
+      "priority": "high",
+      "status": "done",
+      "dependencies": ["SHELL-07"],
+      "references": [
+        "§5.1 Core Shell",
+        "§5.2 Agent Management — Playback Engine"
+      ]
     }
   ]
 }

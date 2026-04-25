@@ -13,7 +13,9 @@
       "Bash(py *)",
       "Bash(xargs grep *)",
       "Bash(python *)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(dotnet msbuild *)",
+      "PowerShell(dotnet msbuild *)"
     ]
   }
 }

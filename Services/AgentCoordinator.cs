@@ -370,7 +370,17 @@ public sealed class AgentCoordinator
 
     private void OnTimerFire(AgentViewModel agent, AgentRuntime rt)
     {
-        if (!rt.Enabled || _globallyPaused) return;
+        // One-shot timer has fired; clear the reference so SetGlobalPaused does not
+        // see a stale handle and schedule a duplicate timer on resume.
+        rt.Timer = null;
+        if (!rt.Enabled) return;
+        if (_globallyPaused)
+        {
+            // Race: pause arrived between the timer firing and this callback running.
+            // Record a zero remaining time so resume reschedules instead of going silent.
+            if (rt.PausedRemainingMs < 0) rt.PausedRemainingMs = 0;
+            return;
+        }
         var file = SelectNextFile(agent, rt);
         if (file == null)
         {
