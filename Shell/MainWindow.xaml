@@ -25,7 +25,10 @@
                 <MenuItem Header="_Debug Log"    IsCheckable="True" Click="OnViewMenuItemClick" Tag="debuglog"/>
                 <MenuItem Header="_Soundboard"   IsCheckable="True" Click="OnViewMenuItemClick" Tag="soundboard"/>
                 <Separator/>
-                <MenuItem Header="Show _All Panels" Click="OnShowAllPanelsClick"/>
+                <MenuItem Header="Show _All Panels" Click="OnShowAllPanelsClick"
+                          ToolTip="Restore any hidden or closed panels"/>
+                <MenuItem Header="_Reset to Default Layout" Click="OnResetLayoutClick"
+                          ToolTip="Restore the original panel layout (fresh-install state)"/>
             </MenuItem>
         </Menu>
 
