@@ -147,10 +147,6 @@
                             <!-- Volume -->
                             <Slider Minimum="0" Maximum="100" Value="{Binding Volume}" Margin="0,4,0,0"/>
 
-                            <!-- Pan indicator -->
-                            <controls:PanIndicator Pan="{Binding LastPanValue}"
-                                                   HorizontalAlignment="Center" Margin="0,2,0,0"/>
-
                             <!-- Countdown + last played -->
                             <TextBlock Text="{Binding NextPlayIn, StringFormat=Next in \{0:mm\\:ss\}}"
                                        Margin="0,4,0,0"/>
