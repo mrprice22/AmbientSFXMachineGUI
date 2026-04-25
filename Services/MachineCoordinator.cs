@@ -126,6 +126,12 @@ public sealed class MachineCoordinator
             coordinator.SetMuteAll(muted);
     }
 
+    public void SetGlobalPaused(bool paused)
+    {
+        foreach (var coordinator in _coordinators.Values)
+            coordinator.SetGlobalPaused(paused);
+    }
+
     public void LoadMachinesFromDisk()
     {
         var dir = MachinesDir;

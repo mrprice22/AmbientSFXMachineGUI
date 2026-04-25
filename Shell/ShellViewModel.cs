@@ -90,6 +90,7 @@ public partial class ShellViewModel : ObservableObject
     [ObservableProperty] private MachineViewModel? _selectedMachine;
     [ObservableProperty] private double _masterVolume = 100;
     [ObservableProperty] private bool _isMutedAll;
+    [ObservableProperty] private bool _isGloballyPaused;
     [ObservableProperty] private Profile? _activeProfile;
     [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private string _libraryFilter = string.Empty;
@@ -545,6 +546,11 @@ public partial class ShellViewModel : ObservableObject
     {
         _machineCoordinator.SetMuteAll(value);
         App.DebugLog.LogUser("Shell", value ? "Mute-all ON" : "Mute-all OFF");
+    }
+    partial void OnIsGloballyPausedChanged(bool value)
+    {
+        _machineCoordinator.SetGlobalPaused(value);
+        App.DebugLog.LogUser("Shell", value ? "Global pause ON" : "Global pause OFF (resumed)");
     }
     partial void OnActiveProfileChanged(Profile? oldValue, Profile? newValue)
     {

@@ -26,6 +26,7 @@ public sealed class AgentCoordinator
     private double _machineMasterVolume = 100;
     private bool _mutedAll;
     private bool _groupEnabled = true;
+    private bool _globallyPaused;
 
     public AgentCoordinator(ObservableCollection<AgentViewModel> agents, Action<LogEntryViewModel> publishLog)
     {
@@ -97,6 +98,55 @@ public sealed class AgentCoordinator
     {
         _groupEnabled = enabled;
         foreach (var agent in _agents) { ApplyEnabled(agent); ApplyEffectiveVolume(agent); }
+    }
+
+    public void SetGlobalPaused(bool paused)
+    {
+        if (_globallyPaused == paused) return;
+        _globallyPaused = paused;
+
+        foreach (var kv in _runtime)
+        {
+            var agent = kv.Key;
+            var rt = kv.Value;
+
+            if (paused)
+            {
+                if (rt.Timer != null)
+                {
+                    int elapsed = (int)(DateTime.UtcNow - rt.TimerScheduledAt).TotalMilliseconds;
+                    rt.PausedRemainingMs = Math.Max(0, rt.TimerDelayMs - elapsed);
+                    try { rt.Timer.Dispose(); } catch { }
+                    rt.Timer = null;
+                }
+
+                lock (rt.ActiveLock)
+                {
+                    foreach (var entry in rt.Active.Values)
+                        try { entry.Output.Pause(); } catch { }
+                }
+            }
+            else
+            {
+                lock (rt.ActiveLock)
+                {
+                    foreach (var entry in rt.Active.Values)
+                        try { entry.Output.Play(); } catch { }
+                }
+
+                if (rt.Enabled && rt.PausedRemainingMs >= 0)
+                {
+                    int remaining = rt.PausedRemainingMs;
+                    rt.PausedRemainingMs = -1;
+                    rt.TimerScheduledAt = DateTime.UtcNow;
+                    rt.TimerDelayMs = remaining;
+                    var dispatcher = Application.Current?.Dispatcher;
+                    if (dispatcher != null)
+                        dispatcher.BeginInvoke(new Action(() => agent.NextPlayIn = TimeSpan.FromMilliseconds(remaining)));
+                    rt.Timer = new System.Threading.Timer(_ => OnTimerFire(agent, rt), null, remaining, Timeout.Infinite);
+                }
+            }
+        }
     }
 
     /// <summary>Effective gain in [0,1] = appMaster * machineMaster * agent.Volume (all 0–100 sliders).</summary>
@@ -274,6 +324,15 @@ public sealed class AgentCoordinator
         if (dispatcher != null)
             dispatcher.BeginInvoke(new Action(() => agent.NextPlayIn = TimeSpan.FromMilliseconds(waitMs)));
 
+        rt.TimerDelayMs = waitMs;
+        rt.TimerScheduledAt = DateTime.UtcNow;
+
+        if (_globallyPaused)
+        {
+            rt.PausedRemainingMs = waitMs;
+            return;
+        }
+
         rt.Timer = new System.Threading.Timer(_ => OnTimerFire(agent, rt), null, waitMs, Timeout.Infinite);
     }
 
@@ -311,7 +370,7 @@ public sealed class AgentCoordinator
 
     private void OnTimerFire(AgentViewModel agent, AgentRuntime rt)
     {
-        if (!rt.Enabled) return;
+        if (!rt.Enabled || _globallyPaused) return;
         var file = SelectNextFile(agent, rt);
         if (file == null)
         {
@@ -519,6 +578,10 @@ public sealed class AgentCoordinator
         public readonly Dictionary<Guid, RuntimeActive> Active = new();
         public readonly Dictionary<string, DateTime> LastPerFileFire =
             new(StringComparer.OrdinalIgnoreCase);
+        // Pause/resume tracking
+        public DateTime TimerScheduledAt;
+        public int TimerDelayMs;
+        public int PausedRemainingMs = -1;
     }
 }
 

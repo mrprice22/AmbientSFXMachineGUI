@@ -38,6 +38,20 @@
                 <TextBlock Text="Master" VerticalAlignment="Center" Margin="4,0"/>
                 <Slider Width="120" Minimum="0" Maximum="100"
                         Value="{Binding MasterVolume, Mode=TwoWay}"/>
+                <ToggleButton IsChecked="{Binding IsGloballyPaused}"
+                              ToolTip="Pause / Resume all machines"
+                              FontFamily="Segoe UI Symbol" Width="28">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                            <Setter Property="Content" Value="&#x2016;"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content" Value="&#x25B6;"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
                 <ToggleButton Content="Mute All" IsChecked="{Binding IsMutedAll}"/>
                 <Separator/>
                 <TextBlock Text="Profile:" VerticalAlignment="Center" Margin="4,0"/>

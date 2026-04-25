@@ -1293,7 +1293,7 @@
       "title": "Global Pause/Play button next to the master volume slider",
       "description": "Add a Pause/Play toggle button in the top shell bar, immediately adjacent to the master volume slider. When Pause is pressed: all active WaveOutEvent instances across every machine/agent should be paused mid-playback (WaveOutEvent.Pause()) so the current audio position is preserved; all agent scheduler timers should be suspended so no new sounds are triggered while paused. When Play (resume) is pressed: all previously-paused WaveOutEvent instances should resume from their saved position (WaveOutEvent.Play() after Pause keeps the buffer position); all agent scheduler timers should restart from where they were suspended. Paused state must survive a SelectedMachine change and should be communicated to AgentCoordinator via a new SetGlobalPaused(bool) method (or equivalent) so each coordinator knows to hold new fires. The button should use a recognisable pause (‖) and play (▶) icon and reflect the current state visually. DebugLog.LogUser should record the pause/resume action.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["SHELL-06"],
       "references": [
         "§5.1 Core Shell",
