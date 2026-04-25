@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using AmbientSFXMachineGUI.Services;
@@ -57,6 +58,7 @@ public partial class App : Application
         Tray.MachineMuteToggled += OnTrayMachineMuteToggled;
         Tray.MachineSoloRequested += OnTrayMachineSoloRequested;
         Tray.MachineShowCardsRequested += OnTrayMachineShowCardsRequested;
+        Tray.MachineCloseRequested += OnTrayMachineCloseRequested;
         Tray.AttachMachines(MachineCoordinator.Machines);
 
         Hotkeys.Register("app.muteAll", () =>
@@ -120,6 +122,19 @@ public partial class App : Application
         {
             foreach (var m in MachineCoordinator.Machines)
                 m.IsEnabled = m.Id == id;
+        });
+    }
+
+    // MACHINE-13: confirmed via the inline tray submenu, so just unload here.
+    private void OnTrayMachineCloseRequested(object? sender, System.Guid id)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            var machine = MachineCoordinator.Machines.FirstOrDefault(m => m.Id == id);
+            if (machine is null) return;
+            DebugLog.LogUser("Tray", $"Close machine '{machine.Name}' (unload)");
+            MachineCoordinator.UnloadMachine(machine);
+            Tray.ShowBalloon("Machine closed", $"'{machine.Name}' has been unloaded from the session.");
         });
     }
 

@@ -26,6 +26,8 @@ public sealed class TrayService : IDisposable
     public event EventHandler<Guid>? MachineMuteToggled;
     public event EventHandler<Guid>? MachineSoloRequested;
     public event EventHandler<Guid>? MachineShowCardsRequested;
+    // MACHINE-13: Close (unload) the machine from the running app.
+    public event EventHandler<Guid>? MachineCloseRequested;
 
     public void Initialize()
     {
@@ -105,9 +107,20 @@ public sealed class TrayService : IDisposable
         var showItem = new ToolStripMenuItem("Show cards");
         showItem.Click += (_, _) => MachineShowCardsRequested?.Invoke(this, machine.Id);
 
+        // MACHINE-13: Close machine. Uses an inline confirm sub-item rather than a modal —
+        // the parent says "Close machine"; hovering reveals "Confirm: Close '<name>'" which
+        // actually fires the event. Works for degraded entries (no icon, missing root path)
+        // because no per-machine state beyond Id and Name is read here.
+        var closeItem = new ToolStripMenuItem("Close machine") { Name = "close" };
+        var confirmItem = new ToolStripMenuItem($"Confirm: Close '{machine.Name}'") { Name = "confirmClose" };
+        confirmItem.Click += (_, _) => MachineCloseRequested?.Invoke(this, machine.Id);
+        closeItem.DropDownItems.Add(confirmItem);
+
         item.DropDownItems.Add(muteItem);
         item.DropDownItems.Add(soloItem);
         item.DropDownItems.Add(showItem);
+        item.DropDownItems.Add(new ToolStripSeparator());
+        item.DropDownItems.Add(closeItem);
         return item;
     }
 
@@ -120,6 +133,12 @@ public sealed class TrayService : IDisposable
         {
             case nameof(MachineViewModel.Name):
                 item.Text = machine.Name;
+                // MACHINE-13: keep the Close confirm label in sync with the displayed name.
+                if (item.DropDownItems["close"] is ToolStripMenuItem closeMenuItem &&
+                    closeMenuItem.DropDownItems["confirmClose"] is ToolStripMenuItem confirmCloseItem)
+                {
+                    confirmCloseItem.Text = $"Confirm: Close '{machine.Name}'";
+                }
                 break;
             case nameof(MachineViewModel.IconPath):
             case nameof(MachineViewModel.RootPath):

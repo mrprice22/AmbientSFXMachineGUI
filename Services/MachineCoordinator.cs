@@ -48,6 +48,35 @@ public sealed class MachineCoordinator
         Machines.Remove(machine);
     }
 
+    /// <summary>
+    /// MACHINE-13: Unload a machine from the running app (stop agents, drop coordinator,
+    /// remove from runtime collection, and delete its persisted JSON so it does not
+    /// auto-load on next startup). Equivalent to RemoveMachine on disk; once MACHINE-15
+    /// lands, callers should also append/refresh the recent-machines list before invoking
+    /// this so the machine can be re-imported with one click.
+    /// </summary>
+    public void UnloadMachine(MachineViewModel machine)
+    {
+        machine.PropertyChanged -= OnMachinePropertyChanged;
+        if (_coordinators.Remove(machine, out var coordinator))
+        {
+            coordinator.PlaybackStarted -= OnPlaybackStarted;
+            coordinator.PlaybackEnded   -= OnPlaybackEnded;
+            coordinator.Shutdown();
+        }
+        Machines.Remove(machine);
+
+        try
+        {
+            var path = Path.Combine(MachinesDir, $"{machine.Id}.json");
+            if (File.Exists(path)) File.Delete(path);
+        }
+        catch (Exception ex)
+        {
+            _debug?.LogError("MachineCoordinator", $"Unload: failed to delete persisted record for '{machine.Name}': {ex.Message}");
+        }
+    }
+
     private void OnPlaybackStarted(object? sender, ActivePlayback playback)
         => Application.Current.Dispatcher.Invoke(() => PlaybackStarted?.Invoke(this, playback));
 

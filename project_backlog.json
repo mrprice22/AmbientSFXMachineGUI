@@ -970,7 +970,7 @@
       "title": "Tray submenu: Close (unload) machine action",
       "description": "Extend the per-machine system tray submenu (added by MACHINE-09) with a 'Close machine' entry that unloads the machine from the running app — stops its agents, removes it from MachineCoordinator, and drops its tray submenu. This is the unload-from-session counterpart to MACHINE-07 (Remove machine, which also unlinks from the persisted index); Close should keep the machine in the recent/previously-loaded list (see MACHINE-15) so it can be re-imported later with one click. Confirm via a lightweight tray-balloon or inline submenu prompt rather than a modal. Also surfaces the same issue encountered during testing: a broken 'snd' pseudo-machine (see MACHINE-04 validation) currently shows in the tray with no icon and cannot be removed — this story must ensure Close works even for degraded/iconless entries. NOTE: MACHINE-09 was marked done but did not include the Close/unload entry — this story delivers the missing piece.",
       "priority": "high",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "MACHINE-09",
         "MACHINE-07"
