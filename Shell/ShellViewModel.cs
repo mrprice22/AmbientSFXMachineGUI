@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -639,6 +640,256 @@ public partial class ShellViewModel : ObservableObject
     {
         if (SelectedMachine is not null)
             _machineCoordinator.RegisterAgentFromFolder(SelectedMachine, folderPath);
+    }
+
+    [RelayCommand]
+    private void RenameAgent(AgentViewModel? agent)
+    {
+        if (agent is null) return;
+        var machine = Machines.FirstOrDefault(m => m.Agents.Contains(agent));
+        if (machine is null) return;
+
+        var oldName = agent.Name;
+        var oldFolderPath = agent.FolderPath;
+        var sndDir = Path.GetDirectoryName(oldFolderPath);
+        if (string.IsNullOrEmpty(sndDir))
+        {
+            System.Windows.MessageBox.Show("Cannot rename: agent has no on-disk folder.",
+                "Rename Agent", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var dialog = new InputDialog("Rename Agent", "New name:", oldName)
+            { Owner = System.Windows.Application.Current.MainWindow };
+        if (dialog.ShowDialog() != true) return;
+
+        var newName = dialog.Value?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(newName) || string.Equals(newName, oldName, StringComparison.Ordinal))
+            return;
+
+        if (!IsValidFolderName(newName, out var reason))
+        {
+            System.Windows.MessageBox.Show($"Cannot rename to '{newName}': {reason}.",
+                "Rename Agent", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var newFolderPath = Path.Combine(sndDir, newName);
+        if (Directory.Exists(newFolderPath))
+        {
+            System.Windows.MessageBox.Show($"A folder named '{newName}' already exists in {sndDir}.",
+                "Rename Agent", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            return;
+        }
+
+        var oldPrefix = AddTrailingSep(oldFolderPath);
+        var newPrefix = AddTrailingSep(newFolderPath);
+        var wasEnabled = agent.IsEnabled;
+        bool folderMoved = false;
+
+        try
+        {
+            // AC#2: stop in-flight playback for this agent before touching the folder.
+            if (wasEnabled) agent.IsEnabled = false;
+
+            Directory.Move(oldFolderPath, newFolderPath);
+            folderMoved = true;
+
+            // Rename the convention-based <oldName>.config inside the folder so future writes match the new name.
+            var oldConfig = Path.Combine(newFolderPath, oldName + ".config");
+            var newConfig = Path.Combine(newFolderPath, newName + ".config");
+            if (File.Exists(oldConfig) && !File.Exists(newConfig))
+            {
+                try { File.Move(oldConfig, newConfig); }
+                catch (Exception ex)
+                {
+                    App.DebugLog.LogError("Agent",
+                        $"Could not rename '{oldName}.config' → '{newName}.config': {ex.Message}");
+                }
+            }
+
+            // AC#3: rewrite every machine's agent-file SoundFileViewModels whose path lives under the old folder.
+            // Replacing the SoundFileViewModel triggers AudioLibrary's CollectionChanged: old usages drop, new
+            // ones register against the new path — so library mappings are kept in sync automatically.
+            foreach (var m in Machines)
+            {
+                foreach (var a in m.Agents)
+                {
+                    for (int i = 0; i < a.Files.Count; i++)
+                    {
+                        var old = a.Files[i];
+                        if (!StartsWithIgnoreCase(old.FilePath, oldPrefix)) continue;
+                        var newPath = newPrefix + old.FilePath.Substring(oldPrefix.Length);
+                        a.Files[i] = new SoundFileViewModel(newPath)
+                        {
+                            IsEnabled                = old.IsEnabled,
+                            VolumeOverride           = old.VolumeOverride,
+                            CooldownOverrideSeconds  = old.CooldownOverrideSeconds,
+                            IsFavorite               = old.IsFavorite,
+                            PlayCountThisSession     = old.PlayCountThisSession,
+                        };
+                    }
+                    a.FileCount = a.Files.Count;
+                }
+
+                // Soundboard items in this machine (in-memory; profile JSONs are rewritten below).
+                foreach (var sb in m.SoundboardItems)
+                {
+                    if (StartsWithIgnoreCase(sb.FilePath, oldPrefix))
+                        sb.FilePath = newPrefix + sb.FilePath.Substring(oldPrefix.Length);
+                }
+            }
+
+            // Drop now-orphaned library entries that pointed at files inside the old folder.
+            foreach (var entry in AudioLibrary.Entries.ToList())
+            {
+                if (entry.Usages.Count == 0
+                    && StartsWithIgnoreCase(entry.AbsolutePath, oldPrefix))
+                    AudioLibrary.RemoveEntry(entry);
+            }
+
+            // Update the agent's identity AFTER file paths so PropertyChanged listeners observe the new name
+            // alongside the new folder.
+            agent.FolderPath = newFolderPath;
+            agent.Name = newName;
+
+            // Rewrite every machine's profile JSONs — paths are absolute so foreign machines may also reference
+            // the renamed folder, and pinned/named-agent entries inside this machine's profiles must be updated.
+            foreach (var m in Machines)
+                RewriteProfilesForRename(m.Id, oldName, newName, oldPrefix, newPrefix);
+
+            // Reload the active machine's profiles so UI bindings see the rewritten data; clear any active
+            // selection because the in-memory Profile object the binding held is now stale on disk.
+            if (SelectedMachine is { } sel)
+            {
+                _suppressProfileApply = true;
+                try
+                {
+                    _profileService.LoadAll(sel.Id);
+                    ActiveProfile = null;
+                }
+                finally { _suppressProfileApply = false; }
+            }
+
+            App.DebugLog.LogUser("Agent",
+                $"Renamed agent '{oldName}' → '{newName}' (machine: {machine.Name})");
+        }
+        catch (Exception ex)
+        {
+            App.DebugLog.LogError("Agent",
+                $"Rename failed for '{oldName}' → '{newName}': {ex.Message}");
+            // Best-effort revert if Directory.Move succeeded but a later step threw.
+            if (folderMoved && Directory.Exists(newFolderPath) && !Directory.Exists(oldFolderPath))
+            {
+                try { Directory.Move(newFolderPath, oldFolderPath); }
+                catch { }
+            }
+            System.Windows.MessageBox.Show(
+                $"Could not rename agent '{oldName}': {ex.Message}",
+                "Rename Agent",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
+        finally
+        {
+            if (wasEnabled) agent.IsEnabled = true;
+        }
+    }
+
+    private static readonly string[] ReservedFolderNames =
+    {
+        "CON","PRN","AUX","NUL",
+        "COM1","COM2","COM3","COM4","COM5","COM6","COM7","COM8","COM9",
+        "LPT1","LPT2","LPT3","LPT4","LPT5","LPT6","LPT7","LPT8","LPT9"
+    };
+
+    private static bool IsValidFolderName(string name, out string reason)
+    {
+        if (string.IsNullOrWhiteSpace(name)) { reason = "name is empty"; return false; }
+        if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+        { reason = "contains invalid characters"; return false; }
+        if (name.EndsWith('.') || name.EndsWith(' '))
+        { reason = "must not end with '.' or whitespace"; return false; }
+        if (ReservedFolderNames.Contains(name, StringComparer.OrdinalIgnoreCase))
+        { reason = "is a reserved Windows name"; return false; }
+        reason = string.Empty;
+        return true;
+    }
+
+    private static string AddTrailingSep(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return path;
+        char last = path[^1];
+        return last == Path.DirectorySeparatorChar || last == Path.AltDirectorySeparatorChar
+            ? path : path + Path.DirectorySeparatorChar;
+    }
+
+    private static bool StartsWithIgnoreCase(string? value, string prefix)
+        => !string.IsNullOrEmpty(value)
+           && value!.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+
+    private static void RewriteProfilesForRename(
+        Guid machineId, string oldAgentName, string newAgentName,
+        string oldPrefix, string newPrefix)
+    {
+        var dir = MachinePaths.ProfilesDir(machineId);
+        if (!Directory.Exists(dir)) return;
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        foreach (var jsonPath in Directory.GetFiles(dir, "*.json"))
+        {
+            Profile? profile;
+            try { profile = JsonSerializer.Deserialize<Profile>(File.ReadAllText(jsonPath)); }
+            catch { continue; }
+            if (profile is null) continue;
+
+            bool changed = false;
+
+            foreach (var o in profile.SoundOverrides)
+            {
+                if (StartsWithIgnoreCase(o.Path, oldPrefix))
+                {
+                    o.Path = newPrefix + o.Path.Substring(oldPrefix.Length);
+                    changed = true;
+                }
+            }
+
+            foreach (var s in profile.Soundboard)
+            {
+                if (StartsWithIgnoreCase(s.FilePath, oldPrefix))
+                {
+                    s.FilePath = newPrefix + s.FilePath.Substring(oldPrefix.Length);
+                    changed = true;
+                }
+            }
+
+            foreach (var a in profile.Agents)
+            {
+                if (string.Equals(a.Name, oldAgentName, StringComparison.OrdinalIgnoreCase))
+                {
+                    a.Name = newAgentName;
+                    changed = true;
+                }
+            }
+
+            for (int i = 0; i < profile.PinnedAgents.Count; i++)
+            {
+                if (string.Equals(profile.PinnedAgents[i], oldAgentName, StringComparison.OrdinalIgnoreCase))
+                {
+                    profile.PinnedAgents[i] = newAgentName;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                try { File.WriteAllText(jsonPath, JsonSerializer.Serialize(profile, options)); }
+                catch (Exception ex)
+                {
+                    App.DebugLog.LogError("Agent",
+                        $"Could not rewrite profile '{Path.GetFileName(jsonPath)}': {ex.Message}");
+                }
+            }
+        }
     }
 
     private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)

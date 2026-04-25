@@ -1063,7 +1063,7 @@
       "title": "Rename agent within a machine",
       "description": "Add a 'Rename' action to the agent card (context menu and/or inline edit on the name label) that changes the agent's display name and its on-disk folder name under <machineRoot>\\snd\\<agent>\\. Renaming the folder requires rewriting every library usage that references files under the old path (AudioLibrary.Usages entries + any file-override paths stored in profiles and soundboard items under %AppData%\\AmbientAgents\\machines\\<id>\\). Acceptance criteria: (1) rename is rejected with a clear error if the target folder name already exists or is filesystem-invalid; (2) any currently playing sound from that agent is stopped gracefully before the folder rename; (3) library/soundboard/profile mappings are rewritten atomically so no reference is orphaned; (4) DebugLog.LogUser records the rename with old → new names.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": [
         "AGENT-01",
         "LIB-01",

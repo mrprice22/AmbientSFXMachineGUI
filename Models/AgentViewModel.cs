@@ -8,13 +8,14 @@ namespace AmbientSFXMachineGUI.Models;
 public partial class AgentViewModel : ObservableObject
 {
     public Guid Id { get; } = Guid.NewGuid();
-    public string FolderPath { get; }
-    public string Name { get; }
+
+    [ObservableProperty] private string _folderPath = string.Empty;
+    [ObservableProperty] private string _name = string.Empty;
 
     public AgentViewModel(string folderPath)
     {
-        FolderPath = folderPath;
-        Name = System.IO.Path.GetFileName(folderPath);
+        _folderPath = folderPath;
+        _name = System.IO.Path.GetFileName(folderPath);
         Files = new ObservableCollection<SoundFileViewModel>();
     }
 
