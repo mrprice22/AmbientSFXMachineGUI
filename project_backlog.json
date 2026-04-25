@@ -900,22 +900,6 @@
       ]
     },
     {
-      "id": "MACHINE-11",
-      "feature": "F03_MACHINE",
-      "title": "Group agents by machine in collapsible sections in the agents panel",
-      "description": "The agent cards panel currently shows a flat list of all agents with no indication of which machine they belong to. When multiple machines are imported, agents from different machines are indistinguishable. Wrap each machine's agents in a collapsible GroupBox or Expander section whose header shows the machine name (and optionally its icon). Expanding/collapsing a section should persist across sessions. This is the prerequisite for MACHINE-12 (per-machine play/pause).",
-      "priority": "high",
-      "status": "backlog",
-      "dependencies": [
-        "MACHINE-02",
-        "MACHINE-04"
-      ],
-      "references": [
-        "Â§5.8 Machine Management (Machines rail)",
-        "Â§5.2 Agent Management — AgentCard UI elements"
-      ]
-    },
-    {
       "id": "S-BUG-003",
       "feature": "F03_MACHINE",
       "title": "Importing a second machine clears agent list instead of appending, and crashes on retry",
@@ -1152,12 +1136,44 @@
       ]
     },
     {
+      "id": "S-BUG-007",
+      "feature": "F01_SHELL",
+      "title": "View menu Show-All crashes; checkmarks don't reflect closed panes",
+      "description": "Two defects introduced by SHELL-05's View menu, both visible in session-20260424-224138.log. (1) Crash: OnShowAllPanelsClick enumerates DockManager.Layout.Descendents().OfType<LayoutAnchorable>() and calls Show() on each hidden anchorable inside the loop — Show() mutates the layout tree, so the iterator throws System.InvalidOperationException 'Collection was modified; enumeration operation may not execute' (LayoutRoot.get_Children → Extensions.Descendents). Fix: materialize via .ToList() before mutating. (2) Stale checkmarks: with all panes already closed at startup, the View menu rendered every item checked. Root cause: the menu items are bound TwoWay to the XAML-named LayoutAnchorables via ElementName=PaneXxx, but after AvalonDock's XmlLayoutSerializer deserializes layout.xml, closed anchorables move into LayoutRoot.Hidden and the IsVisible property on the original XAML instances no longer reliably mirrors the live layout — the bindings still report 'shown'. Fix: drop ElementName bindings and instead resolve each panel by stable ContentId at SubmenuOpened time (search both Layout.Descendents().OfType<LayoutAnchorable>() AND Layout.Hidden), then set MenuItem.IsChecked from the resolved anchorable's IsVisible. Click handler resolves by ContentId and calls Show()/Hide() accordingly. Show-All uses the same resolver and a materialized list. DebugLog.LogUser continues to record toggles + restored count.",
+      "priority": "high",
+      "status": "in progress",
+      "dependencies": [
+        "SHELL-05"
+      ],
+      "references": [
+        "Â§4 Panel Layout System",
+        "Â§5.1 Core Shell — SHELL-01",
+        "Â§8 Persistence (Panel layout → layout.xml)"
+      ]
+    },
+    {
+      "id": "SHELL-05",
+      "feature": "F01_SHELL",
+      "title": "View menu to toggle and restore panel visibility",
+      "description": "Add a top menu bar to MainWindow with a 'View' menu listing every dockable panel (Machines, Agents, Live Log, Now Playing, Audio Library, Debug Log, Soundboard) as a checkable IsCheckable=True MenuItem bound TwoWay to the corresponding LayoutAnchorable.IsVisible so the user can toggle a panel from the menu and the checkmark always reflects current state — regardless of how the panel was hidden (close button, auto-hide pin, layout deserialize). A 'Show All Panels' command at the bottom of the menu re-shows every hidden anchorable in one click. Implementation: give each LayoutAnchorable a stable x:Name (PaneMachines, PaneAgents, PaneLog, PaneNowPlaying, PaneLibrary, PaneDebugLog, PaneSoundboard) so menu items bind via ElementName; the Show-All handler iterates DockManager.Layout.Descendents().OfType<LayoutAnchorable>() and calls Show() on each that is hidden. The pre-existing CanClose='False' on each anchorable is dropped now that the View menu provides a path to bring panels back, so the standard X / pane context-menu close routes work as users expect. DebugLog.LogUser records both per-panel toggles (panel name + new visible state) and the Show-All action (count restored).",
+      "priority": "medium",
+      "status": "done",
+      "dependencies": [
+        "SHELL-01"
+      ],
+      "references": [
+        "Â§4 Panel Layout System",
+        "Â§5.1 Core Shell — SHELL-01",
+        "Â§8 Persistence (Panel layout → layout.xml)"
+      ]
+    },
+    {
       "id": "S-BUG-006",
       "feature": "F02_AGENTS",
       "title": "Agents panel is empty at startup until an agent is re-imported",
       "description": "On app launch the 'Agents' dock panel renders an empty list even though agents from the previously-loaded machines are alive: their schedulers fire and play audio, and the system tray menu enumerates them. Root cause (confirmed from session log): the user's MachinesDir contains multiple machine records, one of which is an empty 'Default' machine at Order=0 with no RootPath (and therefore zero agents). ShellViewModel's ctor hard-selected Machines[0], so the Default empty machine became SelectedMachine; meanwhile the populated PACMAN/Spooky machines (Order>=1) still had their AgentCoordinators running in the background, which is why audio kept playing. Agents panel bound correctly — it was just bound to the empty Default machine's Agents collection. Dropping an agent folder onto the panel appeared to 'fix' things because ImportAgentFolder adds to SelectedMachine (Default), and with the collection-mirror refactor any new add is reflected — but the underlying bug was that the wrong machine was selected from the start. Fix: (a) ShellViewModel.PickInitialMachine() — prefer the last-selected machine id persisted in AppSettings.lastSelectedMachineId; otherwise pick the first machine with Agents.Count>0 (skipping empty auto-created Default); fall back to Machines[0]. (b) Persist SelectedMachine.Id to AppSettings whenever it changes so subsequent sessions restore the user's pick. (c) As a defense-in-depth cleanup (separate from the root cause), convert ShellViewModel.Agents / SoundboardItems from switching proxies into stable ObservableCollections mirrored from SelectedMachine via CollectionChanged forwarding, so the view binds once and never risks latching onto a stale empty reference even if SelectedMachine is briefly null during init.",
       "priority": "high",
-      "status": "in_progress",
+      "status": "done",
       "dependencies": [],
       "references": [
         "Â§5.2 Agent Management",

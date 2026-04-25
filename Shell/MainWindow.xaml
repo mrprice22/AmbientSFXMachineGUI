@@ -14,6 +14,21 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
     <DockPanel>
+        <!-- Menu bar: View > panel toggles | Show All Panels -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_View" SubmenuOpened="OnViewMenuSubmenuOpened">
+                <MenuItem Header="_Machines"     IsCheckable="True" Click="OnViewMenuItemClick" Tag="machines"/>
+                <MenuItem Header="_Agents"       IsCheckable="True" Click="OnViewMenuItemClick" Tag="agents"/>
+                <MenuItem Header="Live _Log"     IsCheckable="True" Click="OnViewMenuItemClick" Tag="log"/>
+                <MenuItem Header="_Now Playing"  IsCheckable="True" Click="OnViewMenuItemClick" Tag="now"/>
+                <MenuItem Header="Audio Lib_rary" IsCheckable="True" Click="OnViewMenuItemClick" Tag="library"/>
+                <MenuItem Header="_Debug Log"    IsCheckable="True" Click="OnViewMenuItemClick" Tag="debuglog"/>
+                <MenuItem Header="_Soundboard"   IsCheckable="True" Click="OnViewMenuItemClick" Tag="soundboard"/>
+                <Separator/>
+                <MenuItem Header="Show _All Panels" Click="OnShowAllPanelsClick"/>
+            </MenuItem>
+        </Menu>
+
         <!-- Toolbar: Master Vol | Mute All | Profile Picker | Settings -->
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
@@ -60,34 +75,34 @@
                 <avalon:LayoutPanel Orientation="Vertical">
                     <avalon:LayoutPanel Orientation="Horizontal">
                         <avalon:LayoutAnchorablePane DockWidth="200">
-                            <avalon:LayoutAnchorable ContentId="machines" Title="Machines" CanClose="False">
+                            <avalon:LayoutAnchorable x:Name="PaneMachines" ContentId="machines" Title="Machines">
                                 <machines:MachinesRailView/>
                             </avalon:LayoutAnchorable>
                         </avalon:LayoutAnchorablePane>
                         <avalon:LayoutAnchorablePane DockWidth="*">
-                            <avalon:LayoutAnchorable ContentId="agents" Title="Agents" CanClose="False">
+                            <avalon:LayoutAnchorable x:Name="PaneAgents" ContentId="agents" Title="Agents">
                                 <agent:AgentPanelView/>
                             </avalon:LayoutAnchorable>
                         </avalon:LayoutAnchorablePane>
                         <avalon:LayoutAnchorablePane DockWidth="*">
-                            <avalon:LayoutAnchorable ContentId="log" Title="Live Log" CanClose="False">
+                            <avalon:LayoutAnchorable x:Name="PaneLog" ContentId="log" Title="Live Log">
                                 <log:LogPanelView/>
                             </avalon:LayoutAnchorable>
                         </avalon:LayoutAnchorablePane>
                     </avalon:LayoutPanel>
                     <avalon:LayoutAnchorablePane DockHeight="200">
-                        <avalon:LayoutAnchorable ContentId="now" Title="Now Playing" CanClose="False">
+                        <avalon:LayoutAnchorable x:Name="PaneNowPlaying" ContentId="now" Title="Now Playing">
                             <now:NowPlayingPanelView/>
                         </avalon:LayoutAnchorable>
-                        <avalon:LayoutAnchorable ContentId="library" Title="Audio Library" CanClose="False">
+                        <avalon:LayoutAnchorable x:Name="PaneLibrary" ContentId="library" Title="Audio Library">
                             <lib:LibraryPanelView/>
                         </avalon:LayoutAnchorable>
-                        <avalon:LayoutAnchorable ContentId="debuglog" Title="Debug Log" CanClose="False">
+                        <avalon:LayoutAnchorable x:Name="PaneDebugLog" ContentId="debuglog" Title="Debug Log">
                             <dbg:DebugLogPanelView/>
                         </avalon:LayoutAnchorable>
                     </avalon:LayoutAnchorablePane>
                     <avalon:LayoutAnchorablePane DockHeight="160">
-                        <avalon:LayoutAnchorable ContentId="soundboard" Title="Soundboard" CanClose="False">
+                        <avalon:LayoutAnchorable x:Name="PaneSoundboard" ContentId="soundboard" Title="Soundboard">
                             <sb:SoundboardPanelView/>
                         </avalon:LayoutAnchorable>
                     </avalon:LayoutAnchorablePane>
