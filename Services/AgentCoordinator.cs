@@ -244,6 +244,7 @@ public sealed class AgentCoordinator
 
     private void StopRuntime(AgentRuntime rt)
     {
+        rt.Enabled = false;
         try { rt.Timer?.Dispose(); } catch { }
         rt.Timer = null;
         List<RuntimeActive> snapshot;
