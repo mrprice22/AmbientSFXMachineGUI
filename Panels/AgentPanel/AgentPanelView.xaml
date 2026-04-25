@@ -421,6 +421,12 @@
                                             </Style>
                                         </Image.Style>
                                     </Image>
+                                    <!-- AGENT-16: per-machine on/off toggle mirroring MachinesRail card style; binds to shared MachineViewModel.IsEnabled. -->
+                                    <ToggleButton DockPanel.Dock="Right"
+                                                  IsChecked="{Binding Machine.IsEnabled}"
+                                                  MinWidth="34" FontSize="10" Padding="3,1"
+                                                  Margin="6,0,0,0"
+                                                  Style="{StaticResource OnOffToggleStyle}"/>
                                     <TextBlock Text="{Binding Machine.Name}" FontWeight="SemiBold"
                                                FontSize="13" VerticalAlignment="Center"
                                                Foreground="#E8E8E8"

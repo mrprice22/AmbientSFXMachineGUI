@@ -1280,7 +1280,7 @@
       "title": "Per-machine on/off toggle in the Agents pane grouped-view header row",
       "description": "When the Agents pane is in grouped mode (MACHINE-11), each machine-group header row should include an on/off ToggleButton that mirrors the machine's IsEnabled state — identical in appearance to the toggle already present on the machine card in the Machines pane (SHELL-06 style: blue 'On' / light-red 'Off'). Toggling either button must update the shared MachineViewModel.IsEnabled property so both panes stay in sync without a separate sync step. The toggle should sit to the right of the machine name/icon inside the group header Border, docked to the right edge of the DockPanel.",
       "priority": "medium",
-      "status": "backlog",
+      "status": "done",
       "dependencies": ["MACHINE-11", "SHELL-06"],
       "references": [
         "§5.2 Agent Management",
